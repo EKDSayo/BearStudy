@@ -91,7 +91,7 @@ const LANG = {
 
 const UI = {
   vi: {
-    brandTagline:"Học vui mỗi ngày", navHome:"Trang chủ", navVocabulary:"Từ vựng", navFlashcard:"Flashcard",
+    brandTagline:"Học vui mỗi ngày", navHome:"Trang chủ", navVocabulary:"Từ vựng", navLearned:"Từ đã học", navFlashcard:"Flashcard",
     navQuiz:"Trắc nghiệm", navTyping:"Gõ đáp án", navWrong:"Từ cần ôn", profileNav:"Hồ sơ", navSettings:"Cài đặt",
     sidebarTipTitle:"Học một chút mỗi ngày!", sidebarTipText:"Tiến trình của bạn sẽ được lưu riêng theo tài khoản.",
     pageHome:"Trang chủ", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
@@ -128,7 +128,7 @@ const UI = {
     dictionaryEmpty:"Nhập một từ để bắt đầu tra cứu."
   },
   en: {
-    brandTagline:"Learn happily every day", navHome:"Home", navVocabulary:"Vocabulary", navFlashcard:"Flashcards",
+    brandTagline:"Learn happily every day", navHome:"Home", navVocabulary:"Vocabulary", navLearned:"Learned", navFlashcard:"Flashcards",
     navQuiz:"Quiz", navTyping:"Type answer", navWrong:"Review", profileNav:"Profile", navSettings:"Settings",
     sidebarTipTitle:"A little every day!", sidebarTipText:"Your progress is saved separately for your account.",
     pageHome:"Home", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
@@ -164,7 +164,7 @@ const UI = {
     dictionaryEmpty:"Enter a word to start searching."
   },
   ko: {
-    brandTagline:"매일 즐겁게 공부해요", navHome:"홈", navVocabulary:"단어", navFlashcard:"플래시카드",
+    brandTagline:"매일 즐겁게 공부해요", navHome:"홈", navVocabulary:"단어", navLearned:"학습한 단어", navFlashcard:"플래시카드",
     navQuiz:"퀴즈", navTyping:"답 입력", navWrong:"복습", profileNav:"프로필", navSettings:"설정",
     sidebarTipTitle:"매일 조금씩!", sidebarTipText:"학습 진행 상황은 계정별로 따로 저장됩니다.",
     pageHome:"홈", homeEyebrow:"🐻 STUDYBEAR에 오신 것을 환영해요",
@@ -444,6 +444,7 @@ function logoutUser() {
   applyTheme();
   applyInterfaceLanguage();
   refreshAll();
+  updateLearnedNavCount();
   showToast("👋 Bạn đã đăng xuất.");
 }
 
@@ -533,7 +534,7 @@ $("interfaceLanguage").addEventListener("change", e => {
 
 const PAGE_KEYS = {
   home:"pageHome", dictionary:"dictionaryTitle", vocabulary:"vocabTitle", flashcard:"flashTitle",
-  quiz:"quizTitle", typing:"typingTitle", wrong:"wrongTitle", profile:"profileNav", settings:"navSettings"
+  quiz:"quizTitle", typing:"typingTitle", wrong:"wrongTitle", learned:"learnedPageTitle", profile:"profileNav", settings:"navSettings"
 };
 
 function updatePageTitle() {
@@ -563,6 +564,7 @@ function showPage(page) {
   if (page === "profile") renderProfile();
   if (page === "quiz") newQuiz();
   if (page === "typing") newTyping();
+  if (page === "learned") renderLearnedVault();
 
   $("sidebar").classList.remove("open");
 }
@@ -1459,10 +1461,10 @@ function updateFlashcard() {
   }
 
   if (!pool.includes(flashIndex)) {
-    flashIndex = pool[0];
     flashPosition = 0;
+    flashIndex = pool[0];
   } else {
-    flashPosition = Math.max(0, pool.indexOf(flashIndex));
+    flashPosition = pool.indexOf(flashIndex);
   }
 
   const item = vocabulary[flashIndex];
@@ -1470,16 +1472,16 @@ function updateFlashcard() {
   const targetLang = currentTargetLanguage();
 
   $("flashNumber").textContent = `${flashPosition + 1} / ${pool.length}`;
-  $("flashVi").textContent = item[nativeLang] || item.vi;
+  $("flashVi").textContent = item[nativeLang] || item.vi || "";
   $("flashEn").textContent = item.en || "";
   $("flashKo").textContent = item[targetLang] || item.en || "";
   $("flashTargetLabel").textContent = LANG[targetLang].label;
-
-  if ($("flashPinyin")) {
-    $("flashPinyin").textContent = targetLang === "zh" ? (item.pinyin || "") : "";
-  }
-
+  if ($("flashPinyin")) $("flashPinyin").textContent = targetLang === "zh" ? (item.pinyin || "") : "";
   $("flashcard").classList.remove("flipped");
+  $("flashcard").classList.toggle(
+    "flashcard-learned",
+    !!state && state.learned.includes(flashIndex)
+  );
   syncStudyLanguageFromProfile();
 }
 
@@ -1503,11 +1505,39 @@ $("flashNext").addEventListener("click", () => {
   flashPosition = nextPos;
   updateFlashcard();
 });
-$("flashLearnedBtn").addEventListener("click", e => {
+$("flashLearnedBtn")?.addEventListener("click", e => {
+  e.preventDefault();
   e.stopPropagation();
-  if (markLearned(flashIndex)) updateFlashcard();
-});
 
+  if (!state) {
+    openAuth();
+    showToast("🐻 Hãy đăng nhập để lưu từ đã học.");
+    return;
+  }
+
+  const index = Number(flashIndex);
+  if (!Number.isInteger(index) || !vocabulary[index]) {
+    showToast("⚠️ Không xác định được từ hiện tại.");
+    return;
+  }
+
+  // One source of truth: the same learned array used by Vocabulary,
+  // Quiz and Typing.
+  const alreadyLearned = state.learned.includes(index);
+
+  if (!alreadyLearned) {
+    state.learned.push(index);
+    state.wrong = state.wrong.filter(i => i !== index);
+    state.xp += 5;
+    saveState();
+    updateDashboard();
+  }
+
+  updateLearnedNavCount();
+  renderLearnedVault();
+  renderVocabulary();
+  showToast("✅ Đã thêm từ này vào mục Từ đã học.");
+});
 /* ---------- QUIZ ---------- */
 
 function newQuiz() {
@@ -1573,6 +1603,136 @@ function checkQuiz(button, answer) {
   updateDashboard();
 }
 
+
+
+
+/* ---------- LEARNED WORDS VAULT ---------- */
+function markLearned(index) {
+  return markKnownWord(index);
+}
+
+function markKnownWord(index) {
+  if (!requireLogin()) return false;
+  if (!state.learned.includes(index)) {
+    state.learned.push(index);
+    state.wrong = state.wrong.filter(i => i !== index);
+    addXP(5, false);
+    saveState();
+    updateDashboard();
+  }
+  renderLearnedVault();
+  return true;
+}
+
+function updateLearnedNavCount() {
+  const badge = $("learnedNavCount");
+  if (badge) badge.textContent = state?.learned?.length || 0;
+}
+
+function renderLearnedVault() {
+  const list = $("learnedVocabList");
+  const pageCount = $("learnedPageCount");
+  if (!list) return;
+
+  const learned = (state?.learned || []).filter(index => vocabulary[index]);
+
+  if (pageCount) pageCount.textContent = learned.length;
+  updateLearnedNavCount();
+
+  if (!learned.length) {
+    list.innerHTML = `
+      <div class="empty learned-empty">
+        <div class="empty-bear">🐻</div>
+        <strong>${
+          getUILang() === "en" ? "No learned words yet." :
+          getUILang() === "ko" ? "아직 학습한 단어가 없습니다." :
+          "Chưa có từ nào được đánh dấu đã học."
+        }</strong>
+        <p>${
+          getUILang() === "en" ? "Mark a word as learned in Vocabulary, Flashcards, Quiz or Typing." :
+          getUILang() === "ko" ? "단어, 플래시카드, 퀴즈 또는 답 입력에서 학습 완료로 표시하세요." :
+          "Hãy đánh dấu một từ là đã học trong Từ vựng, Flashcard, Trắc nghiệm hoặc Gõ đáp án."
+        }</p>
+      </div>`;
+    return;
+  }
+
+  const native = currentNativeLanguage();
+  const target = currentTargetLanguage();
+  const ui = UI[getUILang()];
+
+  list.innerHTML = learned.map(index => {
+    const item = vocabulary[index];
+    const source = getVerifiedNativeText(item, native) || item[native] || item.vi || item.en || "";
+    const dest = getVerifiedNativeText(item, target) || item[target] || item.en || "";
+    const pinyin = target === "zh" ? (item.pinyin || "") : "";
+    const topic = TOPICS[item.topic]?.[getUILang()] || item.topic || "";
+    const level = LEVEL_LABELS[getUILang()]?.[item.level || "basic"] || item.level || "";
+
+    return `
+      <article class="vocab-card learned">
+        <span class="index">✓</span>
+        <h3>${escapeHTML(source)}</h3>
+        <div class="en">${escapeHTML(LANG[native].label)} → ${escapeHTML(LANG[target].label)}</div>
+        <div class="ko">${escapeHTML(dest)}</div>
+        ${pinyin ? `<div class="vocab-pinyin">Pinyin: ${escapeHTML(pinyin)}</div>` : ""}
+        <div class="vocab-badges">
+          <span class="topic-tag">${escapeHTML(topic)}</span>
+          <span class="level-tag">${escapeHTML(level)}</span>
+        </div>
+        <div class="actions">
+          <button class="primary-btn" data-review-learned="${index}">📖 ${
+            getUILang() === "en" ? "Review" :
+            getUILang() === "ko" ? "복습" : "Ôn tập"
+          }</button>
+          <button class="secondary-btn" data-unlearn="${index}">↩ ${
+            getUILang() === "en" ? "Remove" :
+            getUILang() === "ko" ? "학습 취소" : "Bỏ khỏi kho"
+          }</button>
+          <button class="secondary-btn" data-speak-known="${index}">🔊 ${ui.speakWord || "Nghe"}</button>
+        </div>
+      </article>`;
+  }).join("");
+
+  list.querySelectorAll("[data-review-learned]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const index = Number(btn.dataset.reviewLearned);
+      if (!vocabulary[index]) return;
+      flashIndex = index;
+      showPage("flashcard");
+      updateFlashcard();
+      window.scrollTo({ top:0, behavior:"smooth" });
+    });
+  });
+
+  list.querySelectorAll("[data-unlearn]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!requireLogin()) return;
+      const index = Number(btn.dataset.unlearn);
+      state.learned = state.learned.filter(i => i !== index);
+      saveState();
+      updateDashboard();
+      renderLearnedVault();
+      renderVocabulary();
+    });
+  });
+
+  list.querySelectorAll("[data-speak-known]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const index = Number(btn.dataset.speakKnown);
+      speakWord(index);
+    });
+  });
+}
+
+/* ---------- QUIZ NEXT BUTTON ---------- */
+const nextQuizButton = $("nextQuiz");
+if (nextQuizButton) {
+  nextQuizButton.addEventListener("click", () => {
+    newQuiz();
+  });
+}
+
 /* ---------- TYPING ---------- */
 
 function newTyping() {
@@ -1586,6 +1746,7 @@ function newTyping() {
   $("typingQuestion").textContent = sourceWord(typingIndex);
   $("typingInput").value = "";
   $("typingFeedback").textContent = "";
+  if ($("typingCounter")) $("typingCounter").textContent = `${typingRound} / ${pool.length}`;
 
   const countTarget = $("typingCounter");
   if (countTarget) countTarget.textContent = `${typingRound} / ${pool.length}`;
@@ -1800,8 +1961,10 @@ function showToast(message) {
 
 function refreshAll() {
   updateDashboard();
+  updateLearnedNavCount();
   renderVocabulary();
   renderWrong();
+  renderLearnedVault();
   renderProfile();
   syncStudyLanguageFromProfile();
   renderTopics();

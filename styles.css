@@ -1416,3 +1416,208 @@ body.dark .level-tag {
     bottom: -5px;
   }
 }
+
+.learned-toolbar {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin: 0 0 14px;
+}
+.learned-vault { margin-top: 16px; }
+.learned-vault[hidden] { display:none !important; }
+.learned-vault .section-heading.compact { margin-bottom: 12px; }
+.learned-vault .section-heading.compact > div { text-align:left; }
+#learnedVaultCount {
+  display:inline-grid;
+  place-items:center;
+  min-width:32px;
+  height:32px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#e7f4ff;
+  color:var(--primary-dark);
+}
+.typing-counter-row {
+  max-width:760px;
+  margin:0 auto 8px;
+  display:flex;
+  justify-content:flex-end;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.flash-study-layout {
+  display:grid;
+  grid-template-columns:minmax(220px, 285px) minmax(0, 760px);
+  gap:18px;
+  align-items:start;
+  max-width:1060px;
+  margin:0 auto;
+}
+.flash-learned-vault {
+  position:sticky;
+  top:16px;
+  max-height:620px;
+  overflow:hidden;
+}
+.flash-vault-head {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+.flash-vault-head h3 {
+  margin:4px 0 3px;
+}
+.flash-vault-head p {
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+}
+#flashLearnedCount {
+  min-width:30px;
+  height:30px;
+  padding:0 8px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:#e7f4ff;
+  color:var(--primary-dark);
+}
+.flash-learned-list {
+  max-height:510px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  padding-right:3px;
+}
+.flash-learned-item {
+  width:100%;
+  border:1px solid var(--border);
+  background:var(--bg);
+  color:var(--text);
+  border-radius:12px;
+  padding:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-align:left;
+  cursor:pointer;
+}
+.flash-learned-item:hover {
+  border-color:#9cccf0;
+  transform:translateY(-1px);
+}
+.flash-learned-main {
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.flash-learned-main strong,
+.flash-learned-main small,
+.flash-learned-main em {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.flash-learned-main strong { font-size:12px; }
+.flash-learned-main small { font-size:11px; color:var(--muted); }
+.flash-learned-main em { font-size:10px; color:var(--muted); }
+.flash-learned-review {
+  margin-left:auto;
+  font-size:17px;
+  color:var(--primary-dark);
+}
+.flash-vault-empty {
+  padding:18px 8px;
+  color:var(--muted);
+  text-align:center;
+  font-size:11px;
+  line-height:1.5;
+}
+.flash-vault-empty div {
+  font-size:28px;
+  margin-bottom:5px;
+}
+
+@media (max-width: 900px) {
+  .flash-study-layout {
+    grid-template-columns:1fr;
+  }
+  .flash-learned-vault {
+    position:static;
+    order:2;
+  }
+  .flash-wrap {
+    order:1;
+  }
+}
+
+.learned-nav-btn {
+  position:relative;
+}
+.learned-nav-count {
+  margin-left:auto;
+  min-width:22px;
+  height:22px;
+  padding:0 6px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.10);
+  color:inherit;
+  font-size:10px;
+  font-weight:800;
+  line-height:1;
+}
+.nav-btn.active .learned-nav-count,
+.learned-nav-btn:hover .learned-nav-count {
+  background:rgba(255,255,255,.18);
+}
+
+.learned-page-count {
+  display:inline-grid;
+  place-items:center;
+  min-width:34px;
+  height:34px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#e7f4ff;
+  color:var(--primary-dark);
+  font-weight:800;
+}
+.learned-page-toolbar {
+  margin-bottom:14px;
+}
+.learned-empty {
+  grid-column:1 / -1;
+  min-height:220px;
+}
+
+.flashcard-learned {
+  outline: 3px solid rgba(92, 170, 107, .35);
+  outline-offset: 4px;
+}
+
+.learned-empty {
+  grid-column: 1 / -1;
+  min-height: 220px;
+  padding: 30px;
+  box-sizing: border-box;
+  text-align: center;
+}
+.learned-page-count {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: #e7f4ff;
+  color: var(--primary-dark);
+  font-weight: 800;
+}

@@ -30,6 +30,10 @@
       <button class="nav-btn" data-page="quiz">🧠 <span data-i18n="navQuiz">Trắc nghiệm</span></button>
       <button class="nav-btn" data-page="typing">⌨️ <span data-i18n="navTyping">Gõ đáp án</span></button>
       <button class="nav-btn" data-page="wrong">❌ <span data-i18n="navWrong">Từ cần ôn</span></button>
+      <button class="nav-btn learned-nav-btn" data-page="learned" type="button">
+        ✅ <span data-i18n="navLearned">Từ đã học</span>
+        <span class="learned-nav-count" id="learnedNavCount">0</span>
+      </button>
       <button class="nav-btn" data-page="profile">👤 <span data-i18n="profileNav">Hồ sơ</span></button>
       <button class="nav-btn" data-page="settings">⚙️ <span data-i18n="navSettings">Cài đặt</span></button>
     </nav>
@@ -211,9 +215,8 @@
         </div>
         <select class="filter-select" id="levelButtons" aria-label="Trình độ"></select>
       </div>
-
-      <div class="vocab-grid" id="vocabGrid"></div>
-    </section>
+<div class="vocab-grid" id="vocabGrid"></div>
+</section>
 
     <section class="page" id="page-flashcard">
       <div class="section-heading">
@@ -223,8 +226,9 @@
         <label for="flashTopic" data-i18n="studyTopicLabel">🗂️ Chủ đề học</label>
         <select id="flashTopic" class="filter-select"></select>
       </div>
-      <div class="flash-wrap">
-        <div class="flashcard" id="flashcard">
+      
+<div class="flash-wrap">
+          <div class="flashcard" id="flashcard">
           <div class="flash-inner">
             <div class="flash-face flash-front">
               <span class="flash-number" id="flashNumber">1 / 28</span>
@@ -293,7 +297,22 @@
       <div id="wrongList" class="vocab-grid"></div>
     </section>
 
-    <section class="page" id="page-profile">
+    
+    <section class="page" id="page-learned">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">✅ LEARNED</span>
+          <h2 data-i18n="learnedPageTitle">Từ đã học</h2>
+          <p data-i18n="learnedPageSubtitle">Kho từ bạn đã đánh dấu để ôn tập lại bất cứ lúc nào</p>
+        </div>
+        <strong class="learned-page-count" id="learnedPageCount">0</strong>
+      </div>
+      <div class="learned-page-toolbar">
+        <span class="muted" data-i18n="learnedPageHint">Chọn “Ôn tập” để mở từ ngay trong Flashcard.</span>
+      </div>
+      <div id="learnedVocabList" class="vocab-grid"></div>
+    </section>
+<section class="page" id="page-profile">
       <div class="section-heading">
         <div><span class="eyebrow">👤 PROFILE</span><h2 data-i18n="profileTitle">Hồ sơ của bạn</h2><p data-i18n="profileSubtitle">Chỉnh sửa thông tin cá nhân và bộ sưu tập</p></div>
       </div>
