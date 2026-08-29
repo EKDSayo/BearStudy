@@ -110,8 +110,8 @@ const UI = {
     settingsSubtitle:"Quản lý tiến trình học của bạn", loggedInAs:"Đang đăng nhập", dataTitle:"💾 Dữ liệu học tập",
     dataSubtitle:"Tiến trình được lưu riêng trong trình duyệt cho từng tài khoản.", exportData:"📤 Xuất dữ liệu",
     resetData:"🗑️ Xóa tiến trình", noteTitle:"🔐 Lưu ý",
-    noteText:"Đây là hệ thống đăng nhập demo bằng LocalStorage.", authSubtitle:"Đăng nhập để lưu hành trình học của bạn 💙",
-    loginTab:"Đăng nhập", registerTab:"Đăng ký", usernameLabel:"Tên đăng nhập", passwordLabel:"Mật khẩu",
+    noteText:"StudyBear ưu tiên Supabase cho tài khoản thật; LocalStorage chỉ được giữ tạm để bảo vệ dữ liệu cũ trong giai đoạn chuyển đổi.", authSubtitle:"Đăng nhập để lưu hành trình học của bạn 💙",
+    loginTab:"Đăng nhập", registerTab:"Đăng ký", usernameLabel:"Tên đăng nhập", emailLabel:"Email", emailOrUsernameLabel:"Email hoặc username", passwordLabel:"Mật khẩu",
     loginBtn:"🐻 Đăng nhập", displayNameLabel:"Tên hiển thị", confirmPasswordLabel:"Nhập lại mật khẩu",
     registerBtn:"✨ Tạo tài khoản", guest:"Khách", notLogged:"Chưa đăng nhập", saved:"💾 Đã lưu thay đổi!",
     profileTitle:"Hồ sơ của bạn", profileSubtitle:"Chỉnh sửa thông tin cá nhân và bộ sưu tập",
@@ -146,11 +146,11 @@ const UI = {
     wrongTitle:"Review words", wrongSubtitle:"Words you answered incorrectly", settingsTitle:"Account & data",
     settingsSubtitle:"Manage your learning progress", loggedInAs:"Signed in as", dataTitle:"💾 Learning data",
     dataSubtitle:"Progress is saved separately in this browser for each account.", exportData:"📤 Export data",
-    resetData:"🗑️ Reset progress", noteTitle:"🔐 Note", noteText:"This is a demo login system using LocalStorage.",
+    resetData:"🗑️ Reset progress", noteTitle:"🔐 Note", noteText:"StudyBear uses Supabase for real accounts; LocalStorage is kept temporarily to protect legacy data during migration.",
     authSubtitle:"Sign in to save your learning journey 💙", loginTab:"Sign in", registerTab:"Register",
     usernameLabel:"Username", passwordLabel:"Password", loginBtn:"🐻 Sign in", displayNameLabel:"Display name",
     confirmPasswordLabel:"Confirm password", registerBtn:"✨ Create account", guest:"Guest", notLogged:"Not signed in",
-    saved:"💾 Changes saved!", profileTitle:"Your profile", profileSubtitle:"Edit your personal information and collections",
+    emailLabel:"Email", emailOrUsernameLabel:"Email or username", saved:"💾 Changes saved!", profileTitle:"Your profile", profileSubtitle:"Edit your personal information and collections",
     learningLanguage:"🌱 Learning language", nativeLanguage:"🏠 Native language", learningLevel:"📊 Language level",
     saveProfile:"💙 Save changes", learningInfoTitle:"Learning information", learningInfoSubtitle:"Your current language settings",
     levelMini:"Level", xpMini:"XP", learnedMini:"Learned", collectionTitle:"Collection",
@@ -182,11 +182,11 @@ const UI = {
     wrongTitle:"복습할 단어", wrongSubtitle:"틀렸던 단어를 다시 공부하세요", settingsTitle:"계정 및 데이터",
     settingsSubtitle:"학습 진행 상황을 관리하세요", loggedInAs:"로그인 계정", dataTitle:"💾 학습 데이터",
     dataSubtitle:"진행 상황은 브라우저에서 계정별로 저장됩니다.", exportData:"📤 데이터 내보내기",
-    resetData:"🗑️ 진행 상황 초기화", noteTitle:"🔐 안내", noteText:"LocalStorage를 사용하는 데모 로그인입니다.",
+    resetData:"🗑️ 진행 상황 초기화", noteTitle:"🔐 안내", noteText:"StudyBear는 실제 계정에 Supabase를 사용하며, 마이그레이션 기간에는 기존 데이터를 보호하기 위해 LocalStorage를 임시로 유지합니다.",
     authSubtitle:"로그인하여 학습 기록을 저장하세요 💙", loginTab:"로그인", registerTab:"회원가입",
     usernameLabel:"사용자 이름", passwordLabel:"비밀번호", loginBtn:"🐻 로그인", displayNameLabel:"표시 이름",
     confirmPasswordLabel:"비밀번호 확인", registerBtn:"✨ 계정 만들기", guest:"게스트", notLogged:"로그인하지 않음",
-    saved:"💾 변경사항이 저장되었습니다!", profileTitle:"프로필", profileSubtitle:"개인 정보와 컬렉션을 관리하세요",
+    emailLabel:"이메일", emailOrUsernameLabel:"이메일 또는 사용자 이름", saved:"💾 변경사항이 저장되었습니다!", profileTitle:"프로필", profileSubtitle:"개인 정보와 컬렉션을 관리하세요",
     learningLanguage:"🌱 학습 언어", nativeLanguage:"🏠 모국어", learningLevel:"📊 언어 수준",
     saveProfile:"💙 변경사항 저장", learningInfoTitle:"학습 정보", learningInfoSubtitle:"현재 언어 설정",
     levelMini:"레벨", xpMini:"XP", learnedMini:"학습 완료", collectionTitle:"컬렉션",
@@ -328,6 +328,9 @@ function saveState() {
   users[currentUsername] = normalizeUser(state);
   state = users[currentUsername];
   saveAllUsers();
+  // LocalStorage remains the immediate source for UI responsiveness.
+  // Supabase is synchronized asynchronously so a network problem never freezes StudyBear.
+  syncStateToSupabase().catch(error => console.warn("[StudyBear] Supabase sync skipped:", error));
 }
 
 function loadCurrentUser() {
@@ -346,6 +349,176 @@ function requireLogin() {
   openAuth();
   showToast("🐻 Hãy đăng nhập để sử dụng chức năng này.");
   return false;
+}
+
+/* ---------- SUPABASE AUTH BRIDGE ---------- */
+function getSupabaseClient() {
+  return window.studyBearSupabase || null;
+}
+
+function hasSupabaseAuth() {
+  const client = getSupabaseClient();
+  return Boolean(client && window.studyBearSupabaseReady);
+}
+
+function showAuthMessage(id, text, kind="error") {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = kind === "success" ? "var(--success)" : "var(--danger)";
+}
+
+async function loadSupabaseUserState(user) {
+  const client = getSupabaseClient();
+  if (!client || !user) return false;
+
+  const { data: profile, error: profileError } = await client
+    .from("profiles")
+    .select("id,username,display_name,avatar_url,interface_language,native_language,learning_language,learning_level,xp")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.warn("[StudyBear] Profile load failed:", profileError);
+    return false;
+  }
+
+  const { data: progress, error: progressError } = await client
+    .from("learning_progress")
+    .select("vocabulary_id,learned,favorite,wrong_count")
+    .eq("user_id", user.id);
+
+  if (progressError) {
+    console.warn("[StudyBear] Progress load failed:", progressError);
+    return false;
+  }
+
+  const username = normalizeUsername(profile?.username || user.user_metadata?.username || user.email?.split("@")[0] || "user");
+  const localFallback = users[username] ? normalizeUser(users[username]) : makeDefaultUser(profile?.display_name || user.email?.split("@")[0] || "User");
+
+  const nextState = normalizeUser({
+    ...localFallback,
+    displayName: profile?.display_name || user.user_metadata?.display_name || localFallback.displayName,
+    interfaceLanguage: profile?.interface_language || localFallback.interfaceLanguage,
+    nativeLanguage: profile?.native_language || localFallback.nativeLanguage,
+    learningLanguage: profile?.learning_language || localFallback.learningLanguage,
+    learningLevel: profile?.learning_level || localFallback.learningLevel,
+    xp: Number.isFinite(Number(profile?.xp)) ? Number(profile.xp) : localFallback.xp,
+    avatar: localFallback.avatar, // Storage migration will handle avatar persistence later.
+    password: ""
+  });
+
+  const learned=[]; const favorites=[]; const wrong=[];
+  for (const row of (progress || [])) {
+    const index=Number(row.vocabulary_id);
+    if (!Number.isInteger(index) || !vocabulary[index]) continue;
+    if (row.learned) learned.push(index);
+    if (row.favorite) favorites.push(index);
+    if (Number(row.wrong_count) > 0) wrong.push(index);
+  }
+  nextState.learned=[...new Set(learned)];
+  nextState.favorites=[...new Set(favorites)];
+  nextState.wrong=[...new Set(wrong)];
+
+  currentUsername=username;
+  users[currentUsername]=nextState;
+  state=nextState;
+  localStorage.setItem(STORAGE_CURRENT,currentUsername);
+  saveAllUsers();
+  return true;
+}
+
+async function syncStateToSupabase() {
+  const client=getSupabaseClient();
+  if (!client || !state || !currentUsername) return;
+
+  const { data: { user }, error:userError } = await client.auth.getUser();
+  if (userError || !user) return;
+
+  const profilePayload={
+    id:user.id,
+    username:currentUsername,
+    display_name:state.displayName,
+    interface_language:state.interfaceLanguage,
+    native_language:state.nativeLanguage,
+    learning_language:state.learningLanguage,
+    learning_level:state.learningLevel,
+    xp:state.xp,
+    updated_at:new Date().toISOString()
+  };
+
+  const { error:profileError }=await client.from("profiles").upsert(profilePayload,{onConflict:"id"});
+  if (profileError) throw profileError;
+
+  const indexes=new Set([
+    ...(state.learned||[]),
+    ...(state.favorites||[]),
+    ...(state.wrong||[])
+  ]);
+
+  if (!indexes.size) return;
+
+  const rows=[...indexes]
+    .filter(index=>Number.isInteger(index) && vocabulary[index])
+    .map(index=>({
+      user_id:user.id,
+      vocabulary_id:String(index),
+      learned:state.learned.includes(index),
+      favorite:state.favorites.includes(index),
+      wrong_count:state.wrong.includes(index) ? 1 : 0,
+      last_studied_at:state.learned.includes(index) ? new Date().toISOString() : null
+    }));
+
+  if (rows.length) {
+    const { error:progressError }=await client
+      .from("learning_progress")
+      .upsert(rows,{onConflict:"user_id,vocabulary_id"});
+    if (progressError) throw progressError;
+  }
+}
+
+async function handleSupabaseSession(session) {
+  if (!session?.user) return;
+  const ok=await loadSupabaseUserState(session.user);
+  if (!ok) {
+    showToast("⚠️ Không thể tải hồ sơ Supabase.");
+    return;
+  }
+  updateUserUI();
+  applyTheme();
+  applyInterfaceLanguage();
+  syncStudyLanguageFromProfile();
+  refreshAll();
+  closeAuth();
+}
+
+function initSupabaseAuthBridge() {
+  const client=getSupabaseClient();
+  if (!client) return;
+
+  client.auth.getSession().then(({data,error})=>{
+    if (error) {
+      console.warn("[StudyBear] Session load failed:",error);
+      return;
+    }
+    if (data?.session) handleSupabaseSession(data.session);
+  });
+
+  client.auth.onAuthStateChange((event,session)=>{
+    // Defer to avoid running heavy UI/database work inside the Auth callback.
+    setTimeout(()=>{
+      if (session && ["SIGNED_IN","TOKEN_REFRESHED","INITIAL_SESSION"].includes(event)) {
+        handleSupabaseSession(session);
+      }
+      if (event === "SIGNED_OUT") {
+        currentUsername=null;
+        state=null;
+        localStorage.removeItem(STORAGE_CURRENT);
+        updateUserUI();
+        refreshAll();
+      }
+    },0);
+  });
 }
 
 /* ---------- AUTH ---------- */
@@ -369,58 +542,104 @@ document.querySelectorAll(".auth-tab").forEach(tab => {
   });
 });
 
-$("registerForm").addEventListener("submit", e => {
+$("registerForm").addEventListener("submit", async e => {
   e.preventDefault();
 
   const displayName = $("registerDisplayName").value.trim();
+  const email = $("registerEmail")?.value.trim().toLowerCase() || "";
   const username = normalizeUsername($("registerUsername").value);
   const password = $("registerPassword").value;
   const password2 = $("registerPassword2").value;
   const msg = $("registerMessage");
 
-  const fail = text => {
-    msg.textContent = text;
-    msg.style.color = "var(--danger)";
-  };
+  const fail = text => showAuthMessage("registerMessage", text, "error");
 
-  if (!displayName || !username || !password || !password2) return fail("⚠️ Vui lòng điền đầy đủ thông tin.");
+  if (!displayName || !email || !username || !password || !password2) return fail("⚠️ Vui lòng điền đầy đủ thông tin.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("⚠️ Email không hợp lệ.");
   if (!/^[a-z0-9_.-]{3,24}$/.test(username)) return fail("⚠️ Username phải có 3–24 ký tự và không có khoảng trắng.");
-  if (password.length < 4) return fail("⚠️ Mật khẩu phải có ít nhất 4 ký tự.");
+  if (password.length < 6) return fail("⚠️ Mật khẩu phải có ít nhất 6 ký tự.");
   if (password !== password2) return fail("⚠️ Hai mật khẩu không giống nhau.");
-  if (usernameExists(username)) return fail("❌ Username này đã được sử dụng.");
 
-  users[username] = makeDefaultUser(displayName);
-  users[username].password = password;
-  saveAllUsers();
-  loginAs(username);
-  showToast("🎉 Tạo tài khoản thành công!");
+  if (!hasSupabaseAuth()) {
+    if (usernameExists(username)) return fail("❌ Username này đã được sử dụng.");
+    users[username] = makeDefaultUser(displayName);
+    users[username].password = password;
+    users[username].email = email;
+    saveAllUsers();
+    loginAs(username);
+    showToast("🎉 Tạo tài khoản cục bộ thành công!");
+    return;
+  }
+
+  const client=getSupabaseClient();
+  const {data,error}=await client.auth.signUp({
+    email,
+    password,
+    options:{
+      data:{username,display_name:displayName}
+    }
+  });
+
+  if (error) {
+    console.error("[StudyBear] Supabase signup error:",error);
+    return fail(error.message || "❌ Không thể tạo tài khoản.");
+  }
+
+  // Confirm email is enabled in this project, so a new signup normally has no session yet.
+  if (data?.session) {
+    await handleSupabaseSession(data.session);
+    showToast("🎉 Tạo tài khoản thành công!");
+  } else {
+    showAuthMessage(
+      "registerMessage",
+      "✅ Đăng ký thành công. Hãy kiểm tra email để xác nhận tài khoản rồi đăng nhập.",
+      "success"
+    );
+  }
 });
 
-$("loginForm").addEventListener("submit", e => {
+$("loginForm").addEventListener("submit", async e => {
   e.preventDefault();
 
-  const username = normalizeUsername($("loginUsername").value);
+  const identifier = $("loginUsername").value.trim();
   const password = $("loginPassword").value;
-  const msg = $("loginMessage");
 
+  if (!identifier || !password) {
+    showAuthMessage("loginMessage", "⚠️ Vui lòng nhập đầy đủ thông tin.");
+    return;
+  }
+
+  // Supabase accounts use the real email/password.
+  if (hasSupabaseAuth() && identifier.includes("@")) {
+    const client=getSupabaseClient();
+    const {data,error}=await client.auth.signInWithPassword({email:identifier.toLowerCase(),password});
+    if (error) {
+      console.error("[StudyBear] Supabase login error:",error);
+      showAuthMessage("loginMessage", error.message || "❌ Đăng nhập thất bại.");
+      return;
+    }
+    if (data?.session) await handleSupabaseSession(data.session);
+    showToast("👋 Chào mừng bạn quay trở lại!");
+    return;
+  }
+
+  // Keep old local accounts working during the migration.
+  const username=normalizeUsername(identifier);
   if (!usernameExists(username)) {
-    msg.textContent = "❌ Tài khoản không tồn tại.";
-    msg.style.color = "var(--danger)";
+    showAuthMessage("loginMessage", "❌ Tài khoản không tồn tại. Với tài khoản mới, hãy đăng nhập bằng email.");
     return;
   }
 
-  const user = normalizeUser(users[username]);
-
+  const user=normalizeUser(users[username]);
   if (user.password !== password) {
-    msg.textContent = "❌ Mật khẩu không chính xác.";
-    msg.style.color = "var(--danger)";
+    showAuthMessage("loginMessage", "❌ Mật khẩu không chính xác.");
     return;
   }
 
-  users[username] = user;
+  users[username]=user;
   saveAllUsers();
   loginAs(username);
-  showToast("👋 Chào mừng bạn quay trở lại!");
+  showToast("👋 Đăng nhập bằng tài khoản cũ thành công.");
 });
 
 function loginAs(username) {
@@ -1983,6 +2202,7 @@ renderStudyTopicOptions();
 updateFlashcard();
 newQuiz();
 newTyping();
+initSupabaseAuthBridge();
 
 if (!currentUsername) {
   const guestLang = localStorage.getItem("studyBearGuestLanguage");

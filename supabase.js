@@ -48,6 +48,7 @@ function initStudyBearSupabase() {
     );
 
     studyBearSupabaseReady = true;
+    window.studyBearSupabaseReady = true;
     window.studyBearSupabase = supabaseClient;
     console.info("[StudyBear] Supabase client initialized.");
     return supabaseClient;
