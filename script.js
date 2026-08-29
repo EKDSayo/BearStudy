@@ -1989,3 +1989,10 @@ if (!currentUsername) {
   if (UI[guestLang]) applyInterfaceLanguage();
   setTimeout(openAuth, 300);
 }
+
+/* ---------- SUPABASE STATUS BRIDGE (NON-BLOCKING) ---------- */
+window.getStudyBearSupabaseStatus = function () {
+  return {
+    ready: Boolean(window.studyBearSupabaseReady && window.studyBearSupabase)
+  };
+};
