@@ -1679,3 +1679,5 @@ body.dark .level-tag {
 .chat-composer { display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--border); }
 .chat-composer .profile-input { flex:1; }
 @media (max-width: 800px) { .social-columns { grid-template-columns:1fr; } .chat-layout { grid-template-columns:1fr; } .chat-sidebar { border-right:0; border-bottom:1px solid var(--border); } .conversation-list { flex-direction:row; overflow-x:auto; max-height:none; } .conversation-item { min-width:230px; } }
+
+/* V32 avatar sync: versioned cloud URLs prevent cross-device stale images. */

@@ -327,11 +327,16 @@ function saveAllUsers() {
   localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
 }
 
-function saveState() {
+function saveStateLocalOnly() {
   if (!state || !currentUsername) return;
   users[currentUsername] = normalizeUser(state);
   state = users[currentUsername];
   saveAllUsers();
+}
+
+function saveState() {
+  saveStateLocalOnly();
+  if (!state || !currentUsername) return;
   // LocalStorage remains the immediate source for UI responsiveness.
   // Supabase is synchronized asynchronously so a network problem never freezes StudyBear.
   syncStateToSupabase().catch(error => console.warn("[StudyBear] Supabase sync skipped:", error));
@@ -378,7 +383,7 @@ async function loadSupabaseUserState(user) {
 
   const { data: profile, error: profileError } = await client
     .from("profiles")
-    .select("id,username,display_name,avatar_url,interface_language,native_language,learning_language,learning_level,xp")
+    .select("id,username,display_name,avatar_url,updated_at,interface_language,native_language,learning_language,learning_level,xp")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -408,8 +413,8 @@ async function loadSupabaseUserState(user) {
     learningLanguage: profile?.learning_language || localFallback.learningLanguage,
     learningLevel: profile?.learning_level || localFallback.learningLevel,
     xp: Number.isFinite(Number(profile?.xp)) ? Number(profile.xp) : localFallback.xp,
-    avatar: profile?.avatar_url || localFallback.avatar,
-    avatarUrl: profile?.avatar_url || localFallback.avatarUrl || "",
+    avatar: profile?.avatar_url ? `${profile.avatar_url}${profile.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(profile.updated_at || Date.now())}` : localFallback.avatar,
+    avatarUrl: profile?.avatar_url ? `${profile.avatar_url}${profile.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(profile.updated_at || Date.now())}` : localFallback.avatarUrl || "",
     password: ""
   });
 
@@ -914,16 +919,14 @@ $("saveProfileBtn").addEventListener("click", () => {
 
 async function uploadAvatarToSupabase(file) {
   const client = getSupabaseClient();
-  if (!client) return null;
+  if (!client) throw new Error("Supabase client chưa sẵn sàng.");
 
   const { data: { user }, error: userError } = await client.auth.getUser();
-  if (userError || !user) return null;
+  if (userError || !user) throw userError || new Error("Chưa đăng nhập Supabase.");
 
-  const ext = "webp";
-  const path = `${user.id}/avatar.webp`;
   let body = file;
 
-  // Compress large images before upload. Falls back to the original file if canvas is unavailable.
+  // Resize/compress once to keep avatars small and quick on mobile/desktop.
   try {
     const bitmap = await createImageBitmap(file);
     const maxSize = 640;
@@ -932,16 +935,31 @@ async function uploadAvatarToSupabase(file) {
     canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
     canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
     const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) throw new Error("Không tạo được canvas.");
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    body = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", 0.86));
+
+    const compressed = await new Promise((resolve, reject) => {
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Không nén được ảnh.")),
+        "image/webp", 0.86);
+    });
+    body = compressed;
     bitmap.close?.();
   } catch (error) {
     console.info("[StudyBear] Avatar compression fallback.", error);
   }
 
+  // IMPORTANT: use a new object path for every upload.
+  // Reusing avatar.webp can leave another device showing a CDN/browser-cached old image.
+  const version = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const path = `${user.id}/avatar-${version}.webp`;
+
   const { error: uploadError } = await client.storage
     .from("avatars")
-    .upload(path, body, { upsert: true, contentType: "image/webp", cacheControl: "3600" });
+    .upload(path, body, {
+      upsert: false,
+      contentType: "image/webp",
+      cacheControl: "31536000"
+    });
 
   if (uploadError) throw uploadError;
 
@@ -949,17 +967,120 @@ async function uploadAvatarToSupabase(file) {
     .from("avatars")
     .getPublicUrl(path);
 
-  const publicUrl = `${publicData.publicUrl}?v=${Date.now()}`;
+  const publicUrl = publicData?.publicUrl;
+  if (!publicUrl) throw new Error("Không lấy được URL ảnh từ Supabase Storage.");
 
+  // Upsert instead of update so the avatar still syncs even if the profile row
+  // was missing for an older account.
   const { error: profileError } = await client
     .from("profiles")
-    .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
-    .eq("id", user.id);
+    .upsert({
+      id: user.id,
+      username: currentUsername,
+      display_name: state?.displayName || user.user_metadata?.display_name || "User",
+      avatar_url: publicUrl,
+      interface_language: state?.interfaceLanguage || "vi",
+      native_language: state?.nativeLanguage || "vi",
+      learning_language: state?.learningLanguage || "ko",
+      learning_level: state?.learningLevel || "beginner",
+      xp: Number(state?.xp || 0),
+      updated_at: new Date().toISOString()
+    }, { onConflict: "id" });
 
   if (profileError) throw profileError;
 
-  return publicUrl;
+  // Read back what the server stored; this prevents a local-only success state.
+  const { data: savedProfile, error: verifyError } = await client
+    .from("profiles")
+    .select("avatar_url,updated_at")
+    .eq("id", user.id)
+    .single();
+
+  if (verifyError) throw verifyError;
+  if (!savedProfile?.avatar_url) {
+    throw new Error("Supabase chưa lưu avatar_url.");
+  }
+
+  return {
+    url: savedProfile.avatar_url,
+    updatedAt: savedProfile.updated_at || new Date().toISOString()
+  };
 }
+
+$("avatarInput").addEventListener("change", async e => {
+  if (!requireLogin()) return;
+
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    showToast("⚠️ Vui lòng chọn một file ảnh.");
+    e.target.value = "";
+    return;
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    showToast("⚠️ Ảnh đại diện tối đa 2MB.");
+    e.target.value = "";
+    return;
+  }
+
+  try {
+    const reader = new FileReader();
+
+    reader.onload = async () => {
+      // Fast local preview.
+      state.avatar = reader.result;
+      renderProfile();
+      updateUserUI();
+      saveStateLocalOnly?.();
+
+      if (!hasSupabaseAuth()) {
+        showToast("📷 Đã đổi ảnh trên thiết bị này.");
+        return;
+      }
+
+      try {
+        const cloud = await uploadAvatarToSupabase(file);
+        state.avatarUrl = cloud.url;
+        state.avatar = cloud.url;
+
+        // Do not re-upload the data URI after the cloud upload.
+        // Persist locally without triggering another network sync.
+        saveStateLocalOnly?.();
+        renderProfile();
+        updateUserUI();
+
+        // Verify the exact URL that a second device will read.
+        const client = getSupabaseClient();
+        const { data: { user } } = await client.auth.getUser();
+        const { data: serverProfile } = await client
+          .from("profiles")
+          .select("avatar_url")
+          .eq("id", user.id)
+          .single();
+
+        if (!serverProfile?.avatar_url || serverProfile.avatar_url !== cloud.url) {
+          throw new Error("Xác minh avatar trên server thất bại.");
+        }
+
+        showToast("☁️ Avatar đã đồng bộ trên tất cả thiết bị.");
+      } catch (error) {
+        console.error("[StudyBear] Avatar cloud sync failed:", error);
+        showToast(UI[getUILang()].saveCloudError || "⚠️ Không thể đồng bộ ảnh.");
+      }
+    };
+
+    reader.onerror = () => {
+      showToast("⚠️ Không đọc được file ảnh.");
+    };
+
+    reader.readAsDataURL(file);
+  } finally {
+    // Allows selecting the same file again.
+    e.target.value = "";
+  }
+});
 
 $("avatarInput").addEventListener("change", async e => {
   if (!requireLogin()) return;
