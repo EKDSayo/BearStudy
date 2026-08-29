@@ -30,7 +30,10 @@
       <button class="nav-btn" data-page="quiz">🧠 <span data-i18n="navQuiz">Trắc nghiệm</span></button>
       <button class="nav-btn" data-page="typing">⌨️ <span data-i18n="navTyping">Gõ đáp án</span></button>
       <button class="nav-btn" data-page="wrong">❌ <span data-i18n="navWrong">Từ cần ôn</span></button>
-      <button class="nav-btn learned-nav-btn" data-page="learned" type="button">
+      
+      <button class="nav-btn" data-page="friends">👥 <span data-i18n="navFriends">Bạn bè</span><span class="social-nav-count" id="friendRequestCount">0</span></button>
+      <button class="nav-btn" data-page="chat">💬 <span data-i18n="navChat">Tin nhắn</span></button>
+<button class="nav-btn learned-nav-btn" data-page="learned" type="button">
         ✅ <span data-i18n="navLearned">Từ đã học</span>
         <span class="learned-nav-count" id="learnedNavCount">0</span>
       </button>
@@ -311,6 +314,77 @@
         <span class="muted" data-i18n="learnedPageHint">Chọn “Ôn tập” để mở từ ngay trong Flashcard.</span>
       </div>
       <div id="learnedVocabList" class="vocab-grid"></div>
+    </section>
+
+    <section class="page" id="page-friends">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">👥 SOCIAL</span>
+          <h2 data-i18n="friendsTitle">Bạn bè</h2>
+          <p data-i18n="friendsSubtitle">Kết bạn bằng username và học cùng nhau</p>
+        </div>
+      </div>
+
+      <div class="social-search card">
+        <label for="friendSearchInput" data-i18n="friendSearchLabel">Tìm username</label>
+        <div class="social-search-row">
+          <input class="profile-input" id="friendSearchInput" autocomplete="off" maxlength="24" data-i18n-placeholder="friendSearchPlaceholder" placeholder="Nhập username...">
+          <button class="primary-btn" id="friendSearchBtn" data-i18n="friendSearchBtn">🔎 Tìm</button>
+        </div>
+        <div class="social-status" id="friendSearchStatus"></div>
+        <div class="friend-results" id="friendSearchResults"></div>
+      </div>
+
+      <div class="social-columns">
+        <div class="card">
+          <div class="card-title">
+            <div><span class="card-icon">🔔</span><div><h3 data-i18n="friendRequestsTitle">Lời mời kết bạn</h3><p data-i18n="friendRequestsSubtitle">Các yêu cầu đang chờ</p></div></div>
+          </div>
+          <div id="friendRequestsList" class="social-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <div><span class="card-icon">🤝</span><div><h3 data-i18n="friendsListTitle">Danh sách bạn bè</h3><p data-i18n="friendsListSubtitle">Bạn bè đã chấp nhận</p></div></div>
+          </div>
+          <div id="friendsList" class="social-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-chat">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">💬 CHAT</span>
+          <h2 data-i18n="chatTitle">Tin nhắn</h2>
+          <p data-i18n="chatSubtitle">Trò chuyện với bạn bè theo thời gian thực</p>
+        </div>
+      </div>
+
+      <div class="chat-layout card">
+        <aside class="chat-sidebar">
+          <div class="chat-sidebar-head">
+            <strong data-i18n="conversationsTitle">Cuộc trò chuyện</strong>
+            <span id="conversationCount" class="learned-nav-count">0</span>
+          </div>
+          <div id="conversationList" class="conversation-list"></div>
+        </aside>
+
+        <section class="chat-main">
+          <header class="chat-header" id="chatHeader">
+            <div class="chat-user-avatar" id="chatUserAvatar">🐻</div>
+            <div>
+              <strong id="chatUserName" data-i18n="selectFriendToChat">Chọn một người bạn để bắt đầu</strong>
+              <span id="chatUserStatus" class="muted"></span>
+            </div>
+          </header>
+          <div class="chat-messages" id="chatMessages"></div>
+          <form class="chat-composer" id="chatForm">
+            <input id="chatInput" class="profile-input" autocomplete="off" maxlength="1000" data-i18n-placeholder="chatPlaceholder" placeholder="Nhập tin nhắn...">
+            <button class="primary-btn" type="submit" data-i18n="sendMessage">Gửi</button>
+          </form>
+          <div class="social-status" id="chatStatus"></div>
+        </section>
+      </div>
     </section>
 <section class="page" id="page-profile">
       <div class="section-heading">
