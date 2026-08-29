@@ -18,36 +18,43 @@
       <div class="brand-bear">🐻</div>
       <div>
         <h1>Bear Study</h1>
-        <span>Học vui mỗi ngày</span>
+        <span data-i18n="brandTagline">Học vui mỗi ngày</span>
       </div>
     </div>
 
     <nav>
-      <button class="nav-btn active" data-page="home">🏠 <span>Trang chủ</span></button>
-      <button class="nav-btn" data-page="vocabulary">📚 <span>Từ vựng</span></button>
-      <button class="nav-btn" data-page="flashcard">🃏 <span>Flashcard</span></button>
-      <button class="nav-btn" data-page="quiz">🧠 <span>Trắc nghiệm</span></button>
-      <button class="nav-btn" data-page="typing">⌨️ <span>Gõ đáp án</span></button>
-      <button class="nav-btn" data-page="wrong">❌ <span>Từ cần ôn</span></button>
-      <button class="nav-btn" data-page="settings">⚙️ <span>Cài đặt</span></button>
+      <button class="nav-btn active" data-page="home">🏠 <span data-i18n="navHome">Trang chủ</span></button>
+      <button class="nav-btn" data-page="dictionary">📖 <span data-i18n="navDictionary">Kho từ điển</span></button>
+      <button class="nav-btn" data-page="vocabulary">📚 <span data-i18n="navVocabulary">Từ vựng</span></button>
+      <button class="nav-btn" data-page="flashcard">🃏 <span data-i18n="navFlashcard">Flashcard</span></button>
+      <button class="nav-btn" data-page="quiz">🧠 <span data-i18n="navQuiz">Trắc nghiệm</span></button>
+      <button class="nav-btn" data-page="typing">⌨️ <span data-i18n="navTyping">Gõ đáp án</span></button>
+      <button class="nav-btn" data-page="wrong">❌ <span data-i18n="navWrong">Từ cần ôn</span></button>
+      <button class="nav-btn" data-page="profile">👤 <span data-i18n="profileNav">Hồ sơ</span></button>
+      <button class="nav-btn" data-page="settings">⚙️ <span data-i18n="navSettings">Cài đặt</span></button>
     </nav>
 
     <div class="sidebar-card">
       <div class="mini-bear">🐻</div>
-      <strong>Học một chút mỗi ngày!</strong>
-      <p>Tiến trình của bạn sẽ được lưu riêng theo tài khoản.</p>
+      <strong data-i18n="sidebarTipTitle">Học một chút mỗi ngày!</strong>
+      <p data-i18n="sidebarTipText">Tiến trình của bạn sẽ được lưu riêng theo tài khoản.</p>
     </div>
   </aside>
 
   <main class="main">
     <header class="topbar">
       <button class="icon-btn mobile-menu" id="menuBtn">☰</button>
-      <div class="page-title" id="pageTitle">Trang chủ</div>
+      <div class="page-title" id="pageTitle" data-i18n="pageHome">Trang chủ</div>
 
       <div class="top-actions">
-        <button class="icon-btn" id="darkButton" title="Đổi giao diện">🌙</button>
+        <select class="language-select" id="interfaceLanguage" title="Ngôn ngữ giao diện" aria-label="Ngôn ngữ giao diện">
+      <option value="vi">🇻🇳 Việt</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="ko">🇰🇷 한국어</option>
+    </select>
+    <button class="icon-btn" id="darkButton" title="Đổi giao diện">🌙</button>
 
-        <div class="user-box">
+        <div class="user-box" id="userBox" title="Mở hồ sơ">
           <div class="user-avatar" id="userAvatar">🐻</div>
           <div class="user-info">
             <strong id="currentUserName">Khách</strong>
@@ -61,25 +68,25 @@
     <section class="page active" id="page-home">
       <div class="hero">
         <div class="hero-text">
-          <span class="eyebrow">🐻 WELCOME TO BEAR STUDY</span>
+          <span class="eyebrow" data-i18n="homeEyebrow">🐻 WELCOME TO BEAR STUDY</span>
           <h2 id="heroGreeting">Chào mừng bạn đến với Bear Study!</h2>
-          <p>Học từ vựng Việt – Anh – Hàn theo cách nhẹ nhàng, dễ nhớ và đáng yêu.</p>
-          <button class="primary-btn" data-page-target="vocabulary">📖 Bắt đầu học</button>
+          <p data-i18n="homeDescription">Học từ vựng Việt – Anh – Hàn theo cách nhẹ nhàng, dễ nhớ và đáng yêu.</p>
+          <button class="primary-btn" data-page-target="vocabulary" data-i18n="startLearning">📖 Bắt đầu học</button>
         </div>
         <div class="hero-bear">🐻</div>
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card"><span>📖</span><strong id="statLearned">0</strong><small>Từ đã học</small></div>
-        <div class="stat-card"><span>⭐</span><strong id="statFavorite">0</strong><small>Yêu thích</small></div>
-        <div class="stat-card"><span>🏆</span><strong id="statScore">0</strong><small>Điểm XP</small></div>
-        <div class="stat-card"><span>❌</span><strong id="statWrong">0</strong><small>Cần ôn</small></div>
+        <div class="stat-card"><span>📖</span><strong id="statLearned">0</strong><small data-i18n="statLearned">Từ đã học</small></div>
+        <div class="stat-card"><span>⭐</span><strong id="statFavorite">0</strong><small data-i18n="statFavorite">Yêu thích</small></div>
+        <div class="stat-card"><span>🏆</span><strong id="statScore">0</strong><small data-i18n="statXP">Điểm XP</small></div>
+        <div class="stat-card"><span>❌</span><strong id="statWrong">0</strong><small data-i18n="statWrong">Cần ôn</small></div>
       </div>
 
       <div class="dashboard-grid">
         <div class="card">
           <div class="card-title">
-            <div><span class="card-icon">🎯</span><div><h3>Tiến trình học</h3><p>Hành trình của bạn</p></div></div>
+            <div><span class="card-icon">🎯</span><div><h3 data-i18n="progressTitle">Tiến trình học</h3><p data-i18n="progressSubtitle">Hành trình của bạn</p></div></div>
             <strong id="progressPercent">0%</strong>
           </div>
           <div class="progress"><div id="progressBar"></div></div>
@@ -89,7 +96,7 @@
         <div class="card level-card">
           <div class="level-bear">🐻</div>
           <div>
-            <span class="muted">Cấp độ</span>
+            <span class="muted" data-i18n="levelLabel">Cấp độ</span>
             <h3>Level <span id="level">1</span></h3>
             <p><strong id="xp">0</strong> XP</p>
           </div>
@@ -99,113 +106,349 @@
 
       <div class="card">
         <div class="card-title">
-          <div><span class="card-icon">✨</span><div><h3>Cách học</h3><p>Chọn một chế độ để luyện tập</p></div></div>
+          <div><span class="card-icon">✨</span><div><h3 data-i18n="studyModesTitle">Cách học</h3><p data-i18n="studyModesSubtitle">Chọn một chế độ để luyện tập</p></div></div>
         </div>
         <div class="mode-grid">
-          <button class="mode-card" data-page-target="flashcard"><span>🃏</span><strong>Flashcard</strong><small>Lật thẻ ghi nhớ</small></button>
-          <button class="mode-card" data-page-target="quiz"><span>🧠</span><strong>Trắc nghiệm</strong><small>Kiểm tra nhanh</small></button>
-          <button class="mode-card" data-page-target="typing"><span>⌨️</span><strong>Gõ đáp án</strong><small>Luyện phản xạ</small></button>
-          <button class="mode-card" data-page-target="vocabulary"><span>📚</span><strong>Tất cả từ</strong><small>Xem 28 từ vựng</small></button>
+          <button class="mode-card" data-page-target="flashcard"><span>🃏</span><strong>Flashcard</strong><small data-i18n="modeFlashcard">Lật thẻ ghi nhớ</small></button>
+          <button class="mode-card" data-page-target="quiz"><span>🧠</span><strong data-i18n="modeQuiz">Trắc nghiệm</strong><small data-i18n="modeQuizSub">Kiểm tra nhanh</small></button>
+          <button class="mode-card" data-page-target="typing"><span>⌨️</span><strong data-i18n="modeTyping">Gõ đáp án</strong><small data-i18n="modeTypingSub">Luyện phản xạ</small></button>
+          <button class="mode-card" data-page-target="vocabulary"><span>📚</span><strong data-i18n="modeAllWords">Tất cả từ</strong><small data-i18n="modeAllWordsSub">Xem 28 từ vựng</small></button>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="page" id="page-dictionary">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">📖 DICTIONARY</span>
+          <h2 data-i18n="dictionaryTitle">Kho từ điển</h2>
+          <p data-i18n="dictionarySubtitle">Tra cứu từ vựng trực tiếp từ Wiktionary</p>
+        </div>
+      </div>
+
+      <div class="card dictionary-controls">
+        <div class="dictionary-control">
+          <label for="dictionarySource" data-i18n="dictionarySourceLabel">Ngôn ngữ tra cứu</label>
+          <select id="dictionarySource" class="profile-select">
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="zh">🇨🇳 中文</option>
+          </select>
+        </div>
+        <div class="dictionary-control dictionary-search-control">
+          <label for="dictionaryInput" data-i18n="dictionarySearchLabel">Từ cần tra</label>
+          <input id="dictionaryInput" class="search" data-i18n-placeholder="dictionaryPlaceholder" placeholder="Nhập từ cần tra...">
+        </div>
+        <button class="primary-btn dictionary-search-btn" id="dictionarySearchBtn" data-i18n="dictionarySearchBtn">🔎 Tra cứu</button>
+      </div>
+
+      <div class="card dictionary-note">
+        <span>🌍</span>
+        <p data-i18n="dictionaryNote">Kho từ điển được tải theo yêu cầu từ Wiktionary. Dữ liệu rất lớn nên không nhúng toàn bộ vào website; cách này nhẹ hơn và cho phép tra cứu nhiều ngôn ngữ.</p>
+      </div>
+
+      <div class="card dictionary-results" id="dictionaryResults">
+        <div class="empty">
+          <div class="empty-bear">🐻</div>
+          <span data-i18n="dictionaryEmpty">Nhập một từ để bắt đầu tra cứu.</span>
         </div>
       </div>
     </section>
 
     <section class="page" id="page-vocabulary">
       <div class="section-heading">
-        <div><span class="eyebrow">📚 VOCABULARY</span><h2>Danh sách từ vựng</h2><p>Việt → English → 한국어</p></div>
-        <input class="search" id="searchInput" placeholder="🔎 Tìm từ vựng...">
+        <div>
+          <span class="eyebrow">📚 VOCABULARY</span>
+          <h2 data-i18n="vocabTitle">Danh sách từ vựng</h2>
+          <p data-i18n="vocabSubtitle">Chọn ngôn ngữ để học</p>
+        </div>
+        <input class="search" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="🔎 Tìm từ vựng...">
       </div>
+
+      <div class="study-language-toolbar card">
+        <div class="toolbar-group">
+          <label for="studyLanguage" data-i18n="studyLanguageLabel">🌱 Ngôn ngữ học</label>
+          <select id="studyLanguage" class="profile-select">
+            <option value="ko">🇰🇷 한국어 — Tiếng Hàn</option>
+            <option value="en">🇬🇧 English — Tiếng Anh</option>
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="ru">🇷🇺 Русский — Tiếng Nga</option>
+            <option value="zh">🇨🇳 中文 — Tiếng Trung</option>
+          </select>
+        </div>
+
+        <div class="toolbar-group voice-group">
+          <label for="voiceSelect" data-i18n="voiceLabel">🔊 Giọng đọc</label>
+          <select id="voiceSelect" class="profile-select">
+            <option value="" data-i18n="voiceLoading">Đang tải giọng đọc...</option>
+          </select>
+        </div>
+
+        <button class="secondary-btn voice-test-btn" id="voiceTest" data-i18n="voiceTest">▶ Thử giọng</button>
+      </div>
+
+      <div class="topic-filter card">
+        <div class="topic-filter-title">
+          <span class="card-icon">🗂️</span>
+          <div>
+            <h3 data-i18n="topicTitle">Chủ đề từ vựng</h3>
+            <p data-i18n="topicSubtitle">Chọn chủ đề để học dễ dàng hơn</p>
+          </div>
+        </div>
+        <select class="filter-select" id="topicButtons" aria-label="Chủ đề từ vựng"></select>
+      </div>
+
+      <div class="level-filter card">
+        <div class="topic-filter-title">
+          <span class="card-icon">📊</span>
+          <div>
+            <h3 data-i18n="levelFilterTitle">Trình độ</h3>
+            <p data-i18n="levelFilterSubtitle">Học theo mức độ phù hợp</p>
+          </div>
+        </div>
+        <select class="filter-select" id="levelButtons" aria-label="Trình độ"></select>
+      </div>
+
       <div class="vocab-grid" id="vocabGrid"></div>
     </section>
 
     <section class="page" id="page-flashcard">
       <div class="section-heading">
-        <div><span class="eyebrow">🃏 FLASHCARD</span><h2>Học bằng thẻ</h2><p>Nhấn vào thẻ để xem đáp án</p></div>
+        <div><span class="eyebrow">🃏 FLASHCARD</span><h2 data-i18n="flashTitle">Học bằng thẻ</h2><p data-i18n="flashSubtitle">Nhấn vào thẻ để xem đáp án</p></div>
+      </div>
+      <div class="study-tool-filter">
+        <label for="flashTopic" data-i18n="studyTopicLabel">🗂️ Chủ đề học</label>
+        <select id="flashTopic" class="filter-select"></select>
       </div>
       <div class="flash-wrap">
         <div class="flashcard" id="flashcard">
           <div class="flash-inner">
             <div class="flash-face flash-front">
               <span class="flash-number" id="flashNumber">1 / 28</span>
-              <span class="flash-label">TIẾNG VIỆT</span>
+              <span class="flash-label" data-i18n="vietnameseLabel">TIẾNG VIỆT</span>
               <h2 id="flashVi">dụng cụ</h2>
-              <p>Nhấn để lật 🐻</p>
+              <p data-i18n="flipHint">Nhấn để lật 🐻</p>
             </div>
             <div class="flash-face flash-back">
-              <span class="flash-label">ENGLISH</span>
+              <span class="flash-label" id="flashTargetLabel">ENGLISH</span>
               <h2 id="flashEn">tool / instrument</h2>
-              <h3 id="flashKo">도구</h3>
-              <button class="small-btn" id="flashLearnedBtn">✓ Đã học từ này</button>
+              <h3 id="flashKo">도구</h3><div class="vocab-pinyin" id="flashPinyin"></div>
+              <div class="flash-audio-row"><button class="small-btn" id="flashSpeakBtn">🔊 <span data-i18n="speakWord">Nghe từ</span></button></div>
+              <button class="small-btn" id="flashLearnedBtn" data-i18n="markLearned">✓ Đã học từ này</button>
             </div>
           </div>
         </div>
         <div class="flash-controls">
-          <button class="secondary-btn" id="flashPrev">← Trước</button>
-          <button class="primary-btn" id="flashNext">Từ tiếp theo →</button>
+          <button class="secondary-btn" id="flashPrev" data-i18n="previous">← Trước</button>
+          <button class="primary-btn" id="flashNext" data-i18n="nextWord">Từ tiếp theo →</button>
         </div>
       </div>
     </section>
 
     <section class="page" id="page-quiz">
       <div class="section-heading">
-        <div><span class="eyebrow">🧠 QUIZ</span><h2>Trắc nghiệm</h2><p>Chọn đáp án đúng</p></div>
+        <div><span class="eyebrow">🧠 QUIZ</span><h2 data-i18n="quizTitle">Trắc nghiệm</h2><p data-i18n="quizSubtitle">Chọn đáp án đúng</p></div>
+      </div>
+      <div class="study-tool-filter">
+        <label for="quizTopic" data-i18n="studyTopicLabel">🗂️ Chủ đề học</label>
+        <select id="quizTopic" class="filter-select"></select>
       </div>
       <div class="quiz-card card">
-        <div class="quiz-top"><span id="quizCounter">Câu 1</span><span>⭐ <b id="quizScore">0</b></span></div>
-        <div class="question"><span>Tiếng Hàn của:</span><h2 id="quizQuestion">dụng cụ</h2></div>
+        <div class="quiz-top"><span id="quizCounter">1 / 1</span><span>⭐ <b id="quizScore">0</b></span></div>
+        <div class="question"><span data-i18n="questionLanguage">Tiếng Hàn của:</span><h2 id="quizQuestion">dụng cụ</h2></div>
         <div class="answers" id="quizAnswers"></div>
         <div class="feedback" id="quizFeedback"></div>
-        <button class="primary-btn full" id="nextQuiz">Câu tiếp theo →</button>
+        <button class="primary-btn full" id="nextQuiz" data-i18n="nextQuestion">Câu tiếp theo →</button>
       </div>
     </section>
 
     <section class="page" id="page-typing">
       <div class="section-heading">
-        <div><span class="eyebrow">⌨️ TYPING</span><h2>Gõ đáp án</h2><p>Nhớ từ rồi tự nhập câu trả lời</p></div>
+        <div><span class="eyebrow">⌨️ TYPING</span><h2 data-i18n="typingTitle">Gõ đáp án</h2><p data-i18n="typingSubtitle">Nhớ từ rồi tự nhập câu trả lời</p></div>
+      </div>
+      <div class="study-tool-filter">
+        <label for="typingTopic" data-i18n="studyTopicLabel">🗂️ Chủ đề học</label>
+        <select id="typingTopic" class="filter-select"></select>
       </div>
       <div class="typing-card card">
-        <span class="muted">Hãy nhập tiếng Hàn của:</span>
+        <div class="typing-counter-row"><span class="typing-counter-label">📚</span><strong id="typingCounter">1 / 1</strong></div>
+        <span class="muted" data-i18n="typePrompt">Hãy nhập tiếng Hàn của:</span>
         <h2 id="typingQuestion">dụng cụ</h2>
         <div class="typing-row">
-          <input id="typingInput" autocomplete="off" placeholder="Nhập đáp án tiếng Hàn...">
-          <button class="primary-btn" id="checkTyping">Kiểm tra</button>
+          <input id="typingInput" autocomplete="off" data-i18n-placeholder="typingPlaceholder" placeholder="Nhập đáp án tiếng Hàn...">
+          <button class="primary-btn" id="checkTyping" data-i18n="checkAnswer">Kiểm tra</button>
         </div>
         <div class="feedback" id="typingFeedback"></div>
-        <button class="secondary-btn" id="nextTyping">Từ tiếp theo →</button>
+        <button class="secondary-btn" id="nextTyping" data-i18n="nextWord">Từ tiếp theo →</button>
       </div>
     </section>
 
     <section class="page" id="page-wrong">
       <div class="section-heading">
-        <div><span class="eyebrow">❌ REVIEW</span><h2>Từ cần ôn</h2><p>Những từ bạn từng trả lời sai</p></div>
+        <div><span class="eyebrow">❌ REVIEW</span><h2 data-i18n="wrongTitle">Từ cần ôn</h2><p data-i18n="wrongSubtitle">Những từ bạn từng trả lời sai</p></div>
       </div>
       <div id="wrongList" class="vocab-grid"></div>
     </section>
 
+    <section class="page" id="page-profile">
+      <div class="section-heading">
+        <div><span class="eyebrow">👤 PROFILE</span><h2 data-i18n="profileTitle">Hồ sơ của bạn</h2><p data-i18n="profileSubtitle">Chỉnh sửa thông tin cá nhân và bộ sưu tập</p></div>
+      </div>
+
+      <div class="profile-layout">
+        <div class="card profile-editor-card">
+          <div class="profile-cover">
+            <div class="profile-avatar-wrap">
+              <div id="profileAvatar" class="profile-avatar default-avatar" aria-label="Ảnh đại diện mặc định">🐻</div>
+              <span class="avatar-help" data-i18n="changeAvatar">Đổi ảnh</span>
+              <label class="avatar-edit" id="avatarEditButton" for="avatarInput" title="Đổi ảnh đại diện" aria-label="Đổi ảnh đại diện">📷</label>
+              <input id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+            </div>
+          </div>
+
+          <div class="profile-editor-body">
+            <span class="muted" data-i18n="usernameLabel">Tên đăng nhập</span>
+            <strong id="profileUsername">Chưa đăng nhập</strong>
+
+            <label for="profileDisplayName" data-i18n="displayNameLabel">Tên hiển thị</label>
+            <input class="profile-input" id="profileDisplayName" maxlength="30" data-i18n-placeholder="displayNamePlaceholder" placeholder="Tên hiển thị">
+
+            <div class="language-grid">
+              <div>
+                <label for="learningLanguage" data-i18n="learningLanguage">🌱 Ngôn ngữ học</label>
+                <select class="profile-input" id="learningLanguage">
+                  <option value="ko">🇰🇷 한국어 — Tiếng Hàn</option>
+                  <option value="en">🇬🇧 English — Tiếng Anh</option>
+                  <option value="vi">🇻🇳 Tiếng Việt</option>
+                  <option value="ru">🇷🇺 Русский — Tiếng Nga</option>
+                  <option value="zh">🇨🇳 中文 — Tiếng Trung</option>
+                </select>
+              </div>
+              <div>
+                <label for="nativeLanguage" data-i18n="nativeLanguage">🏠 Ngôn ngữ mẹ đẻ</label>
+                <select class="profile-input" id="nativeLanguage">
+                  <option value="vi">🇻🇳 Tiếng Việt</option>
+                  <option value="ko">🇰🇷 한국어 — Tiếng Hàn</option>
+                  <option value="en">🇬🇧 English — Tiếng Anh</option>
+                  <option value="ru">🇷🇺 Русский — Tiếng Nga</option>
+                  <option value="zh">🇨🇳 中文 — Tiếng Trung</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="language-level-row">
+              <label for="learningLevel" data-i18n="learningLevel">📊 Trình độ ngôn ngữ</label>
+              <select class="profile-input" id="learningLevel">
+                <option value="beginner">Sơ cấp</option>
+                <option value="basic">Căn bản</option>
+                <option value="intermediate">Trung cấp</option>
+                <option value="advanced">Cao cấp</option>
+                <option value="fluent">Thông thạo</option>
+              </select>
+            </div>
+
+            <button class="primary-btn profile-save-btn" id="saveProfileBtn" data-i18n="saveProfile">💙 Lưu thay đổi</button>
+            <div class="profile-message" id="profileMessage"></div>
+          </div>
+        </div>
+
+        <div class="card profile-summary-card">
+          <div class="profile-summary-head">
+            <div><span class="card-icon">🌱</span><div><h3 data-i18n="learningInfoTitle">Thông tin học tập</h3><p data-i18n="learningInfoSubtitle">Ngôn ngữ bạn đang sử dụng</p></div></div>
+          </div>
+          <div class="language-summary">
+            <div><span data-i18n="learningLanguage">Ngôn ngữ học</span><strong id="summaryLearningLanguage">Tiếng Hàn</strong></div>
+            <div><span data-i18n="nativeLanguage">Ngôn ngữ mẹ đẻ</span><strong id="summaryNativeLanguage">Tiếng Việt</strong></div>
+          </div>
+          <div class="profile-stats-mini">
+            <div><strong id="profileLevel">1</strong><span data-i18n="levelMini">Level</span></div>
+            <div><strong id="profileXP">0</strong><span data-i18n="xpMini">XP</span></div>
+            <div><strong id="profileLearned">0</strong><span data-i18n="learnedMini">Đã học</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card collection-section">
+        <div class="card-title">
+          <div><span class="card-icon">🎁</span><div><h3 data-i18n="collectionTitle">Bộ sưu tập</h3><p data-i18n="collectionSubtitle">Các bảng trưng bày theo mùa và chủ đề</p></div></div>
+        </div>
+
+        <div class="collection-grid">
+          <div class="collection-board season-spring">
+            <div class="board-head"><span>🌸</span><div><strong data-i18n="spring">Mùa xuân</strong><small data-i18n="springEn">Spring Collection</small></div></div>
+            <div class="item-slots">
+              <div class="item-slot">🌱<small>Vật phẩm 01</small></div>
+              <div class="item-slot">🌷<small>Vật phẩm 02</small></div>
+              <div class="item-slot empty-slot">＋<small>Đang chờ</small></div>
+            </div>
+          </div>
+
+          <div class="collection-board season-summer">
+            <div class="board-head"><span>☀️</span><div><strong data-i18n="summer">Mùa hè</strong><small data-i18n="summerEn">Summer Collection</small></div></div>
+            <div class="item-slots">
+              <div class="item-slot">🍉<small>Vật phẩm 01</small></div>
+              <div class="item-slot">🏖️<small>Vật phẩm 02</small></div>
+              <div class="item-slot empty-slot">＋<small>Đang chờ</small></div>
+            </div>
+          </div>
+
+          <div class="collection-board season-autumn">
+            <div class="board-head"><span>🍂</span><div><strong data-i18n="autumn">Mùa thu</strong><small data-i18n="autumnEn">Autumn Collection</small></div></div>
+            <div class="item-slots">
+              <div class="item-slot">🍁<small>Vật phẩm 01</small></div>
+              <div class="item-slot">🌰<small>Vật phẩm 02</small></div>
+              <div class="item-slot empty-slot">＋<small>Đang chờ</small></div>
+            </div>
+          </div>
+
+          <div class="collection-board season-winter">
+            <div class="board-head"><span>❄️</span><div><strong data-i18n="winter">Mùa đông</strong><small data-i18n="winterEn">Winter Collection</small></div></div>
+            <div class="item-slots">
+              <div class="item-slot">⛄<small>Vật phẩm 01</small></div>
+              <div class="item-slot">🧣<small>Vật phẩm 02</small></div>
+              <div class="item-slot empty-slot">＋<small>Đang chờ</small></div>
+            </div>
+          </div>
+
+          <div class="collection-board theme-board">
+            <div class="board-head"><span>✨</span><div><strong data-i18n="special">Chủ đề đặc biệt</strong><small data-i18n="specialEn">Special Collection</small></div></div>
+            <div class="item-slots">
+              <div class="item-slot">🐻<small>Bear Item</small></div>
+              <div class="item-slot">🎓<small>Study Item</small></div>
+              <div class="item-slot empty-slot">＋<small>Đang chờ</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="page" id="page-settings">
       <div class="section-heading">
-        <div><span class="eyebrow">⚙️ SETTINGS</span><h2>Tài khoản & dữ liệu</h2><p>Quản lý tiến trình học của bạn</p></div>
+        <div><span class="eyebrow">⚙️ SETTINGS</span><h2 data-i18n="settingsTitle">Tài khoản & dữ liệu</h2><p data-i18n="settingsSubtitle">Quản lý tiến trình học của bạn</p></div>
       </div>
 
       <div class="settings-grid">
         <div class="card profile-card">
           <div class="big-avatar">🐻</div>
-          <div><span class="muted">Đang đăng nhập</span><h2 id="settingsName">Khách</h2><p>Điểm: <strong id="settingsScore">0</strong> XP</p></div>
+          <div><span class="muted" data-i18n="loggedInAs">Đang đăng nhập</span><h2 id="settingsName">Khách</h2><p>Điểm: <strong id="settingsScore">0</strong> XP</p></div>
           <button class="primary-btn" id="settingsAuthBtn">Đăng nhập</button>
         </div>
 
         <div class="card">
-          <h3>💾 Dữ liệu học tập</h3>
-          <p class="muted">Tiến trình được lưu riêng trong trình duyệt cho từng tài khoản.</p>
+          <h3 data-i18n="dataTitle">💾 Dữ liệu học tập</h3>
+          <p class="muted" data-i18n="dataSubtitle">Tiến trình được lưu riêng trong trình duyệt cho từng tài khoản.</p>
           <div class="settings-actions">
-            <button class="secondary-btn" id="exportBtn">📤 Xuất dữ liệu</button>
-            <button class="danger-btn" id="resetBtn">🗑️ Xóa tiến trình</button>
+            <button class="secondary-btn" id="exportBtn" data-i18n="exportData">📤 Xuất dữ liệu</button>
+            <button class="danger-btn" id="resetBtn" data-i18n="resetData">🗑️ Xóa tiến trình</button>
           </div>
         </div>
 
         <div class="card">
-          <h3>🔐 Lưu ý</h3>
-          <p class="muted">Đây là hệ thống đăng nhập ảo bằng LocalStorage. Không dùng để lưu tài khoản thật hoặc dữ liệu nhạy cảm trên website thực tế.</p>
+          <h3 data-i18n="noteTitle">🔐 Lưu ý</h3>
+          <p class="muted" data-i18n="noteText">Đây là hệ thống đăng nhập ảo bằng LocalStorage. Không dùng để lưu tài khoản thật hoặc dữ liệu nhạy cảm trên website thực tế.</p>
         </div>
       </div>
     </section>
@@ -218,33 +461,33 @@
       <div class="auth-bear">🐻</div>
       <div class="auth-title">
         <h2>Bear Study</h2>
-        <p>Đăng nhập để lưu hành trình học của bạn 💙</p>
+        <p data-i18n="authSubtitle">Đăng nhập để lưu hành trình học của bạn 💙</p>
       </div>
 
       <div class="auth-tabs">
-        <button class="auth-tab active" data-auth-tab="login">Đăng nhập</button>
-        <button class="auth-tab" data-auth-tab="register">Đăng ký</button>
+        <button class="auth-tab active" data-auth-tab="login" data-i18n="loginTab">Đăng nhập</button>
+        <button class="auth-tab" data-auth-tab="register" data-i18n="registerTab">Đăng ký</button>
       </div>
 
       <form class="auth-form active" id="loginForm">
-        <label>Tên đăng nhập</label>
+        <label data-i18n="usernameLabel">Tên đăng nhập</label>
         <input class="auth-input" id="loginUsername" required placeholder="Ví dụ: minhnhat">
-        <label>Mật khẩu</label>
+        <label data-i18n="passwordLabel">Mật khẩu</label>
         <input class="auth-input" id="loginPassword" type="password" required placeholder="Mật khẩu">
-        <button class="auth-submit" type="submit">🐻 Đăng nhập</button>
+        <button class="auth-submit" type="submit" data-i18n="loginBtn">🐻 Đăng nhập</button>
         <div class="auth-message" id="loginMessage"></div>
       </form>
 
       <form class="auth-form" id="registerForm">
-        <label>Tên hiển thị</label>
+        <label data-i18n="displayNameLabel">Tên hiển thị</label>
         <input class="auth-input" id="registerDisplayName" required placeholder="Ví dụ: Minh Nhật">
-        <label>Tên đăng nhập</label>
+        <label data-i18n="usernameLabel">Tên đăng nhập</label>
         <input class="auth-input" id="registerUsername" required placeholder="Ít nhất 3 ký tự">
-        <label>Mật khẩu</label>
+        <label data-i18n="passwordLabel">Mật khẩu</label>
         <input class="auth-input" id="registerPassword" type="password" required placeholder="Ít nhất 4 ký tự">
-        <label>Nhập lại mật khẩu</label>
+        <label data-i18n="confirmPasswordLabel">Nhập lại mật khẩu</label>
         <input class="auth-input" id="registerPassword2" type="password" required placeholder="Nhập lại mật khẩu">
-        <button class="auth-submit" type="submit">✨ Tạo tài khoản</button>
+        <button class="auth-submit" type="submit" data-i18n="registerBtn">✨ Tạo tài khoản</button>
         <div class="auth-message" id="registerMessage"></div>
       </form>
     </div>
