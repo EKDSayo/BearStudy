@@ -93,7 +93,7 @@ const UI = {
   vi: {
     brandTagline:"Học vui mỗi ngày", navHome:"Trang chủ", navVocabulary:"Từ vựng", navLearned:"Từ đã học", navFlashcard:"Flashcard",
     navQuiz:"Trắc nghiệm", navTyping:"Gõ đáp án", navWrong:"Từ cần ôn", navFriends:"Bạn bè", navChat:"Tin nhắn", profileNav:"Hồ sơ", navSettings:"Cài đặt",
-    friendsTitle:"Bạn bè", friendsSubtitle:"Kết bạn bằng username và học cùng nhau", friendSearchLabel:"Tìm username", friendSearchPlaceholder:"Nhập username...", friendSearchBtn:"🔎 Tìm", friendRequestsTitle:"Lời mời kết bạn", friendRequestsSubtitle:"Các yêu cầu đang chờ", friendsListTitle:"Danh sách bạn bè", friendsListSubtitle:"Bạn bè đã chấp nhận", friendRequestSent:"✅ Đã gửi lời mời", friendAdd:"Kết bạn", friendAccept:"Chấp nhận", friendDecline:"Từ chối", friendRemove:"Xóa bạn", friendChat:"Nhắn tin", friendPending:"Đang chờ", friendAccepted:"Đã là bạn", friendNoResults:"Không tìm thấy người dùng.", friendEmpty:"Chưa có bạn bè.", requestEmpty:"Không có lời mời nào.", chatTitle:"Tin nhắn", chatSent:"Đã gửi", chatSeen:"Đã xem", chatSending:"Đang gửi...", chatRetry:"Gửi lại", chatReady:"💬 Đã mở cuộc trò chuyện.", chatSubtitle:"Trò chuyện với bạn bè theo thời gian thực", conversationsTitle:"Cuộc trò chuyện", selectFriendToChat:"Chọn một người bạn để bắt đầu", chatPlaceholder:"Nhập tin nhắn...", sendMessage:"Gửi", chatEmpty:"Chưa có tin nhắn.", chatNeedFriend:"Hãy kết bạn trước khi bắt đầu trò chuyện.", online:"Đang hoạt động", offline:"Ngoại tuyến", saveCloudError:"Không thể đồng bộ lên máy chủ, dữ liệu cục bộ vẫn được giữ lại.",
+    friendsTitle:"Bạn bè", friendsSubtitle:"Kết bạn bằng username và học cùng nhau", friendSearchLabel:"Tìm username", friendSearchPlaceholder:"Nhập username...", friendSearchBtn:"🔎 Tìm", friendRequestsTitle:"Lời mời kết bạn", friendRequestsSubtitle:"Các yêu cầu đang chờ", friendsListTitle:"Danh sách bạn bè", friendsListSubtitle:"Bạn bè đã chấp nhận", friendRequestSent:"✅ Đã gửi lời mời", friendAdd:"Kết bạn", friendAccept:"Chấp nhận", friendDecline:"Từ chối", friendRemove:"Xóa bạn", friendChat:"Nhắn tin", friendPending:"Đang chờ", friendAccepted:"Đã là bạn", friendNoResults:"Không tìm thấy người dùng.", friendEmpty:"Chưa có bạn bè.", requestEmpty:"Không có lời mời nào.", chatTitle:"Tin nhắn", chatReady:"💬 Đã mở cuộc trò chuyện.", chatSubtitle:"Trò chuyện với bạn bè theo thời gian thực", conversationsTitle:"Cuộc trò chuyện", selectFriendToChat:"Chọn một người bạn để bắt đầu", chatPlaceholder:"Nhập tin nhắn...", sendMessage:"Gửi", chatEmpty:"Chưa có tin nhắn.", chatNeedFriend:"Hãy kết bạn trước khi bắt đầu trò chuyện.", online:"Đang hoạt động", offline:"Ngoại tuyến", saveCloudError:"Không thể đồng bộ lên máy chủ, dữ liệu cục bộ vẫn được giữ lại.",
     sidebarTipTitle:"Học một chút mỗi ngày!", sidebarTipText:"Tiến trình của bạn sẽ được lưu riêng theo tài khoản.",
     pageHome:"Trang chủ", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
     homeDescription:"Học từ vựng theo cách nhẹ nhàng, dễ nhớ và đáng yêu.",
@@ -131,7 +131,7 @@ const UI = {
   en: {
     brandTagline:"Learn happily every day", navHome:"Home", navVocabulary:"Vocabulary", navLearned:"Learned", navFlashcard:"Flashcards",
     navQuiz:"Quiz", navTyping:"Type answer", navWrong:"Review", navFriends:"Friends", navChat:"Messages", profileNav:"Profile", navSettings:"Settings",
-    friendsTitle:"Friends", friendsSubtitle:"Connect by username and learn together", friendSearchLabel:"Find username", friendSearchPlaceholder:"Enter username...", friendSearchBtn:"🔎 Search", friendRequestsTitle:"Friend requests", friendRequestsSubtitle:"Pending requests", friendsListTitle:"Friends list", friendsListSubtitle:"Accepted friends", friendRequestSent:"✅ Request sent", friendAdd:"Add friend", friendAccept:"Accept", friendDecline:"Decline", friendRemove:"Remove", friendChat:"Message", friendPending:"Pending", friendAccepted:"Friends", friendNoResults:"No user found.", friendEmpty:"No friends yet.", requestEmpty:"No pending requests.", chatTitle:"Messages", chatSent:"Sent", chatSeen:"Seen", chatSending:"Sending...", chatRetry:"Retry", chatReady:"💬 Chat opened.", chatSubtitle:"Chat with friends in real time", conversationsTitle:"Conversations", selectFriendToChat:"Choose a friend to start", chatPlaceholder:"Type a message...", sendMessage:"Send", chatEmpty:"No messages yet.", chatNeedFriend:"Become friends before chatting.", online:"Online", offline:"Offline", saveCloudError:"Could not sync to the server; local data is still kept.",
+    friendsTitle:"Friends", friendsSubtitle:"Connect by username and learn together", friendSearchLabel:"Find username", friendSearchPlaceholder:"Enter username...", friendSearchBtn:"🔎 Search", friendRequestsTitle:"Friend requests", friendRequestsSubtitle:"Pending requests", friendsListTitle:"Friends list", friendsListSubtitle:"Accepted friends", friendRequestSent:"✅ Request sent", friendAdd:"Add friend", friendAccept:"Accept", friendDecline:"Decline", friendRemove:"Remove", friendChat:"Message", friendPending:"Pending", friendAccepted:"Friends", friendNoResults:"No user found.", friendEmpty:"No friends yet.", requestEmpty:"No pending requests.", chatTitle:"Messages", chatReady:"💬 Chat opened.", chatSubtitle:"Chat with friends in real time", conversationsTitle:"Conversations", selectFriendToChat:"Choose a friend to start", chatPlaceholder:"Type a message...", sendMessage:"Send", chatEmpty:"No messages yet.", chatNeedFriend:"Become friends before chatting.", online:"Online", offline:"Offline", saveCloudError:"Could not sync to the server; local data is still kept.",
     sidebarTipTitle:"A little every day!", sidebarTipText:"Your progress is saved separately for your account.",
     pageHome:"Home", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
     homeDescription:"Learn vocabulary in a gentle, memorable and cute way.", startLearning:"📖 Start learning",
@@ -168,7 +168,7 @@ const UI = {
   ko: {
     brandTagline:"매일 즐겁게 공부해요", navHome:"홈", navVocabulary:"단어", navLearned:"학습한 단어", navFlashcard:"플래시카드",
     navQuiz:"퀴즈", navTyping:"답 입력", navWrong:"복습", navFriends:"친구", navChat:"메시지", profileNav:"프로필", navSettings:"설정",
-    friendsTitle:"친구", friendsSubtitle:"사용자 이름으로 친구를 추가하고 함께 공부하세요", friendSearchLabel:"사용자 이름 검색", friendSearchPlaceholder:"사용자 이름 입력...", friendSearchBtn:"🔎 검색", friendRequestsTitle:"친구 요청", friendRequestsSubtitle:"대기 중인 요청", friendsListTitle:"친구 목록", friendsListSubtitle:"수락한 친구", friendRequestSent:"✅ 요청 보냄", friendAdd:"친구 추가", friendAccept:"수락", friendDecline:"거절", friendRemove:"삭제", friendChat:"메시지", friendPending:"대기 중", friendAccepted:"친구", friendNoResults:"사용자를 찾을 수 없습니다.", friendEmpty:"아직 친구가 없습니다.", requestEmpty:"대기 중인 요청이 없습니다.", chatTitle:"메시지", chatSent:"전송됨", chatSeen:"읽음", chatSending:"전송 중...", chatRetry:"다시 보내기", chatReady:"💬 대화를 열었습니다.", chatSubtitle:"친구와 실시간으로 대화하세요", conversationsTitle:"대화", selectFriendToChat:"대화할 친구를 선택하세요", chatPlaceholder:"메시지를 입력하세요...", sendMessage:"보내기", chatEmpty:"아직 메시지가 없습니다.", chatNeedFriend:"먼저 친구가 된 후 대화할 수 있습니다.", online:"온라인", offline:"오프라인", saveCloudError:"서버와 동기화하지 못했습니다. 로컬 데이터는 유지됩니다.",
+    friendsTitle:"친구", friendsSubtitle:"사용자 이름으로 친구를 추가하고 함께 공부하세요", friendSearchLabel:"사용자 이름 검색", friendSearchPlaceholder:"사용자 이름 입력...", friendSearchBtn:"🔎 검색", friendRequestsTitle:"친구 요청", friendRequestsSubtitle:"대기 중인 요청", friendsListTitle:"친구 목록", friendsListSubtitle:"수락한 친구", friendRequestSent:"✅ 요청 보냄", friendAdd:"친구 추가", friendAccept:"수락", friendDecline:"거절", friendRemove:"삭제", friendChat:"메시지", friendPending:"대기 중", friendAccepted:"친구", friendNoResults:"사용자를 찾을 수 없습니다.", friendEmpty:"아직 친구가 없습니다.", requestEmpty:"대기 중인 요청이 없습니다.", chatTitle:"메시지", chatReady:"💬 대화를 열었습니다.", chatSubtitle:"친구와 실시간으로 대화하세요", conversationsTitle:"대화", selectFriendToChat:"대화할 친구를 선택하세요", chatPlaceholder:"메시지를 입력하세요...", sendMessage:"보내기", chatEmpty:"아직 메시지가 없습니다.", chatNeedFriend:"먼저 친구가 된 후 대화할 수 있습니다.", online:"온라인", offline:"오프라인", saveCloudError:"서버와 동기화하지 못했습니다. 로컬 데이터는 유지됩니다.",
     sidebarTipTitle:"매일 조금씩!", sidebarTipText:"학습 진행 상황은 계정별로 따로 저장됩니다.",
     pageHome:"홈", homeEyebrow:"🐻 STUDYBEAR에 오신 것을 환영해요",
     homeDescription:"부담 없이 쉽고 재미있게 단어를 공부해요.", startLearning:"📖 공부 시작",
@@ -2355,7 +2355,6 @@ window.getStudyBearSupabaseStatus = function () {
       $("friendSearchInput")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();this.searchFriends();}});
       $("chatForm")?.addEventListener("submit",e=>{e.preventDefault();this.sendMessage();});
       $("chatInput")?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();this.sendMessage();}});
-      $("chatMessages")?.addEventListener("click",e=>{const btn=e.target.closest("[data-retry-message]");if(btn){e.preventDefault();this.retryMessage(btn.dataset.retryMessage);}});
     },
 
     async onPage(page) {
@@ -2564,49 +2563,31 @@ window.getStudyBearSupabaseStatus = function () {
     async openChatWith(friendId){
       const client=this.client();
       if(!client) return;
+
       const user=await this.user();
       if(!user){openAuth();return;}
 
       try{
-        // The direct-chat RPC verifies friendship server-side. We no longer
-        // require a prior search to make the chat button work.
+        // Server-side RPC verifies that both users are accepted friends and
+        // returns one stable direct conversation.
         const {data,error}=await client.rpc("get_or_create_direct_conversation",{p_other_user_id:friendId});
         if(error) throw error;
-        const conversationId=Number(data);
-        if(!Number.isInteger(conversationId)||conversationId<=0) throw new Error("Không tạo được cuộc trò chuyện.");
 
-        const {data: friendships, error: friendsError}=await client.rpc("get_my_friendships");
-        if(friendsError) throw friendsError;
-        const friend= (friendships||[]).find(x=>x.friend_id===friendId && x.status==="accepted");
-        if(!friend) throw new Error(this.text("chatNeedFriend","Hãy kết bạn trước khi trò chuyện."));
-
-        // Keep a local conversation row so the chat opens immediately even if
-        // the conversation-list query has not caught up yet.
-        const existing=this.conversations.find(c=>Number(c.conversation_id)===conversationId);
-        if(!existing){
-          this.conversations=[{
-            conversation_id:conversationId,
-            friend_id:friend.friend_id,
-            username:friend.username,
-            display_name:friend.display_name,
-            avatar_url:friend.avatar_url,
-            last_message:"",
-            last_message_at:null
-          }, ...this.conversations];
-        }
+        const id=Number(data);
+        if(!Number.isInteger(id) || id<=0) throw new Error("Không tạo được cuộc trò chuyện.");
 
         showPage("chat");
-        this.activeConversationId=conversationId;
+        await this.renderConversations();
+
+        // The freshly-created conversation may not yet be in the list returned
+        // by the query on a very fast connection, so select it directly.
+        this.activeConversationId=id;
         this.activeFriendId=friendId;
-        this.updateChatHeader();
-        await this.loadMessages();
-        await this.markConversationRead();
-        await this.subscribeMessages();
-        this.renderConversations();
-        setTimeout(()=>$('chatInput')?.focus(),50);
+        await this.selectConversation(id);
+        showToast(this.text("chatReady","💬 Đã mở cuộc trò chuyện."));
       }catch(error){
-        console.error('[StudyBear] openChatWith',error);
-        showToast(error.message||this.text('chatNeedFriend','Hãy kết bạn trước khi trò chuyện.'));
+        console.error("[StudyBear] openChatWith",error);
+        showToast(error.message||this.text("chatNeedFriend","Hãy kết bạn trước khi trò chuyện."));
       }
     },
 
@@ -2638,11 +2619,8 @@ window.getStudyBearSupabaseStatus = function () {
       this.activeConversationId=id;
       const row=this.conversations.find(c=>Number(c.conversation_id)===Number(id));
       this.activeFriendId=row?.friend_id||null;
-      const current=await this.user();
-      this._currentUserId=current?.id||null;
       this.updateChatHeader();
       await this.loadMessages();
-      await this.markConversationRead();
       await this.subscribeMessages();
       this.renderConversations();
       setTimeout(()=>$("chatInput")?.focus(),50);
@@ -2658,197 +2636,73 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     async loadMessages(){
-      const client=this.client();
-      const box=$("chatMessages");
-      if(!client||!box||!this.activeConversationId)return;
-
-      const conversationId=Number(this.activeConversationId);
-      const {data,error}=await client
-        .from("messages")
-        .select("id,conversation_id,sender_id,content,created_at,read_at")
-        .eq("conversation_id",conversationId)
-        .order("created_at",{ascending:true});
-
-      if(error){
-        box.innerHTML=`<div class="empty">⚠️ ${escapeHTML(error.message)}</div>`;
-        return;
-      }
-
+      const client=this.client(); const box=$("chatMessages"); if(!client||!box||!this.activeConversationId)return;
+      const {data,error}=await client.from("messages").select("id,conversation_id,sender_id,content,created_at").eq("conversation_id",this.activeConversationId).order("created_at",{ascending:true});
+      if(error){box.innerHTML=`<div class="empty">⚠️ ${escapeHTML(error.message)}</div>`;return;}
+      if(!data?.length){box.innerHTML=`<div class="empty">${escapeHTML(this.text("chatEmpty","Chưa có tin nhắn."))}</div>`;return;}
       const user=await this.user();
-      if(!data?.length){
-        box.innerHTML=`<div class="empty">${escapeHTML(this.text("chatEmpty","Chưa có tin nhắn."))}</div>`;
-        return;
-      }
-
       box.innerHTML=data.map(m=>this.messageHTML(m,user?.id)).join("");
       box.scrollTop=box.scrollHeight;
-      this.updateMessageStatuses(data);
-    },
-
-    messageStatusLabel(m,userId){
-      if(m.localStatus==="failed"){
-        return `<button type="button" class="chat-retry" data-retry-message="${escapeHTML(m.localId||"")}">⚠️ ${escapeHTML(this.text("chatRetry","Gửi lại"))}</button>`;
-      }
-      if(m.localStatus==="sending"){
-        return `<span class="chat-status sending">${escapeHTML(this.text("chatSending","Đang gửi..."))}</span>`;
-      }
-      if(m.sender_id!==userId) return "";
-      if(m.read_at){
-        return `<span class="chat-status seen">✓✓ ${escapeHTML(this.text("chatSeen","Đã xem"))}</span>`;
-      }
-      return `<span class="chat-status sent">✓ ${escapeHTML(this.text("chatSent","Đã gửi"))}</span>`;
     },
 
     messageHTML(m,userId){
       const own=m.sender_id===userId;
-      const t=new Date(m.created_at||Date.now()).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
-      const messageId=m.id ?? m.localId ?? `local-${Date.now()}`;
-      const status=this.messageStatusLabel(m,userId);
-      return `<div class="chat-row ${own?"own":"friend"}" data-message-id="${escapeHTML(String(messageId))}">
-        <div class="chat-bubble">
-          <span class="chat-message-content">${escapeHTML(m.content||"")}</span>
-          <small class="chat-meta"><span>${t}</span>${status}</small>
-        </div>
-      </div>`;
-    },
-
-    updateMessageStatuses(messages){
-      const box=$("chatMessages");
-      if(!box) return;
-      for(const m of (messages||[])){
-        const row=box.querySelector(`[data-message-id="${CSS.escape(String(m.id))}"]`);
-        if(!row) continue;
-        const bubble=row.querySelector('.chat-bubble');
-        if(!bubble) continue;
-        const userIdCache=row.classList.contains('own') ? (this._currentUserId||null) : null;
-        if(row.classList.contains('own')){
-          const statusEl=bubble.querySelector('.chat-meta');
-          if(statusEl){
-            const t=new Date(m.created_at).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
-            statusEl.innerHTML=`<span>${t}</span>${this.messageStatusLabel(m,this._currentUserId)}`;
-          }
-        }
-      }
-    },
-
-    async markConversationRead(){
-      const client=this.client();
-      if(!client||!this.activeConversationId) return;
-      try{
-        const {error}=await client.rpc("mark_conversation_read",{p_conversation_id:Number(this.activeConversationId)});
-        if(error) throw error;
-        await this.loadMessages();
-      }catch(error){
-        console.warn('[StudyBear] markConversationRead',error);
-      }
+      const t=new Date(m.created_at).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
+      return `<div class="chat-row ${own?"own":"friend"}"><div class="chat-bubble"><span>${escapeHTML(m.content)}</span><small>${t}</small></div></div>`;
     },
 
     async subscribeMessages(){
       const client=this.client();
       if(!client||!this.activeConversationId)return;
-      if(this.messageChannel){
-        await client.removeChannel(this.messageChannel);
-        this.messageChannel=null;
-      }
+      if(this.messageChannel){await client.removeChannel(this.messageChannel);this.messageChannel=null;}
       const conversationId=Number(this.activeConversationId);
       this.messageChannel=client.channel(`studybear-chat-${conversationId}`)
         .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:`conversation_id=eq.${conversationId}`},async payload=>{
           const box=$("chatMessages"); if(!box) return;
           const user=await this.user();
-          this._currentUserId=user?.id||null;
-          if(box.querySelector(`[data-message-id="${CSS.escape(String(payload.new.id))}"]`)) return;
+          if(box.querySelector(`[data-message-id="${payload.new.id}"]`)) return;
           const wrapper=document.createElement("div");
+          wrapper.dataset.messageId=payload.new.id;
           wrapper.innerHTML=this.messageHTML(payload.new,user?.id);
           if(box.querySelector(".empty")) box.innerHTML="";
           box.appendChild(wrapper.firstElementChild);
           box.scrollTop=box.scrollHeight;
           this.renderConversations();
-          if(payload.new.sender_id!==user?.id){
-            await this.markConversationRead();
-          }
         })
-        .on("postgres_changes",{event:"UPDATE",schema:"public",table:"messages",filter:`conversation_id=eq.${conversationId}`},async payload=>{
-          const row=$("chatMessages")?.querySelector(`[data-message-id="${CSS.escape(String(payload.new.id))}"]`);
-          if(!row) return;
-          const user=await this.user();
-          this._currentUserId=user?.id||null;
-          const meta=row.querySelector('.chat-meta');
-          if(meta){
-            const t=new Date(payload.new.created_at).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
-            meta.innerHTML=`<span>${t}</span>${this.messageStatusLabel(payload.new,user?.id)}`;
-          }
-        })
-        .subscribe(status=>{
-          if(status==="SUBSCRIBED") console.info(`[StudyBear] Chat realtime ready: ${conversationId}`);
-          if(status==="CHANNEL_ERROR"||status==="TIMED_OUT") console.warn('[StudyBear] Chat realtime:',status);
-        });
-    },
-
-    async retryMessage(localId){
-      const item=(this._failedMessages||[]).find(x=>x.localId===localId);
-      if(!item) return;
-      this._failedMessages=this._failedMessages.filter(x=>x.localId!==localId);
-      const box=$("chatMessages");
-      const row=box?.querySelector(`[data-message-id="${CSS.escape(String(localId))}"]`);
-      if(row){ row.outerHTML=this.messageHTML({...item,localStatus:"sending"},this._currentUserId); }
-      await this._sendMessagePayload(item.content,true,localId);
-    },
-
-    async _sendMessagePayload(content, isRetry=false, localId=null){
-      const client=this.client();
-      if(!client||!this.activeConversationId) return;
-      const user=await this.user();
-      if(!user){openAuth();return;}
-      this._currentUserId=user.id;
-      const tempId=localId||`local-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
-      const temp={id:null,localId:tempId,conversation_id:Number(this.activeConversationId),sender_id:user.id,content,created_at:new Date().toISOString(),read_at:null,localStatus:"sending"};
-
-      if(!isRetry){
-        const box=$("chatMessages");
-        if(box){
-          if(box.querySelector('.empty')) box.innerHTML='';
-          const wrapper=document.createElement('div');
-          wrapper.innerHTML=this.messageHTML(temp,user.id);
-          box.appendChild(wrapper.firstElementChild);
-          box.scrollTop=box.scrollHeight;
-        }
-      }
-
-      try{
-        const {data,error}=await client.from("messages")
-          .insert({conversation_id:Number(this.activeConversationId),sender_id:user.id,content})
-          .select("id,conversation_id,sender_id,content,created_at,read_at")
-          .single();
-        if(error) throw error;
-
-        const box=$("chatMessages");
-        const row=box?.querySelector(`[data-message-id="${CSS.escape(String(tempId))}"]`);
-        if(row) row.outerHTML=this.messageHTML(data,user.id);
-        await this.renderConversations();
-      }catch(error){
-        console.error('[StudyBear] sendMessage',error);
-        const box=$("chatMessages");
-        const row=box?.querySelector(`[data-message-id="${CSS.escape(String(tempId))}"]`);
-        const failed={...temp,localStatus:"failed"};
-        if(!this._failedMessages)this._failedMessages=[];
-        this._failedMessages=this._failedMessages.filter(x=>x.localId!==tempId);
-        this._failedMessages.push({localId:tempId,content,conversation_id:temp.conversation_id});
-        if(row) row.outerHTML=this.messageHTML(failed,user.id);
-        else if(box){
-          const wrapper=document.createElement('div');
-          wrapper.innerHTML=this.messageHTML(failed,user.id);
-          box.appendChild(wrapper.firstElementChild);
-        }
-        showToast(error.message||"Không thể gửi tin nhắn.");
-      }
+        .subscribe();
     },
 
     async sendMessage(){
-      const input=$("chatInput");
-      if(!input||!this.activeConversationId)return;
+      const client=this.client(); const input=$("chatInput");
+      if(!client||!input||!this.activeConversationId)return;
       const content=input.value.trim(); if(!content)return;
+      const user=await this.user(); if(!user){openAuth();return;}
       input.value="";
-      await this._sendMessagePayload(content,false);
+      const {data,error}=await client.from("messages")
+        .insert({conversation_id:Number(this.activeConversationId),sender_id:user.id,content})
+        .select("id,conversation_id,sender_id,content,created_at")
+        .single();
+
+      if(error){
+        console.error("[StudyBear] sendMessage",error);
+        showToast(error.message||"Không thể gửi tin nhắn.");
+        input.value=content;
+        return;
+      }
+
+      // Realtime will normally render this on both clients. If it arrives late,
+      // render it locally immediately and de-duplicate on the realtime callback.
+      const box=$("chatMessages");
+      if(box && data && !box.querySelector(`[data-message-id="${data.id}"]`)){
+        const wrapper=document.createElement("div");
+        wrapper.dataset.messageId=data.id;
+        wrapper.innerHTML=this.messageHTML(data,user.id);
+        if(box.querySelector(".empty")) box.innerHTML="";
+        box.appendChild(wrapper.firstElementChild);
+        box.scrollTop=box.scrollHeight;
+      }
+
+      await this.renderConversations();
     },
 
     cleanup(){
