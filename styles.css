@@ -1706,3 +1706,33 @@ body.dark .social-inline-count {
   gap:7px;
   flex-wrap:wrap;
 }
+
+/* V42: keep friend identity visible beside wide action buttons */
+.social-user-row{
+  display:grid;
+  grid-template-columns:42px minmax(140px,1fr) auto;
+  align-items:center;
+}
+.social-user-main{
+  min-width:140px;
+  overflow:hidden;
+}
+.social-user-main strong,
+.social-user-main span,
+.social-user-main small{
+  display:block;
+  min-width:0;
+}
+.social-user-actions{
+  max-width:100%;
+  align-items:center;
+}
+@media (max-width:900px){
+  .social-user-row{
+    grid-template-columns:42px minmax(110px,1fr);
+  }
+  .social-user-actions{
+    grid-column:2;
+    justify-content:flex-start;
+  }
+}

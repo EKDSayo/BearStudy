@@ -2529,32 +2529,69 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     async renderFriends(){
-      const client=this.client(); if(!client) return;
+      const client=this.client();
+      if(!client) return;
       if(currentPage!=="friends"&&currentPage!=="home") return;
+
       try{
         const {data,error}=await client.rpc("get_my_friendships");
         if(error) throw error;
 
-        const rows=data||[];
+        let rows=(data||[]).map(x=>({
+          ...x,
+          friend_id: x.friend_id || x.id || null,
+          username: x.username || x.friend_username || "",
+          display_name: x.display_name || x.friend_display_name || "",
+          avatar_url: x.avatar_url || "",
+          avatar_updated_at: x.avatar_updated_at || x.updated_at || null
+        }));
+
+        // Fallback: when an older SQL function or stale schema returns an incomplete
+        // row, hydrate names/avatar directly through one secure RPC call.
+        const missingIds=rows
+          .filter(x=>x.friend_id && (!x.username || !x.display_name))
+          .map(x=>x.friend_id);
+
+        if(missingIds.length){
+          const uniqueIds=[...new Set(missingIds)];
+          const {data:profiles,error:profileError}=await client.rpc(
+            "get_friend_profiles",
+            {p_user_ids:uniqueIds}
+          );
+
+          if(!profileError && profiles){
+            const byId=new Map(profiles.map(p=>[String(p.id),p]));
+            rows=rows.map(x=>{
+              const p=byId.get(String(x.friend_id));
+              return p ? {
+                ...x,
+                username:x.username || p.username || "",
+                display_name:x.display_name || p.display_name || "",
+                avatar_url:x.avatar_url || p.avatar_url || "",
+                avatar_updated_at:x.avatar_updated_at || p.updated_at || null
+              } : x;
+            });
+          }
+        }
+
         const incoming=rows.filter(x=>x.status==="pending"&&x.direction==="incoming");
         const accepted=rows.filter(x=>x.status==="accepted");
 
         $("friendRequestsList") && (
           $("friendRequestsList").innerHTML=incoming.length
-            ? incoming.map(x=>this.friendCard({...x,friendship_status:x.status}, "request")).join("")
+            ? incoming.map(x=>this.friendCard({...x,friendship_status:x.status},"request")).join("")
             : `<div class="empty">${escapeHTML(this.text("requestEmpty","Không có lời mời nào."))}</div>`
         );
 
         $("friendsList") && (
           $("friendsList").innerHTML=accepted.length
-            ? accepted.map(x=>this.friendCard({...x,friendship_status:x.status}, "friend")).join("")
+            ? accepted.map(x=>this.friendCard({...x,friendship_status:x.status},"friend")).join("")
             : `<div class="empty">${escapeHTML(this.text("friendEmpty","Chưa có bạn bè."))}</div>`
         );
 
         this.bindFriendCardButtons($("friendRequestsList"));
         this.bindFriendCardButtons($("friendsList"));
 
-        // IMPORTANT: sidebar "Bạn bè" shows accepted friends, not pending requests.
         this.friendCount=accepted.length;
         this.friendRequestCount=incoming.length;
         const friendCountBadge=$("friendCount");
