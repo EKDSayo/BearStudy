@@ -2433,8 +2433,14 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     friendCard(user,mode){
-      const online=this.onlineIds.has(user.id);
-      const avatar=user.avatar_url?`<img src="${escapeHTML(user.avatar_url)}" alt="">`:`🐻`;
+      const targetId = String(user.friend_id || user.id || "").trim();
+      const online=this.onlineIds.has(targetId);
+      const avatarVersion = user.avatar_updated_at || user.updated_at || "";
+      const avatarBase = user.avatar_url || "";
+      const avatarSrc = avatarBase
+        ? `${avatarBase}${avatarBase.includes("?") ? "&" : "?"}v=${encodeURIComponent(avatarVersion || Date.now())}`
+        : "";
+      const avatar=avatarSrc?`<img src="${escapeHTML(avatarSrc)}" alt="">`:`🐻`;
       const status=online?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
       const relation=user.friendship_status || user.status || null;
       const direction=user.friendship_direction || user.direction || null;
@@ -2443,19 +2449,19 @@ window.getStudyBearSupabaseStatus = function () {
       if(mode==="search"){
         if(relation==="accepted"){
           action=`<span class="social-state accepted">✓ ${escapeHTML(this.text("friendAccepted","Đã kết bạn"))}</span>
-                  <button class="primary-btn" data-chat-user="${user.id}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>`;
+                  <button class="primary-btn" data-chat-user="${targetId}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>`;
         }else if(relation==="pending" && direction==="outgoing"){
           action=`<button class="secondary-btn" disabled>⏳ ${escapeHTML(this.text("friendPending","Chờ phản hồi"))}</button>`;
         }else if(relation==="pending" && direction==="incoming"){
           action=`<button class="primary-btn" data-accept-friend="${user.friendship_id}">✅ ${escapeHTML(this.text("friendAccept","Chấp nhận"))}</button>`;
         }else{
-          action=`<button class="secondary-btn" data-friend-add="${user.id}">➕ ${escapeHTML(this.text("friendAdd","Kết bạn"))}</button>`;
+          action=`<button class="secondary-btn" data-friend-add="${targetId}">➕ ${escapeHTML(this.text("friendAdd","Kết bạn"))}</button>`;
         }
       }
 
       if(mode==="friend"){
         action=`<span class="social-state accepted">✓ ${escapeHTML(this.text("friendAccepted","Đã kết bạn"))}</span>
-                <button class="primary-btn" data-chat-user="${user.id}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>
+                <button class="primary-btn" data-chat-user="${targetId}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>
                 <button class="secondary-btn" data-remove-friend="${user.friendship_id}">↩ ${escapeHTML(this.text("friendRemove","Xóa bạn"))}</button>`;
       }
 
@@ -2564,6 +2570,13 @@ window.getStudyBearSupabaseStatus = function () {
       const client=this.client();
       if(!client) return;
 
+      friendId = String(friendId || "").trim();
+      if(!friendId || friendId === "undefined" || friendId === "null"){
+        console.error("[StudyBear] Invalid friend id:", friendId);
+        showToast("⚠️ Không xác định được người bạn để nhắn tin.");
+        return;
+      }
+
       const user=await this.user();
       if(!user){openAuth();return;}
 
@@ -2601,7 +2614,10 @@ window.getStudyBearSupabaseStatus = function () {
         const list=$("conversationList"); if(!list) return;
         list.innerHTML=this.conversations.length?this.conversations.map(c=>{
           const online=this.onlineIds.has(c.friend_id);
-          const avatar=c.avatar_url?`<img src="${escapeHTML(c.avatar_url)}" alt="">`:`🐻`;
+          const avatarSrc = c.avatar_url
+            ? `${c.avatar_url}${c.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(c.avatar_updated_at || Date.now())}`
+            : "";
+          const avatar=avatarSrc?`<img src="${escapeHTML(avatarSrc)}" alt="">`:`🐻`;
           return `<button class="conversation-item ${Number(c.conversation_id)===Number(this.activeConversationId)?"active":""}" data-conversation="${c.conversation_id}"><span class="social-avatar small">${avatar}</span><span class="conversation-main"><strong>${escapeHTML(c.display_name||c.username||"")}</strong><small>@${escapeHTML(c.username||"")}</small><em>${escapeHTML(c.last_message||"")}</em></span><i class="presence-dot ${online?"online":"offline"}"></i></button>`;
         }).join(""):`<div class="empty">🐻 ${escapeHTML(this.text("chatEmpty","Chưa có cuộc trò chuyện."))}</div>`;
         list.querySelectorAll("[data-conversation]").forEach(btn=>btn.addEventListener("click",()=>this.selectConversation(Number(btn.dataset.conversation))));
@@ -2632,7 +2648,12 @@ window.getStudyBearSupabaseStatus = function () {
       if(!row){if(name)name.textContent=this.text("selectFriendToChat","Chọn một người bạn để bắt đầu"); if(status)status.textContent=""; if(avatar)avatar.textContent="🐻"; return;}
       if(name)name.textContent=`${row.display_name||row.username}`;
       if(status)status.textContent=this.onlineIds.has(row.friend_id)?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
-      if(avatar){avatar.innerHTML=row.avatar_url?`<img src="${escapeHTML(row.avatar_url)}" alt="">`:"🐻";}
+      if(avatar){
+        const avatarSrc = row.avatar_url
+          ? `${row.avatar_url}${row.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(row.avatar_updated_at || Date.now())}`
+          : "";
+        avatar.innerHTML=avatarSrc?`<img src="${escapeHTML(avatarSrc)}" alt="">`:"🐻";
+      }
     },
 
     async loadMessages(){
