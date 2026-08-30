@@ -1680,4 +1680,41 @@ body.dark .level-tag {
 .chat-composer .profile-input { flex:1; }
 @media (max-width: 800px) { .social-columns { grid-template-columns:1fr; } .chat-layout { grid-template-columns:1fr; } .chat-sidebar { border-right:0; border-bottom:1px solid var(--border); } .conversation-list { flex-direction:row; overflow-x:auto; max-height:none; } .conversation-item { min-width:230px; } }
 
-/* V32 avatar sync: versioned cloud URLs prevent cross-device stale images. */
+.social-inline-count {
+  display:inline-grid;
+  place-items:center;
+  min-width:20px;
+  height:20px;
+  padding:0 5px;
+  margin-left:5px;
+  border-radius:999px;
+  background:#eaf4ff;
+  color:var(--primary-dark);
+  font-size:10px;
+  font-weight:800;
+}
+.social-state {
+  display:inline-flex;
+  align-items:center;
+  min-height:32px;
+  padding:0 9px;
+  border-radius:9px;
+  font-size:11px;
+  font-weight:800;
+}
+.social-state.accepted {
+  background:#eaf8ef;
+  color:#34764a;
+}
+body.dark .social-state.accepted,
+body.dark .social-inline-count {
+  background:#213a2a;
+  color:#a5e0b6;
+}
+.social-user-actions {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+  flex-wrap:wrap;
+}

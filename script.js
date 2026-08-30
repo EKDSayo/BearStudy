@@ -93,7 +93,7 @@ const UI = {
   vi: {
     brandTagline:"Học vui mỗi ngày", navHome:"Trang chủ", navVocabulary:"Từ vựng", navLearned:"Từ đã học", navFlashcard:"Flashcard",
     navQuiz:"Trắc nghiệm", navTyping:"Gõ đáp án", navWrong:"Từ cần ôn", navFriends:"Bạn bè", navChat:"Tin nhắn", profileNav:"Hồ sơ", navSettings:"Cài đặt",
-    friendsTitle:"Bạn bè", friendsSubtitle:"Kết bạn bằng username và học cùng nhau", friendSearchLabel:"Tìm username", friendSearchPlaceholder:"Nhập username...", friendSearchBtn:"🔎 Tìm", friendRequestsTitle:"Lời mời kết bạn", friendRequestsSubtitle:"Các yêu cầu đang chờ", friendsListTitle:"Danh sách bạn bè", friendsListSubtitle:"Bạn bè đã chấp nhận", friendRequestSent:"✅ Đã gửi lời mời", friendAdd:"Kết bạn", friendAccept:"Chấp nhận", friendDecline:"Từ chối", friendRemove:"Xóa bạn", friendChat:"Nhắn tin", friendPending:"Đang chờ", friendAccepted:"Đã là bạn", friendNoResults:"Không tìm thấy người dùng.", friendEmpty:"Chưa có bạn bè.", requestEmpty:"Không có lời mời nào.", chatTitle:"Tin nhắn", chatSubtitle:"Trò chuyện với bạn bè theo thời gian thực", conversationsTitle:"Cuộc trò chuyện", selectFriendToChat:"Chọn một người bạn để bắt đầu", chatPlaceholder:"Nhập tin nhắn...", sendMessage:"Gửi", chatEmpty:"Chưa có tin nhắn.", chatNeedFriend:"Hãy kết bạn trước khi bắt đầu trò chuyện.", online:"Đang hoạt động", offline:"Ngoại tuyến", saveCloudError:"Không thể đồng bộ lên máy chủ, dữ liệu cục bộ vẫn được giữ lại.",
+    friendsTitle:"Bạn bè", friendsSubtitle:"Kết bạn bằng username và học cùng nhau", friendSearchLabel:"Tìm username", friendSearchPlaceholder:"Nhập username...", friendSearchBtn:"🔎 Tìm", friendRequestsTitle:"Lời mời kết bạn", friendRequestsSubtitle:"Các yêu cầu đang chờ", friendsListTitle:"Danh sách bạn bè", friendsListSubtitle:"Bạn bè đã chấp nhận", friendRequestSent:"✅ Đã gửi lời mời", friendAdd:"Kết bạn", friendAccept:"Chấp nhận", friendDecline:"Từ chối", friendRemove:"Xóa bạn", friendChat:"Nhắn tin", friendPending:"Đang chờ", friendAccepted:"Đã là bạn", friendNoResults:"Không tìm thấy người dùng.", friendEmpty:"Chưa có bạn bè.", requestEmpty:"Không có lời mời nào.", chatTitle:"Tin nhắn", chatReady:"💬 Đã mở cuộc trò chuyện.", chatSubtitle:"Trò chuyện với bạn bè theo thời gian thực", conversationsTitle:"Cuộc trò chuyện", selectFriendToChat:"Chọn một người bạn để bắt đầu", chatPlaceholder:"Nhập tin nhắn...", sendMessage:"Gửi", chatEmpty:"Chưa có tin nhắn.", chatNeedFriend:"Hãy kết bạn trước khi bắt đầu trò chuyện.", online:"Đang hoạt động", offline:"Ngoại tuyến", saveCloudError:"Không thể đồng bộ lên máy chủ, dữ liệu cục bộ vẫn được giữ lại.",
     sidebarTipTitle:"Học một chút mỗi ngày!", sidebarTipText:"Tiến trình của bạn sẽ được lưu riêng theo tài khoản.",
     pageHome:"Trang chủ", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
     homeDescription:"Học từ vựng theo cách nhẹ nhàng, dễ nhớ và đáng yêu.",
@@ -131,7 +131,7 @@ const UI = {
   en: {
     brandTagline:"Learn happily every day", navHome:"Home", navVocabulary:"Vocabulary", navLearned:"Learned", navFlashcard:"Flashcards",
     navQuiz:"Quiz", navTyping:"Type answer", navWrong:"Review", navFriends:"Friends", navChat:"Messages", profileNav:"Profile", navSettings:"Settings",
-    friendsTitle:"Friends", friendsSubtitle:"Connect by username and learn together", friendSearchLabel:"Find username", friendSearchPlaceholder:"Enter username...", friendSearchBtn:"🔎 Search", friendRequestsTitle:"Friend requests", friendRequestsSubtitle:"Pending requests", friendsListTitle:"Friends list", friendsListSubtitle:"Accepted friends", friendRequestSent:"✅ Request sent", friendAdd:"Add friend", friendAccept:"Accept", friendDecline:"Decline", friendRemove:"Remove", friendChat:"Message", friendPending:"Pending", friendAccepted:"Friends", friendNoResults:"No user found.", friendEmpty:"No friends yet.", requestEmpty:"No pending requests.", chatTitle:"Messages", chatSubtitle:"Chat with friends in real time", conversationsTitle:"Conversations", selectFriendToChat:"Choose a friend to start", chatPlaceholder:"Type a message...", sendMessage:"Send", chatEmpty:"No messages yet.", chatNeedFriend:"Become friends before chatting.", online:"Online", offline:"Offline", saveCloudError:"Could not sync to the server; local data is still kept.",
+    friendsTitle:"Friends", friendsSubtitle:"Connect by username and learn together", friendSearchLabel:"Find username", friendSearchPlaceholder:"Enter username...", friendSearchBtn:"🔎 Search", friendRequestsTitle:"Friend requests", friendRequestsSubtitle:"Pending requests", friendsListTitle:"Friends list", friendsListSubtitle:"Accepted friends", friendRequestSent:"✅ Request sent", friendAdd:"Add friend", friendAccept:"Accept", friendDecline:"Decline", friendRemove:"Remove", friendChat:"Message", friendPending:"Pending", friendAccepted:"Friends", friendNoResults:"No user found.", friendEmpty:"No friends yet.", requestEmpty:"No pending requests.", chatTitle:"Messages", chatReady:"💬 Chat opened.", chatSubtitle:"Chat with friends in real time", conversationsTitle:"Conversations", selectFriendToChat:"Choose a friend to start", chatPlaceholder:"Type a message...", sendMessage:"Send", chatEmpty:"No messages yet.", chatNeedFriend:"Become friends before chatting.", online:"Online", offline:"Offline", saveCloudError:"Could not sync to the server; local data is still kept.",
     sidebarTipTitle:"A little every day!", sidebarTipText:"Your progress is saved separately for your account.",
     pageHome:"Home", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
     homeDescription:"Learn vocabulary in a gentle, memorable and cute way.", startLearning:"📖 Start learning",
@@ -168,7 +168,7 @@ const UI = {
   ko: {
     brandTagline:"매일 즐겁게 공부해요", navHome:"홈", navVocabulary:"단어", navLearned:"학습한 단어", navFlashcard:"플래시카드",
     navQuiz:"퀴즈", navTyping:"답 입력", navWrong:"복습", navFriends:"친구", navChat:"메시지", profileNav:"프로필", navSettings:"설정",
-    friendsTitle:"친구", friendsSubtitle:"사용자 이름으로 친구를 추가하고 함께 공부하세요", friendSearchLabel:"사용자 이름 검색", friendSearchPlaceholder:"사용자 이름 입력...", friendSearchBtn:"🔎 검색", friendRequestsTitle:"친구 요청", friendRequestsSubtitle:"대기 중인 요청", friendsListTitle:"친구 목록", friendsListSubtitle:"수락한 친구", friendRequestSent:"✅ 요청 보냄", friendAdd:"친구 추가", friendAccept:"수락", friendDecline:"거절", friendRemove:"삭제", friendChat:"메시지", friendPending:"대기 중", friendAccepted:"친구", friendNoResults:"사용자를 찾을 수 없습니다.", friendEmpty:"아직 친구가 없습니다.", requestEmpty:"대기 중인 요청이 없습니다.", chatTitle:"메시지", chatSubtitle:"친구와 실시간으로 대화하세요", conversationsTitle:"대화", selectFriendToChat:"대화할 친구를 선택하세요", chatPlaceholder:"메시지를 입력하세요...", sendMessage:"보내기", chatEmpty:"아직 메시지가 없습니다.", chatNeedFriend:"먼저 친구가 된 후 대화할 수 있습니다.", online:"온라인", offline:"오프라인", saveCloudError:"서버와 동기화하지 못했습니다. 로컬 데이터는 유지됩니다.",
+    friendsTitle:"친구", friendsSubtitle:"사용자 이름으로 친구를 추가하고 함께 공부하세요", friendSearchLabel:"사용자 이름 검색", friendSearchPlaceholder:"사용자 이름 입력...", friendSearchBtn:"🔎 검색", friendRequestsTitle:"친구 요청", friendRequestsSubtitle:"대기 중인 요청", friendsListTitle:"친구 목록", friendsListSubtitle:"수락한 친구", friendRequestSent:"✅ 요청 보냄", friendAdd:"친구 추가", friendAccept:"수락", friendDecline:"거절", friendRemove:"삭제", friendChat:"메시지", friendPending:"대기 중", friendAccepted:"친구", friendNoResults:"사용자를 찾을 수 없습니다.", friendEmpty:"아직 친구가 없습니다.", requestEmpty:"대기 중인 요청이 없습니다.", chatTitle:"메시지", chatReady:"💬 대화를 열었습니다.", chatSubtitle:"친구와 실시간으로 대화하세요", conversationsTitle:"대화", selectFriendToChat:"대화할 친구를 선택하세요", chatPlaceholder:"메시지를 입력하세요...", sendMessage:"보내기", chatEmpty:"아직 메시지가 없습니다.", chatNeedFriend:"먼저 친구가 된 후 대화할 수 있습니다.", online:"온라인", offline:"오프라인", saveCloudError:"서버와 동기화하지 못했습니다. 로컬 데이터는 유지됩니다.",
     sidebarTipTitle:"매일 조금씩!", sidebarTipText:"학습 진행 상황은 계정별로 따로 저장됩니다.",
     pageHome:"홈", homeEyebrow:"🐻 STUDYBEAR에 오신 것을 환영해요",
     homeDescription:"부담 없이 쉽고 재미있게 단어를 공부해요.", startLearning:"📖 공부 시작",
@@ -327,16 +327,11 @@ function saveAllUsers() {
   localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
 }
 
-function saveStateLocalOnly() {
+function saveState() {
   if (!state || !currentUsername) return;
   users[currentUsername] = normalizeUser(state);
   state = users[currentUsername];
   saveAllUsers();
-}
-
-function saveState() {
-  saveStateLocalOnly();
-  if (!state || !currentUsername) return;
   // LocalStorage remains the immediate source for UI responsiveness.
   // Supabase is synchronized asynchronously so a network problem never freezes StudyBear.
   syncStateToSupabase().catch(error => console.warn("[StudyBear] Supabase sync skipped:", error));
@@ -383,7 +378,7 @@ async function loadSupabaseUserState(user) {
 
   const { data: profile, error: profileError } = await client
     .from("profiles")
-    .select("id,username,display_name,avatar_url,updated_at,interface_language,native_language,learning_language,learning_level,xp")
+    .select("id,username,display_name,avatar_url,interface_language,native_language,learning_language,learning_level,xp")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -413,8 +408,8 @@ async function loadSupabaseUserState(user) {
     learningLanguage: profile?.learning_language || localFallback.learningLanguage,
     learningLevel: profile?.learning_level || localFallback.learningLevel,
     xp: Number.isFinite(Number(profile?.xp)) ? Number(profile.xp) : localFallback.xp,
-    avatar: profile?.avatar_url ? `${profile.avatar_url}${profile.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(profile.updated_at || Date.now())}` : localFallback.avatar,
-    avatarUrl: profile?.avatar_url ? `${profile.avatar_url}${profile.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(profile.updated_at || Date.now())}` : localFallback.avatarUrl || "",
+    avatar: profile?.avatar_url || localFallback.avatar,
+    avatarUrl: profile?.avatar_url || localFallback.avatarUrl || "",
     password: ""
   });
 
@@ -919,14 +914,16 @@ $("saveProfileBtn").addEventListener("click", () => {
 
 async function uploadAvatarToSupabase(file) {
   const client = getSupabaseClient();
-  if (!client) throw new Error("Supabase client chưa sẵn sàng.");
+  if (!client) return null;
 
   const { data: { user }, error: userError } = await client.auth.getUser();
-  if (userError || !user) throw userError || new Error("Chưa đăng nhập Supabase.");
+  if (userError || !user) return null;
 
+  const ext = "webp";
+  const path = `${user.id}/avatar.webp`;
   let body = file;
 
-  // Resize/compress once to keep avatars small and quick on mobile/desktop.
+  // Compress large images before upload. Falls back to the original file if canvas is unavailable.
   try {
     const bitmap = await createImageBitmap(file);
     const maxSize = 640;
@@ -935,31 +932,16 @@ async function uploadAvatarToSupabase(file) {
     canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
     canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
     const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) throw new Error("Không tạo được canvas.");
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-
-    const compressed = await new Promise((resolve, reject) => {
-      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Không nén được ảnh.")),
-        "image/webp", 0.86);
-    });
-    body = compressed;
+    body = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", 0.86));
     bitmap.close?.();
   } catch (error) {
     console.info("[StudyBear] Avatar compression fallback.", error);
   }
 
-  // IMPORTANT: use a new object path for every upload.
-  // Reusing avatar.webp can leave another device showing a CDN/browser-cached old image.
-  const version = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const path = `${user.id}/avatar-${version}.webp`;
-
   const { error: uploadError } = await client.storage
     .from("avatars")
-    .upload(path, body, {
-      upsert: false,
-      contentType: "image/webp",
-      cacheControl: "31536000"
-    });
+    .upload(path, body, { upsert: true, contentType: "image/webp", cacheControl: "3600" });
 
   if (uploadError) throw uploadError;
 
@@ -967,120 +949,17 @@ async function uploadAvatarToSupabase(file) {
     .from("avatars")
     .getPublicUrl(path);
 
-  const publicUrl = publicData?.publicUrl;
-  if (!publicUrl) throw new Error("Không lấy được URL ảnh từ Supabase Storage.");
+  const publicUrl = `${publicData.publicUrl}?v=${Date.now()}`;
 
-  // Upsert instead of update so the avatar still syncs even if the profile row
-  // was missing for an older account.
   const { error: profileError } = await client
     .from("profiles")
-    .upsert({
-      id: user.id,
-      username: currentUsername,
-      display_name: state?.displayName || user.user_metadata?.display_name || "User",
-      avatar_url: publicUrl,
-      interface_language: state?.interfaceLanguage || "vi",
-      native_language: state?.nativeLanguage || "vi",
-      learning_language: state?.learningLanguage || "ko",
-      learning_level: state?.learningLevel || "beginner",
-      xp: Number(state?.xp || 0),
-      updated_at: new Date().toISOString()
-    }, { onConflict: "id" });
+    .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
 
   if (profileError) throw profileError;
 
-  // Read back what the server stored; this prevents a local-only success state.
-  const { data: savedProfile, error: verifyError } = await client
-    .from("profiles")
-    .select("avatar_url,updated_at")
-    .eq("id", user.id)
-    .single();
-
-  if (verifyError) throw verifyError;
-  if (!savedProfile?.avatar_url) {
-    throw new Error("Supabase chưa lưu avatar_url.");
-  }
-
-  return {
-    url: savedProfile.avatar_url,
-    updatedAt: savedProfile.updated_at || new Date().toISOString()
-  };
+  return publicUrl;
 }
-
-$("avatarInput").addEventListener("change", async e => {
-  if (!requireLogin()) return;
-
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  if (!file.type.startsWith("image/")) {
-    showToast("⚠️ Vui lòng chọn một file ảnh.");
-    e.target.value = "";
-    return;
-  }
-
-  if (file.size > 2 * 1024 * 1024) {
-    showToast("⚠️ Ảnh đại diện tối đa 2MB.");
-    e.target.value = "";
-    return;
-  }
-
-  try {
-    const reader = new FileReader();
-
-    reader.onload = async () => {
-      // Fast local preview.
-      state.avatar = reader.result;
-      renderProfile();
-      updateUserUI();
-      saveStateLocalOnly?.();
-
-      if (!hasSupabaseAuth()) {
-        showToast("📷 Đã đổi ảnh trên thiết bị này.");
-        return;
-      }
-
-      try {
-        const cloud = await uploadAvatarToSupabase(file);
-        state.avatarUrl = cloud.url;
-        state.avatar = cloud.url;
-
-        // Do not re-upload the data URI after the cloud upload.
-        // Persist locally without triggering another network sync.
-        saveStateLocalOnly?.();
-        renderProfile();
-        updateUserUI();
-
-        // Verify the exact URL that a second device will read.
-        const client = getSupabaseClient();
-        const { data: { user } } = await client.auth.getUser();
-        const { data: serverProfile } = await client
-          .from("profiles")
-          .select("avatar_url")
-          .eq("id", user.id)
-          .single();
-
-        if (!serverProfile?.avatar_url || serverProfile.avatar_url !== cloud.url) {
-          throw new Error("Xác minh avatar trên server thất bại.");
-        }
-
-        showToast("☁️ Avatar đã đồng bộ trên tất cả thiết bị.");
-      } catch (error) {
-        console.error("[StudyBear] Avatar cloud sync failed:", error);
-        showToast(UI[getUILang()].saveCloudError || "⚠️ Không thể đồng bộ ảnh.");
-      }
-    };
-
-    reader.onerror = () => {
-      showToast("⚠️ Không đọc được file ảnh.");
-    };
-
-    reader.readAsDataURL(file);
-  } finally {
-    // Allows selecting the same file again.
-    e.target.value = "";
-  }
-});
 
 $("avatarInput").addEventListener("change", async e => {
   if (!requireLogin()) return;
@@ -2515,7 +2394,13 @@ window.getStudyBearSupabaseStatus = function () {
           this.renderFriends();
           this.updateRequestBadge();
         })
-        .subscribe();
+        .subscribe(status=>{
+          if(status==="SUBSCRIBED"){
+            console.info(`[StudyBear] Chat realtime ready: ${conversationId}`);
+          }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
+            console.warn("[StudyBear] Chat realtime channel:",status);
+          }
+        });
     },
 
     async searchFriends() {
@@ -2551,11 +2436,43 @@ window.getStudyBearSupabaseStatus = function () {
       const online=this.onlineIds.has(user.id);
       const avatar=user.avatar_url?`<img src="${escapeHTML(user.avatar_url)}" alt="">`:`🐻`;
       const status=online?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
+      const relation=user.friendship_status || user.status || null;
+      const direction=user.friendship_direction || user.direction || null;
       let action="";
-      if(mode==="search") action=`<button class="secondary-btn" data-friend-add="${user.id}">➕ ${escapeHTML(this.text("friendAdd","Kết bạn"))}</button>`;
-      if(mode==="friend") action=`<button class="primary-btn" data-chat-user="${user.id}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button><button class="secondary-btn" data-remove-friend="${user.friendship_id}">↩ ${escapeHTML(this.text("friendRemove","Xóa bạn"))}</button>`;
-      if(mode==="request") action=`<button class="primary-btn" data-accept-friend="${user.friendship_id}">✅ ${escapeHTML(this.text("friendAccept","Chấp nhận"))}</button><button class="secondary-btn" data-decline-friend="${user.friendship_id}">✕ ${escapeHTML(this.text("friendDecline","Từ chối"))}</button>`;
-      return `<div class="social-user-row"><div class="social-avatar">${avatar}</div><div class="social-user-main"><strong>@${escapeHTML(user.username||"")}</strong><span>${escapeHTML(user.display_name||user.username||"")}</span><small><i class="presence-dot ${online?"online":"offline"}"></i>${escapeHTML(status)}</small></div><div class="social-user-actions">${action}</div></div>`;
+
+      if(mode==="search"){
+        if(relation==="accepted"){
+          action=`<span class="social-state accepted">✓ ${escapeHTML(this.text("friendAccepted","Đã kết bạn"))}</span>
+                  <button class="primary-btn" data-chat-user="${user.id}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>`;
+        }else if(relation==="pending" && direction==="outgoing"){
+          action=`<button class="secondary-btn" disabled>⏳ ${escapeHTML(this.text("friendPending","Chờ phản hồi"))}</button>`;
+        }else if(relation==="pending" && direction==="incoming"){
+          action=`<button class="primary-btn" data-accept-friend="${user.friendship_id}">✅ ${escapeHTML(this.text("friendAccept","Chấp nhận"))}</button>`;
+        }else{
+          action=`<button class="secondary-btn" data-friend-add="${user.id}">➕ ${escapeHTML(this.text("friendAdd","Kết bạn"))}</button>`;
+        }
+      }
+
+      if(mode==="friend"){
+        action=`<span class="social-state accepted">✓ ${escapeHTML(this.text("friendAccepted","Đã kết bạn"))}</span>
+                <button class="primary-btn" data-chat-user="${user.id}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>
+                <button class="secondary-btn" data-remove-friend="${user.friendship_id}">↩ ${escapeHTML(this.text("friendRemove","Xóa bạn"))}</button>`;
+      }
+
+      if(mode==="request"){
+        action=`<button class="primary-btn" data-accept-friend="${user.friendship_id}">✅ ${escapeHTML(this.text("friendAccept","Chấp nhận"))}</button>
+                <button class="secondary-btn" data-decline-friend="${user.friendship_id}">✕ ${escapeHTML(this.text("friendDecline","Từ chối"))}</button>`;
+      }
+
+      return `<div class="social-user-row">
+        <div class="social-avatar">${avatar}</div>
+        <div class="social-user-main">
+          <strong>@${escapeHTML(user.username||"")}</strong>
+          <span>${escapeHTML(user.display_name||user.username||"")}</span>
+          <small><i class="presence-dot ${online?"online":"offline"}"></i>${escapeHTML(status)}</small>
+        </div>
+        <div class="social-user-actions">${action}</div>
+      </div>`;
     },
 
     bindFriendCardButtons(root=document) {
@@ -2574,6 +2491,7 @@ window.getStudyBearSupabaseStatus = function () {
         if(error) throw error;
         showToast(this.text("friendRequestSent","✅ Đã gửi lời mời"));
         await this.renderFriends();
+        await this.searchFriends();
       }catch(error){
         console.error(error);
         showToast(error.message||"Không thể gửi lời mời.");
@@ -2604,14 +2522,31 @@ window.getStudyBearSupabaseStatus = function () {
       try{
         const {data,error}=await client.rpc("get_my_friendships");
         if(error) throw error;
+
         const rows=data||[];
         const incoming=rows.filter(x=>x.status==="pending"&&x.direction==="incoming");
         const accepted=rows.filter(x=>x.status==="accepted");
-        $("friendRequestsList") && ($("friendRequestsList").innerHTML=incoming.length?incoming.map(x=>this.friendCard(x,"request")).join(""):`<div class="empty">${escapeHTML(this.text("requestEmpty","Không có lời mời nào."))}</div>`);
-        $("friendsList") && ($("friendsList").innerHTML=accepted.length?accepted.map(x=>this.friendCard(x,"friend")).join(""):`<div class="empty">${escapeHTML(this.text("friendEmpty","Chưa có bạn bè."))}</div>`);
+
+        $("friendRequestsList") && (
+          $("friendRequestsList").innerHTML=incoming.length
+            ? incoming.map(x=>this.friendCard({...x,friendship_status:x.status}, "request")).join("")
+            : `<div class="empty">${escapeHTML(this.text("requestEmpty","Không có lời mời nào."))}</div>`
+        );
+
+        $("friendsList") && (
+          $("friendsList").innerHTML=accepted.length
+            ? accepted.map(x=>this.friendCard({...x,friendship_status:x.status}, "friend")).join("")
+            : `<div class="empty">${escapeHTML(this.text("friendEmpty","Chưa có bạn bè."))}</div>`
+        );
+
         this.bindFriendCardButtons($("friendRequestsList"));
         this.bindFriendCardButtons($("friendsList"));
+
+        // IMPORTANT: sidebar "Bạn bè" shows accepted friends, not pending requests.
+        this.friendCount=accepted.length;
         this.friendRequestCount=incoming.length;
+        const friendCountBadge=$("friendCount");
+        if(friendCountBadge) friendCountBadge.textContent=String(accepted.length);
         this.updateRequestBadge(incoming.length);
       }catch(error){
         console.error("[StudyBear] renderFriends",error);
@@ -2621,19 +2556,39 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     updateRequestBadge(count){
-      const badge=$("friendRequestCount"); if(badge) badge.textContent=String(count ?? this.friendRequestCount ?? 0);
+      const badge=$("friendRequestCount");
+      if(badge) badge.textContent=String(count ?? this.friendRequestCount ?? 0);
     },
 
     async openChatWith(friendId){
-      const client=this.client(); if(!client) return;
+      const client=this.client();
+      if(!client) return;
+
+      const user=await this.user();
+      if(!user){openAuth();return;}
+
       try{
+        // Server-side RPC verifies that both users are accepted friends and
+        // returns one stable direct conversation.
         const {data,error}=await client.rpc("get_or_create_direct_conversation",{p_other_user_id:friendId});
         if(error) throw error;
+
         const id=Number(data);
+        if(!Number.isInteger(id) || id<=0) throw new Error("Không tạo được cuộc trò chuyện.");
+
         showPage("chat");
         await this.renderConversations();
+
+        // The freshly-created conversation may not yet be in the list returned
+        // by the query on a very fast connection, so select it directly.
+        this.activeConversationId=id;
+        this.activeFriendId=friendId;
         await this.selectConversation(id);
-      }catch(error){console.error(error);showToast(error.message||this.text("chatNeedFriend","Hãy kết bạn trước khi trò chuyện."));}
+        showToast(this.text("chatReady","💬 Đã mở cuộc trò chuyện."));
+      }catch(error){
+        console.error("[StudyBear] openChatWith",error);
+        showToast(error.message||this.text("chatNeedFriend","Hãy kết bạn trước khi trò chuyện."));
+      }
     },
 
     async renderConversations(){
@@ -2723,8 +2678,31 @@ window.getStudyBearSupabaseStatus = function () {
       const content=input.value.trim(); if(!content)return;
       const user=await this.user(); if(!user){openAuth();return;}
       input.value="";
-      const {error}=await client.from("messages").insert({conversation_id:Number(this.activeConversationId),sender_id:user.id,content});
-      if(error){console.error(error);showToast(error.message||"Không thể gửi tin nhắn.");input.value=content;return;}
+      const {data,error}=await client.from("messages")
+        .insert({conversation_id:Number(this.activeConversationId),sender_id:user.id,content})
+        .select("id,conversation_id,sender_id,content,created_at")
+        .single();
+
+      if(error){
+        console.error("[StudyBear] sendMessage",error);
+        showToast(error.message||"Không thể gửi tin nhắn.");
+        input.value=content;
+        return;
+      }
+
+      // Realtime will normally render this on both clients. If it arrives late,
+      // render it locally immediately and de-duplicate on the realtime callback.
+      const box=$("chatMessages");
+      if(box && data && !box.querySelector(`[data-message-id="${data.id}"]`)){
+        const wrapper=document.createElement("div");
+        wrapper.dataset.messageId=data.id;
+        wrapper.innerHTML=this.messageHTML(data,user.id);
+        if(box.querySelector(".empty")) box.innerHTML="";
+        box.appendChild(wrapper.firstElementChild);
+        box.scrollTop=box.scrollHeight;
+      }
+
+      await this.renderConversations();
     },
 
     cleanup(){
