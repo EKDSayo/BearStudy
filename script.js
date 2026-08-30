@@ -2444,7 +2444,7 @@ window.getStudyBearSupabaseStatus = function () {
       const input=$("friendSearchInput");
       const results=$("friendSearchResults");
       const status=$("friendSearchStatus");
-      if(!client || !input || !results) return;
+      if(!client||!input||!results) return;
 
       const q=normalizeUsername(String(input.value||"").trim());
       results.innerHTML="";
@@ -2457,29 +2457,16 @@ window.getStudyBearSupabaseStatus = function () {
       if(status) status.textContent=this.getUILabel("searching","Đang tìm...");
 
       try{
-        // Public profile discovery is independent from Supabase Auth.
-        // The StudyBear UI session can exist while auth.uid() is NULL.
-        const rpc=await client.rpc("find_users_for_friend_search",{p_query:q});
-        if(rpc.error) throw rpc.error;
+        // V53: one authoritative RPC returns BOTH profile and relationship.
+        // This removes the race/failure caused by searching first and checking
+        // friendship in a second independent RPC.
+        const {data,error}=await client.rpc(
+          "find_users_with_friendship_status",
+          {p_query:q}
+        );
+        if(error) throw error;
 
-        const users=(rpc.data||[]).filter(x=>x?.id);
-
-        const rows=await Promise.all(users.map(async user=>{
-          let relation={};
-          try{
-            const rel=await client.rpc("get_friendship_status",{p_other_user_id:user.id});
-            const rd=Array.isArray(rel.data)?rel.data[0]:rel.data;
-            if(!rel.error && rd) relation=rd;
-          }catch(_){}
-
-          return {
-            ...user,
-            avatar_updated_at:user.updated_at || null,
-            friendship_status:relation.status || null,
-            friendship_direction:relation.direction || null,
-            friendship_id:relation.friendship_id || null
-          };
-        }));
+        const rows=(Array.isArray(data)?data:[]).filter(x=>x?.id);
 
         if(!rows.length){
           results.innerHTML=`<div class="empty">🐻 ${escapeHTML(this.text("friendNoResults","Không tìm thấy người dùng."))}</div>`;
@@ -2487,7 +2474,14 @@ window.getStudyBearSupabaseStatus = function () {
           return;
         }
 
-        results.innerHTML=rows.map(user=>this.friendCard(user,"search")).join("");
+        results.innerHTML=rows.map(user=>this.friendCard({
+          ...user,
+          friendship_status:user.friendship_status||null,
+          friendship_direction:user.friendship_direction||null,
+          friendship_id:user.friendship_id||null,
+          avatar_updated_at:user.avatar_updated_at||user.updated_at||null
+        },"search")).join("");
+
         this.bindFriendCardButtons(results);
         if(status) status.textContent="";
       }catch(error){
@@ -2514,8 +2508,8 @@ window.getStudyBearSupabaseStatus = function () {
       const avatar=avatarSrc ? `<img src="${escapeHTML(avatarSrc)}" alt="">` : `🐻`;
 
       const status=online?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
-      const relation=user.friendship_status || user.status || null;
-      const direction=user.friendship_direction || user.direction || null;
+      const relation=String(user.friendship_status || user.status || "").toLowerCase() || null;
+      const direction=String(user.friendship_direction || user.direction || "").toLowerCase() || null;
       let action="";
 
       if(mode==="search"){
@@ -2572,7 +2566,13 @@ window.getStudyBearSupabaseStatus = function () {
         await this.searchFriends();
       }catch(error){
         console.error(error);
-        showToast(error.message||"Không thể gửi lời mời.");
+        const msg=String(error?.message||"");
+        if(/REQUEST_EXISTS|already|duplicate|unique/i.test(msg)){
+          showToast(this.text("friendRequestExists","⏳ Đang chờ phản hồi hoặc hai bạn đã là bạn"));
+          await this.searchFriends();
+          return;
+        }
+        showToast(msg||"Không thể gửi lời mời.");
       }
     },
 
