@@ -2334,6 +2334,9 @@ window.getStudyBearSupabaseStatus = function () {
     booted: false,
     uiAbortController: null,
     sendBusy: false,
+    typingChannel: null,
+    typingTimeout: null,
+    typingStopTimer: null,
 
     client() { return typeof getSupabaseClient === "function" ? getSupabaseClient() : null; },
     text(key, fallback) { return (typeof UI !== "undefined" && UI[getUILang()]?.[key]) || fallback; },
@@ -2355,10 +2358,39 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     bindUI() {
+      // Bind once per boot. The chat form is also guarded outside the Social
+      // module so native form navigation can never take the user home.
       $("friendSearchBtn")?.addEventListener("click",()=>this.searchFriends());
-      $("friendSearchInput")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();this.searchFriends();}});
-      $("chatForm")?.addEventListener("submit",e=>{e.preventDefault();this.sendMessage();});
-      $("chatInput")?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();this.sendMessage();}});
+
+      $("friendSearchInput")?.addEventListener("keydown",e=>{
+        if(e.key==="Enter"){
+          e.preventDefault();
+          this.searchFriends();
+        }
+      });
+
+      $("chatForm")?.addEventListener("submit",e=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        this.sendMessage();
+      });
+
+      $("chatInput")?.addEventListener("keydown",e=>{
+        if(e.key==="Enter" && !e.shiftKey){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          this.stopTypingBroadcast();
+          this.sendMessage();
+        }
+      });
+
+      $("chatInput")?.addEventListener("input",()=>{
+        this.startTypingBroadcast();
+      });
+
+      $("chatInput")?.addEventListener("blur",()=>{
+        this.stopTypingBroadcast();
+      });
     },
 
     async onPage(page) {
@@ -2400,9 +2432,9 @@ window.getStudyBearSupabaseStatus = function () {
         })
         .subscribe(status=>{
           if(status==="SUBSCRIBED"){
-            console.info(`[StudyBear] Chat realtime ready: ${conversationId}`);
+            console.info("[StudyBear] Friendship realtime ready.");
           }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
-            console.warn("[StudyBear] Chat realtime channel:",status);
+            console.warn("[StudyBear] Friendship realtime:",status);
           }
         });
     },
@@ -2709,6 +2741,7 @@ window.getStudyBearSupabaseStatus = function () {
 
     async selectConversation(id){
       const client=this.client(); if(!client) return;
+      await this.stopTypingBroadcast();
       this.activeConversationId=id;
       const row=this.conversations.find(c=>Number(c.conversation_id)===Number(id));
       this.activeFriendId=row?.friend_id||null;
@@ -2734,40 +2767,220 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     async loadMessages(){
-      const client=this.client(); const box=$("chatMessages"); if(!client||!box||!this.activeConversationId)return;
-      const {data,error}=await client.from("messages").select("id,conversation_id,sender_id,content,created_at").eq("conversation_id",this.activeConversationId).order("created_at",{ascending:true});
-      if(error){box.innerHTML=`<div class="empty">⚠️ ${escapeHTML(error.message)}</div>`;return;}
-      if(!data?.length){box.innerHTML=`<div class="empty">${escapeHTML(this.text("chatEmpty","Chưa có tin nhắn."))}</div>`;return;}
+      const client=this.client();
+      const box=$("chatMessages");
+      if(!client||!box||!this.activeConversationId)return;
+
+      const {data,error}=await client
+        .from("messages")
+        .select("id,conversation_id,sender_id,content,created_at,read_at")
+        .eq("conversation_id",this.activeConversationId)
+        .order("created_at",{ascending:true});
+
+      if(error){
+        box.innerHTML=`<div class="empty">⚠️ ${escapeHTML(error.message)}</div>`;
+        return;
+      }
+
+      if(!data?.length){
+        box.innerHTML=`<div class="empty">${escapeHTML(this.text("chatEmpty","Chưa có tin nhắn."))}</div>`;
+        await this.markConversationRead();
+        return;
+      }
+
       const user=await this.user();
       box.innerHTML=data.map(m=>this.messageHTML(m,user?.id)).join("");
       box.scrollTop=box.scrollHeight;
+
+      await this.markConversationRead();
+      this.updateAllMessageStatuses();
     },
 
     messageHTML(m,userId){
-      const own=m.sender_id===userId;
-      const t=new Date(m.created_at).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
-      return `<div class="chat-row ${own?"own":"friend"}" data-message-id="${escapeHTML(String(m.id))}"><div class="chat-bubble"><span>${escapeHTML(m.content)}</span><small>${t}</small></div></div>`;
+      const own=String(m.sender_id)===String(userId);
+      const t=new Date(m.created_at).toLocaleTimeString(
+        getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",
+        {hour:"2-digit",minute:"2-digit"}
+      );
+      const status=own
+        ? `<span class="message-meta-status" data-read-at="${escapeHTML(m.read_at||"")}">${m.read_at?"✓✓ Đã xem":"✓ Đã gửi"}</span>`
+        : "";
+
+      return `<div class="chat-row ${own?"own":"friend"}" data-message-id="${escapeHTML(String(m.id))}">
+        <div class="chat-bubble">
+          <span>${escapeHTML(m.content)}</span>
+          <small>${t} ${status}</small>
+        </div>
+      </div>`;
+    },
+
+    updateMessageStatus(messageId,readAt){
+      const row=$(`chatMessages`)?.querySelector(`[data-message-id="${CSS.escape(String(messageId))}"]`);
+      if(!row)return;
+      const el=row.querySelector(".message-meta-status");
+      if(!el)return;
+      el.dataset.readAt=readAt||"";
+      el.textContent=readAt?"✓✓ Đã xem":"✓ Đã gửi";
+    },
+
+    updateAllMessageStatuses(){
+      const box=$("chatMessages");
+      if(!box)return;
+      box.querySelectorAll("[data-message-id]").forEach(row=>{
+        const status=row.querySelector(".message-meta-status");
+        if(!status)return;
+        const readAt=status.dataset.readAt||"";
+        status.textContent=readAt?"✓✓ Đã xem":"✓ Đã gửi";
+      });
+    },
+
+    async markConversationRead(){
+      const client=this.client();
+      const id=Number(this.activeConversationId);
+      if(!client||!Number.isInteger(id)||id<=0)return;
+      try{
+        await client.rpc("mark_conversation_read",{p_conversation_id:id});
+      }catch(error){
+        console.warn("[StudyBear] markConversationRead:",error);
+      }
     },
 
     async subscribeMessages(){
       const client=this.client();
       if(!client||!this.activeConversationId)return;
-      if(this.messageChannel){await client.removeChannel(this.messageChannel);this.messageChannel=null;}
+
+      if(this.messageChannel){
+        await client.removeChannel(this.messageChannel);
+        this.messageChannel=null;
+      }
+
       const conversationId=Number(this.activeConversationId);
-      this.messageChannel=client.channel(`studybear-chat-${conversationId}`)
-        .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:`conversation_id=eq.${conversationId}`},async payload=>{
-          const box=$("chatMessages"); if(!box) return;
-          const user=await this.user();
-          if(box.querySelector(`[data-message-id="${payload.new.id}"]`)) return;
-          const wrapper=document.createElement("div");
-          wrapper.dataset.messageId=payload.new.id;
-          wrapper.innerHTML=this.messageHTML(payload.new,user?.id);
-          if(box.querySelector(".empty")) box.innerHTML="";
-          box.appendChild(wrapper.firstElementChild);
-          box.scrollTop=box.scrollHeight;
-          this.renderConversations();
-        })
-        .subscribe();
+      const user=await this.user();
+
+      this.messageChannel=client.channel(`studybear-chat-${conversationId}`,{
+        config:{broadcast:{self:false}}
+      });
+
+      this.messageChannel
+        .on(
+          "postgres_changes",
+          {
+            event:"INSERT",
+            schema:"public",
+            table:"messages",
+            filter:`conversation_id=eq.${conversationId}`
+          },
+          async payload=>{
+            const box=$("chatMessages");
+            if(!box)return;
+
+            const id=String(payload.new.id);
+            if(box.querySelector(`[data-message-id="${CSS.escape(id)}"]`))return;
+
+            const wrapper=document.createElement("div");
+            wrapper.innerHTML=this.messageHTML(payload.new,user?.id);
+            const node=wrapper.firstElementChild;
+            if(node){
+              if(box.querySelector(".empty"))box.innerHTML="";
+              box.appendChild(node);
+              box.scrollTop=box.scrollHeight;
+            }
+
+            // If the message arrived while the recipient is viewing this chat,
+            // acknowledge it immediately.
+            if(String(payload.new.sender_id)!==String(user?.id||"")){
+              await this.markConversationRead();
+            }
+            this.renderConversations();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:"UPDATE",
+            schema:"public",
+            table:"messages",
+            filter:`conversation_id=eq.${conversationId}`
+          },
+          payload=>{
+            this.updateMessageStatus(payload.new.id,payload.new.read_at||"");
+          }
+        )
+        .on(
+          "broadcast",
+          {event:"typing"},
+          payload=>{
+            const senderId=payload?.payload?.user_id;
+            if(!senderId || String(senderId)===String(user?.id||""))return;
+
+            const isTyping=Boolean(payload?.payload?.isTyping);
+            const statusEl=$("chatStatus");
+            if(!statusEl)return;
+
+            clearTimeout(this.typingTimeout);
+
+            if(isTyping){
+              statusEl.textContent=this.text("typingNow","💬 Đang nhập tin nhắn...");
+              this.typingTimeout=setTimeout(()=>{
+                if(statusEl.textContent===this.text("typingNow","💬 Đang nhập tin nhắn...")){
+                  statusEl.textContent="";
+                }
+              },2200);
+            }else{
+              statusEl.textContent="";
+            }
+          }
+        )
+        .subscribe(status=>{
+          if(status==="SUBSCRIBED"){
+            console.info("[StudyBear] Message realtime ready.");
+          }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
+            console.warn("[StudyBear] Message realtime:",status);
+          }
+        });
+
+      await this.markConversationRead();
+    },
+
+    async startTypingBroadcast(){
+      const client=this.client();
+      const input=$("chatInput");
+      const conversationId=Number(this.activeConversationId);
+      const user=await this.user();
+
+      if(!client||!input||!Number.isInteger(conversationId)||conversationId<=0||!user||!input.value.trim()){
+        return;
+      }
+
+      if(!this.messageChannel) return;
+
+      clearTimeout(this.typingStopTimer);
+
+      try{
+        await this.messageChannel.send({
+          type:"broadcast",
+          event:"typing",
+          payload:{user_id:user.id,isTyping:true}
+        });
+      }catch(error){
+        console.warn("[StudyBear] typing broadcast:",error);
+      }
+
+      this.typingStopTimer=setTimeout(()=>this.stopTypingBroadcast(),1800);
+    },
+
+    async stopTypingBroadcast(){
+      clearTimeout(this.typingStopTimer);
+      const user=await this.user();
+      if(!this.messageChannel||!user)return;
+
+      try{
+        await this.messageChannel.send({
+          type:"broadcast",
+          event:"typing",
+          payload:{user_id:user.id,isTyping:false}
+        });
+      }catch(_){}
     },
 
     async sendMessage(){
@@ -2838,7 +3051,10 @@ window.getStudyBearSupabaseStatus = function () {
       if(client&&this.friendshipChannel) client.removeChannel(this.friendshipChannel);
       if(client&&this.profileChannel) client.removeChannel(this.profileChannel);
       if(client&&this.presenceChannel) client.removeChannel(this.presenceChannel);
+      clearTimeout(this.typingTimeout);
+      clearTimeout(this.typingStopTimer);
       this.messageChannel=this.friendshipChannel=this.profileChannel=this.presenceChannel=null;
+      this.typingChannel=null;
       if(this.uiAbortController){
         try{ this.uiAbortController.abort(); }catch(_){}
         this.uiAbortController=null;
@@ -2970,6 +3186,27 @@ window.getStudyBearSupabaseStatus = function () {
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",bind,{once:true});
   else bind();
+})();
+
+
+/* ---------- V52 CHAT FORM GLOBAL GUARD ---------- */
+(function installV52ChatFormGuard(){
+  function bind(){
+    const form=document.getElementById("chatForm");
+    if(!form || form.dataset.v52Guard==="1")return;
+    form.dataset.v52Guard="1";
+    form.addEventListener("submit",e=>{
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const social=window.StudyBearSocial;
+      if(social?.sendMessage) social.sendMessage();
+    },{capture:true});
+  }
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",bind,{once:true});
+  }else{
+    bind();
+  }
 })();
 
 /* ---------- SOCIAL STARTUP BRIDGE ---------- */

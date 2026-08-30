@@ -1745,3 +1745,16 @@ body.dark .social-inline-count {
 }
 /* V43: cloud avatar is authoritative in friend/chat cards. */
 .social-avatar img { object-fit: cover; }
+
+/* V52 chat status styles */
+.message-meta-status{
+  margin-left:6px;
+  font-size:.78em;
+  white-space:nowrap;
+  opacity:.82;
+}
+#chatStatus{
+  min-height:24px;
+  padding:4px 8px;
+  transition:opacity .15s ease;
+}
