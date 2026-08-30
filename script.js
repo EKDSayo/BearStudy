@@ -286,6 +286,8 @@ function makeDefaultUser(displayName) {
     favorites:[],
     wrong:[],
     xp:0,
+    coins:0,
+    lessonProgress:{},
     dark:false,
     createdAt:new Date().toISOString()
   };
@@ -380,7 +382,7 @@ async function loadSupabaseUserState(user) {
 
   const { data: profile, error: profileError } = await client
     .from("profiles")
-    .select("id,username,display_name,bio,avatar_url,interface_language,native_language,learning_language,learning_level,xp")
+    .select("id,username,display_name,bio,avatar_url,interface_language,native_language,learning_language,learning_level,xp,coins")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -412,6 +414,8 @@ async function loadSupabaseUserState(user) {
     learningLanguage: profile?.learning_language || localFallback.learningLanguage,
     learningLevel: profile?.learning_level || localFallback.learningLevel,
     xp: Number.isFinite(Number(profile?.xp)) ? Number(profile.xp) : localFallback.xp,
+    coins: Number.isFinite(Number(profile?.coins)) ? Number(profile.coins) : localFallback.coins,
+    lessonProgress: localFallback.lessonProgress || {},
     avatar: profile?.avatar_url || localFallback.avatar,
     avatarUrl: profile?.avatar_url || localFallback.avatarUrl || "",
     password: ""
@@ -454,6 +458,7 @@ async function syncStateToSupabase() {
     learning_language:state.learningLanguage,
     learning_level:state.learningLevel,
     xp:state.xp,
+    coins:Math.max(0,Number(state.coins||0)),
     avatar_url: state.avatarUrl || (state.avatar && !state.avatar.startsWith("data:") ? state.avatar : null),
     updated_at:new Date().toISOString()
   };
@@ -788,6 +793,7 @@ $("interfaceLanguage").addEventListener("change", e => {
 /* ---------- NAV ---------- */
 
 const PAGE_KEYS = {
+  learning:"learningPathTitle",
   home:"pageHome", dictionary:"dictionaryTitle", vocabulary:"vocabTitle", flashcard:"flashTitle",
   quiz:"quizTitle", typing:"typingTitle", wrong:"wrongTitle", learned:"learnedPageTitle", profile:"profileNav", settings:"navSettings"
 };
@@ -810,6 +816,7 @@ function showPage(page) {
   if (page === "dictionary") {
     if ($("dictionarySource")) $("dictionarySource").value = currentNativeLanguage();
   }
+  if (page === "learning") renderLearningPath();
   if (page === "vocabulary") {
     renderTopics();
     renderLevels();
@@ -1456,6 +1463,95 @@ function renderLevels() {
     renderVocabulary();
   };
 }
+
+
+/* ---------- LEARNING PATH ---------- */
+const LESSON_LEVELS=["beginner","basic","intermediate","advanced","fluent"];
+const LESSONS_PER_LEVEL=5, QUESTIONS_PER_LESSON=10, COINS_PER_LESSON=20, XP_PER_LESSON=30;
+let lessonSession=null;
+
+function lessonLevelLabel(level){
+  const map={beginner:{vi:"Sơ cấp",en:"Beginner",ko:"초급"},basic:{vi:"Căn bản",en:"Basic",ko:"기초"},intermediate:{vi:"Trung cấp",en:"Intermediate",ko:"중급"},advanced:{vi:"Cao cấp",en:"Advanced",ko:"고급"},fluent:{vi:"Thông thạo",en:"Fluent",ko:"유창함"}};
+  return map[level]?.[getUILang()]||map[level]?.vi||level;
+}
+function lessonKey(level,n){return `${level}-${n}`;}
+function lessonWords(level,n){
+  let arr=vocabulary.map((item,index)=>({item,index})).filter(x=>(x.item.level||"basic")===level);
+  if(!arr.length) arr=vocabulary.map((item,index)=>({item,index}));
+  const start=((n-1)*10)%arr.length;
+  return Array.from({length:Math.min(QUESTIONS_PER_LESSON,arr.length)},(_,i)=>arr[(start+i)%arr.length]);
+}
+function getLessonQuestion(entry,pos,level){
+  const item=entry.item, native=currentNativeLanguage(), target=currentTargetLanguage();
+  const src=item[native]||item.vi||item.en||"";
+  const dst=item[target]||item.en||item.vi||"";
+  const pool=vocabulary.filter(x=>(x.level||"basic")===level).map(x=>x[target]||x.en||x.vi||"").filter(Boolean);
+  const opts=[dst,...pool.filter(v=>v!==dst)].slice(0,4);
+  while(opts.length<4)opts.push("—");
+  return {type:pos%2===0?"Chọn nghĩa đúng":"Chọn từ đúng",prompt:pos%2===0?src:dst,hint:pos%2===0?(LANG[target]?.label||target):(LANG[native]?.label||native),options:opts.sort(()=>Math.random()-.5),answer:pos%2===0?dst:src};
+}
+function renderLearningPath(){
+  const root=$("learningLevels"); if(!root)return;
+  if(!state){root.innerHTML='<div class="empty card">🐻 Hãy đăng nhập để bắt đầu lộ trình học.</div>';return;}
+  const progress=state.lessonProgress||{};
+  let done=0;
+  LESSON_LEVELS.forEach(l=>{for(let n=1;n<=LESSONS_PER_LEVEL;n++) if(progress[lessonKey(l,n)]?.completed)done++;});
+  $("learningCoins").textContent=String(Math.max(0,Number(state.coins||0)));
+  $("learningPathProgressText").textContent=`${done} / 25 bài`;
+  $("learningPathProgressBar").style.width=`${done/25*100}%`;
+  let unlocked=true;
+  root.innerHTML=LESSON_LEVELS.map((level,li)=>{
+    const count=[1,2,3,4,5].filter(n=>progress[lessonKey(level,n)]?.completed).length;
+    const nodes=[1,2,3,4,5].map(n=>{
+      const complete=!!progress[lessonKey(level,n)]?.completed;
+      const open=unlocked&&(n===1||!!progress[lessonKey(level,n-1)]?.completed);
+      return `<button type="button" class="lesson-node ${complete?"done":""} ${open?"":"locked"}" data-lesson="${level}|${n}" ${open?"":"disabled"}><span>${complete?"✓":open?"▶":"🔒"}</span><b>${lessonLevelLabel(level)}</b><small>Bài ${n} · 10 câu</small><em>🪙 ${COINS_PER_LESSON}</em></button>`;
+    }).join("");
+    unlocked=count===LESSONS_PER_LEVEL;
+    return `<section class="learning-level card"><div class="learning-level-head"><h3>${lessonLevelLabel(level)}</h3><span>${count}/5</span></div><div class="lesson-path">${nodes}</div></section>`;
+  }).join("");
+  root.querySelectorAll("[data-lesson]").forEach(btn=>btn.addEventListener("click",()=>{const [l,n]=btn.dataset.lesson.split("|");startLesson(l,Number(n));}));
+}
+function startLesson(level,number){
+  if(!requireLogin())return;
+  const words=lessonWords(level,number); if(!words.length)return;
+  lessonSession={level,number,position:0,score:0,answered:false,questions:words.map((x,i)=>getLessonQuestion(x,i,level))};
+  $("lessonOverlay")?.classList.add("open"); $("lessonOverlay")?.setAttribute("aria-hidden","false");
+  renderLessonQuestion();
+}
+function renderLessonQuestion(){
+  const s=lessonSession,q=s.questions[s.position]; s.answered=false;s.selected=null;
+  $("lessonLevelLabel").textContent=lessonLevelLabel(s.level); $("lessonTitle").textContent=`Bài ${s.number}`;
+  $("lessonCounter").textContent=`${s.position+1} / 10`; $("lessonProgressFill").style.width=`${s.position/10*100}%`;
+  $("lessonQuestionType").textContent=q.type; $("lessonPrompt").textContent=q.prompt; $("lessonHint").textContent=q.hint||"";
+  $("lessonFeedback").textContent=""; $("lessonFeedback").className="lesson-feedback";
+  $("lessonCheckBtn").hidden=false; $("lessonNextBtn").hidden=true;
+  $("lessonOptions").innerHTML=q.options.map((o,i)=>`<button type="button" class="lesson-option" data-i="${i}">${escapeHTML(o)}</button>`).join("");
+  $("lessonOptions").querySelectorAll("[data-i]").forEach(b=>b.addEventListener("click",()=>{if(s.answered)return;s.selected=Number(b.dataset.i);$("lessonOptions").querySelectorAll(".lesson-option").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");}));
+  $("lessonCoins").textContent=String(state.coins||0);
+}
+function checkLessonAnswer(){
+  const s=lessonSession;if(!s||s.answered)return;
+  if(s.selected===null){showToast("🐻 Hãy chọn đáp án.");return;}
+  const q=s.questions[s.position], ok=String(q.options[s.selected])===String(q.answer); s.answered=true; if(ok)s.score++;
+  $("lessonOptions").querySelectorAll(".lesson-option").forEach((b,i)=>{b.disabled=true;if(String(q.options[i])===String(q.answer))b.classList.add("correct");if(i===s.selected&&!ok)b.classList.add("wrong");});
+  $("lessonFeedback").textContent=ok?"✅ Chính xác!":"❌ Chưa đúng. Đáp án: "+q.answer; $("lessonFeedback").className="lesson-feedback "+(ok?"correct":"wrong");
+  $("lessonCheckBtn").hidden=true; $("lessonNextBtn").hidden=false;
+}
+function nextLessonQuestion(){const s=lessonSession;if(!s?.answered)return;if(s.position<9){s.position++;renderLessonQuestion();}else finishLesson();}
+function finishLesson(){
+  const s=lessonSession,key=lessonKey(s.level,s.number),already=!!state.lessonProgress?.[key]?.completed;
+  const xp=already?0:XP_PER_LESSON,coins=already?0:COINS_PER_LESSON;
+  state.lessonProgress=state.lessonProgress||{};
+  state.lessonProgress[key]={completed:true,bestScore:Math.max(Number(state.lessonProgress[key]?.bestScore||0),s.score),completedAt:new Date().toISOString()};
+  if(xp||coins){state.xp+=xp;state.coins=(Number(state.coins)||0)+coins;saveState();}
+  renderLearningPath(); $("lessonOverlay")?.classList.remove("open");$("lessonResultOverlay")?.classList.add("open");$("lessonResultOverlay")?.setAttribute("aria-hidden","false");
+  $("lessonRewardXP").textContent=`+${xp} XP`; $("lessonRewardCoins").textContent=`+${coins} xu`; $("lessonResultSubtitle").textContent=`${s.score} / 10 câu đúng`; lessonSession=null;
+}
+function closeLesson(){lessonSession=null;$("lessonOverlay")?.classList.remove("open");}
+function closeLessonResult(){$("lessonResultOverlay")?.classList.remove("open");}
+function continueLearning(){closeLessonResult();showPage("learning");}
+document.addEventListener("DOMContentLoaded",()=>{$("lessonCheckBtn")?.addEventListener("click",checkLessonAnswer);$("lessonNextBtn")?.addEventListener("click",nextLessonQuestion);$("lessonClose")?.addEventListener("click",closeLesson);$("lessonResultClose")?.addEventListener("click",closeLessonResult);$("lessonResultContinue")?.addEventListener("click",continueLearning);});
 
 /* ---------- VOCABULARY ---------- */
 

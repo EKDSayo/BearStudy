@@ -25,6 +25,7 @@
     <nav>
       <button class="nav-btn active" data-page="home">🏠 <span data-i18n="navHome">Trang chủ</span></button>
       <button class="nav-btn" data-page="dictionary">📖 <span data-i18n="navDictionary">Kho từ điển</span></button>
+      <button class="nav-btn" data-page="learning">🧭 <span>Lộ trình học</span></button>
       <button class="nav-btn" data-page="vocabulary">📚 <span data-i18n="navVocabulary">Từ vựng</span></button>
       <button class="nav-btn" data-page="flashcard">🃏 <span data-i18n="navFlashcard">Flashcard</span></button>
       <button class="nav-btn" data-page="quiz">🧠 <span data-i18n="navQuiz">Trắc nghiệm</span></button>
@@ -156,6 +157,22 @@
           <span data-i18n="dictionaryEmpty">Nhập một từ để bắt đầu tra cứu.</span>
         </div>
       </div>
+    </section>
+
+
+    <section class="page" id="page-learning">
+      <div class="section-heading">
+        <div><span class="eyebrow">🧭 LEARNING PATH</span>
+          <h2>Lộ trình học từng bước</h2>
+          <p>Học từ cơ bản đến nâng cao. Mỗi bài có 10 câu và thưởng xu khi hoàn thành.</p>
+        </div>
+        <div class="coin-badge-large">🪙 <strong id="learningCoins">0</strong></div>
+      </div>
+      <div class="learning-progress-card card">
+        <div class="learning-progress-head"><div><span class="muted">Tiến độ lộ trình</span><strong id="learningPathProgressText">0 / 25 bài</strong></div><span class="level-pill" id="learningCurrentLevel">Sơ cấp</span></div>
+        <div class="path-progress-track"><div id="learningPathProgressBar" class="path-progress-fill"></div></div>
+      </div>
+      <div class="learning-levels" id="learningLevels"></div>
     </section>
 
     <section class="page" id="page-vocabulary">
@@ -631,6 +648,35 @@
       <p id="itemDetailDescription"></p>
       <div class="item-detail-effect" id="itemDetailEffect"></div>
       <button class="primary-btn" id="itemDetailCloseButton" type="button" data-i18n="close">Đóng</button>
+    </div>
+  </div>
+
+
+  <div class="lesson-overlay" id="lessonOverlay" aria-hidden="true">
+    <div class="lesson-shell" role="dialog" aria-modal="true">
+      <header class="lesson-header">
+        <button type="button" class="lesson-close" id="lessonClose">✕</button>
+        <div><span class="muted" id="lessonLevelLabel">Sơ cấp</span><strong id="lessonTitle">Bài 1</strong></div>
+        <div class="lesson-coins">🪙 <strong id="lessonCoins">0</strong></div>
+      </header>
+      <div class="lesson-progress"><div id="lessonProgressFill" class="lesson-progress-fill"></div></div>
+      <main class="lesson-main">
+        <div class="lesson-question-card card">
+          <span id="lessonQuestionType" class="lesson-question-type">Từ vựng</span>
+          <h2 id="lessonPrompt">—</h2><p id="lessonHint" class="muted"></p>
+          <div id="lessonOptions" class="lesson-options"></div>
+        </div>
+        <div id="lessonFeedback" class="lesson-feedback"></div>
+        <div class="lesson-footer"><span id="lessonCounter">1 / 10</span><button id="lessonCheckBtn" class="primary-btn">Kiểm tra</button><button id="lessonNextBtn" class="primary-btn" hidden>Tiếp tục</button></div>
+      </main>
+    </div>
+  </div>
+  <div class="lesson-result-overlay" id="lessonResultOverlay" aria-hidden="true">
+    <div class="lesson-result-modal card">
+      <div id="lessonResultEmoji" class="result-emoji">🎉</div>
+      <h2 id="lessonResultTitle">Hoàn thành!</h2><p id="lessonResultSubtitle"></p>
+      <div class="result-rewards"><div>⭐ <strong id="lessonRewardXP">+0 XP</strong></div><div>🪙 <strong id="lessonRewardCoins">+0 xu</strong></div></div>
+      <div class="result-actions"><button class="secondary-btn" id="lessonResultClose">Đóng</button><button class="primary-btn" id="lessonResultContinue">Tiếp tục học</button></div>
     </div>
   </div>
 
