@@ -126,19 +126,7 @@ nav { display: grid; gap: 7px; }
 body.dark .nav-btn:hover,
 body.dark .nav-btn.active { background: #203c55; }
 
-.sidebar-card {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 20px;
-  padding: 15px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: linear-gradient(135deg, #eef8ff, #ffffff);
-}
-
-body.dark .sidebar-card { background: #1d344a; }
-
+body.dark 
 .mini-bear { font-size: 30px; }
 .sidebar-card strong { font-size: 12px; }
 .sidebar-card p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
