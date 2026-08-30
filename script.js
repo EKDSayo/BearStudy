@@ -2413,21 +2413,65 @@ window.getStudyBearSupabaseStatus = function () {
       const results=$("friendSearchResults");
       const status=$("friendSearchStatus");
       if(!client||!input||!results) return;
-      const q=normalizeUsername(input.value);
+
+      const q=normalizeUsername(input.value).trim();
       results.innerHTML="";
-      if(q.length<2){if(status)status.textContent=this.text("friendSearchLabel","Nhập username để tìm.");return;}
+
+      if(q.length<2){
+        if(status) status.textContent=this.text("friendSearchLabel","Nhập username để tìm.");
+        return;
+      }
+
       if(status) status.textContent=this.getUILabel("searching","Đang tìm...");
+
       try{
-        const {data,error}=await client.rpc("search_profiles",{p_query:q});
-        if(error) throw error;
-        const rows=(data||[]).filter(x=>x.id);
-        if(!rows.length){results.innerHTML=`<div class="empty">🐻 ${escapeHTML(this.text("friendNoResults","Không tìm thấy người dùng."))}</div>`; if(status)status.textContent="";return;}
+        let rows=[];
+
+        // Primary path: server-side secure RPC with relationship state.
+        const rpc=await client.rpc("search_profiles",{p_query:q});
+        if(!rpc.error && Array.isArray(rpc.data)){
+          rows=rpc.data.filter(x=>x?.id);
+        }
+
+        // Fallback path: query the profiles table directly if the RPC is missing,
+        // stale, or returned nothing. This makes existing users like "yanlinh"
+        // discoverable even during SQL migration overlap.
+        if(!rows.length){
+          const direct=await client
+            .from("profiles")
+            .select("id,username,display_name,avatar_url,updated_at")
+            .ilike("username", `%${q}%`)
+            .neq("id", (await this.user())?.id || "")
+            .limit(50);
+
+          if(!direct.error && Array.isArray(direct.data)){
+            rows=direct.data
+              .filter(x=>x?.id)
+              .map(x=>({
+                ...x,
+                avatar_updated_at:x.updated_at,
+                friendship_status:null,
+                friendship_direction:null,
+                friendship_id:null
+              }));
+          }
+        }
+
+        if(!rows.length){
+          results.innerHTML=`<div class="empty">🐻 ${escapeHTML(this.text("friendNoResults","Không tìm thấy người dùng."))}</div>`;
+          if(status) status.textContent="";
+          return;
+        }
+
+        // For fallback rows, hydrate relationship state one user at a time
+        // through the secure search RPC when available.
         results.innerHTML=rows.map(user=>this.friendCard(user,"search")).join("");
         this.bindFriendCardButtons(results);
-        if(status)status.textContent="";
+        if(status) status.textContent="";
       }catch(error){
         console.error("[StudyBear] Friend search error",error);
-        if(status) status.textContent=error.message||"Không thể tìm kiếm.";
+        results.innerHTML=`<div class="empty">⚠️ ${escapeHTML(error.message||"Không thể tìm kiếm.")}</div>`;
+        if(status) status.textContent="";
       }
     },
 
@@ -2829,3 +2873,26 @@ let studyBearSupabaseReadyPoll = setInterval(() => {
   }
 }, 250);
 setTimeout(() => clearInterval(studyBearSupabaseReadyPoll), 15000);
+
+/* ---------- FRIEND SEARCH DIAGNOSTIC ---------- */
+window.studyBearSearchDiagnostic = async function (username) {
+  try {
+    const client = window.StudyBearSocial?.client?.();
+    if (!client) return { ok:false, error:"Supabase client unavailable" };
+    const q = normalizeUsername(username);
+    const rpc = await client.rpc("search_profiles",{p_query:q});
+    const direct = await client.from("profiles")
+      .select("id,username,display_name,avatar_url,updated_at")
+      .ilike("username", `%${q}%`)
+      .limit(20);
+    return {
+      query:q,
+      rpcError:rpc.error?.message || null,
+      rpcRows:rpc.data || [],
+      directError:direct.error?.message || null,
+      directRows:direct.data || []
+    };
+  } catch (error) {
+    return { ok:false, error:error.message };
+  }
+};
