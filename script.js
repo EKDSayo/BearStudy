@@ -1,3 +1,18 @@
+
+function bearcoinIcon(extra=""){
+  return `<img src="assets/bearcoin.png" class="bearcoin-icon ${extra}" alt="Bearcoin">`;
+}
+function formatBearcoins(value){
+  return `${Math.max(0,Number(value||0)).toLocaleString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN")}`;
+}
+function updateBearcoinUI(){
+  const value=Math.max(0,Number(state?.coins||0));
+  if($("bearcoinBalanceTop")) $("bearcoinBalanceTop").textContent=formatBearcoins(value);
+  if($("learningCoins")) $("learningCoins").textContent=formatBearcoins(value);
+  if($("lessonCoins")) $("lessonCoins").textContent=formatBearcoins(value);
+  if($("shopCoins")) $("shopCoins").textContent=formatBearcoins(value);
+}
+
 /* =========================================================
    STUDYBEAR - CLEAN V5
    - Individual local accounts
@@ -742,6 +757,7 @@ function logoutUser() {
 }
 
 function updateUserUI() {
+  updateBearcoinUI();
   const ui = UI[getUILang()];
 
   if (state) {
@@ -850,6 +866,7 @@ function showPage(page) {
     if ($("dictionarySource")) $("dictionarySource").value = currentNativeLanguage();
   }
   if (page === "learning") renderLearningPath();
+  if (page === "shop") renderShop();
   if (page === "vocabulary") {
     renderTopics();
     renderLevels();
@@ -1793,7 +1810,7 @@ async function finishLesson(){
     $("lessonResultTitle").textContent="Hoàn thành bài học!";
     $("lessonResultSubtitle").textContent=`Bạn đúng ${s.score}/${QUESTIONS_PER_LESSON}. Đạt ${Math.round(s.score/QUESTIONS_PER_LESSON*100)}%.`;
     $("lessonRewardXP").textContent=`+${gainedXP} XP`;
-    $("lessonRewardCoins").textContent=`+${gainedCoins} xu`;
+    $("lessonRewardCoins").textContent=`+${gainedCoins} Bearcoin`;
     $("lessonResultContinue").textContent="Tiếp tục học";
     $("lessonResultContinue").dataset.retry="0";
   }
@@ -1831,6 +1848,70 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("lessonResultContinue")?.addEventListener("click",continueLearning);
   $("lessonResultOverlay")?.addEventListener("click",e=>{if(e.target.id==="lessonResultOverlay")closeLessonResult();});
 });
+
+/* ---------- BEARCOIN ECONOMY / SHOP ---------- */
+let shopItemsCache=[];
+
+async function renderShop(){
+  const grid=$("shopGrid");
+  if(!grid)return;
+  if(!state){grid.innerHTML='<div class="empty"><div class="empty-bear">🐻</div>Hãy đăng nhập để dùng cửa hàng.</div>';return;}
+  updateBearcoinUI();
+  const client=getSupabaseClient();
+  if(!client){grid.innerHTML='<div class="empty">⚠️ Chưa kết nối Supabase.</div>';return;}
+
+  const {data,error}=await client.from("collection_item_catalog")
+    .select("id,name,icon,description,effect,season,price,is_shop_item,giftable")
+    .eq("is_shop_item",true)
+    .order("price",{ascending:true});
+
+  if(error){
+    console.warn("[StudyBear] shop load:",error);
+    grid.innerHTML='<div class="empty">⚠️ Không thể tải cửa hàng.</div>';
+    return;
+  }
+  shopItemsCache=data||[];
+  if(!shopItemsCache.length){
+    grid.innerHTML='<div class="empty"><div class="empty-bear">🐻</div>Cửa hàng đang chuẩn bị mở.</div>';
+    return;
+  }
+
+  grid.innerHTML=shopItemsCache.map(item=>`
+    <article class="shop-item-card">
+      <div class="shop-item-icon">${escapeHTML(item.icon||"🎁")}</div>
+      <strong>${escapeHTML(item.name)}</strong>
+      <small>${escapeHTML(item.description||"")}</small>
+      <div class="shop-item-bottom">
+        <span>${bearcoinIcon()} <b>${formatBearcoins(item.price)}</b></span>
+        <button type="button" class="primary-btn" data-buy-item="${escapeHTML(item.id)}">Mua</button>
+      </div>
+    </article>`).join("");
+
+  grid.querySelectorAll("[data-buy-item]").forEach(btn=>{
+    btn.addEventListener("click",()=>buyShopItem(btn.dataset.buyItem));
+  });
+}
+
+async function buyShopItem(itemId){
+  if(!requireLogin())return;
+  const client=getSupabaseClient(); if(!client)return;
+  try{
+    const {data,error}=await client.rpc("purchase_bearcoin_item",{p_item_id:itemId});
+    if(error)throw error;
+    const result=Array.isArray(data)?data[0]:data;
+    if(result){
+      state.coins=Number(result.balance_after||state.coins||0);
+      updateBearcoinUI();
+      saveState();
+      showToast(`🎁 Đã mua ${result.item_name||"vật phẩm"} bằng Bearcoin.`);
+      await renderShop();
+    }
+  }catch(error){
+    console.error("[StudyBear] purchase item:",error);
+    showToast(error.message||"Không thể mua vật phẩm.");
+  }
+}
+
 /* ---------- VOCABULARY ---------- */
 
 function currentTargetLanguage() {
@@ -2604,6 +2685,7 @@ $("darkButton").addEventListener("click", () => {
 /* ---------- DASHBOARD ---------- */
 
 function updateDashboard() {
+  updateBearcoinUI();
   const learned = state?.learned.length || 0;
   const favorites = state?.favorites.length || 0;
   const wrong = state?.wrong.length || 0;
@@ -2662,6 +2744,7 @@ function showToast(message) {
 }
 
 function refreshAll() {
+  updateBearcoinUI();
   updateDashboard();
   updateLearnedNavCount();
   renderVocabulary();

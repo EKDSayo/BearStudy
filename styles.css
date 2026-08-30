@@ -1989,3 +1989,35 @@ body.dark .social-inline-count {
 .learning-levels{padding-bottom:20px}
 .lesson-node{transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease}
 .lesson-node.done{box-shadow:0 0 0 1px rgba(78,170,111,.18)}
+
+/* V57 Bearcoin */
+.bearcoin-icon{
+  width:20px;height:20px;object-fit:contain;vertical-align:middle;display:inline-block;
+  flex:0 0 auto;
+}
+.bearcoin-icon-lg{width:34px;height:34px}
+.bearcoin-top-badge{
+  display:flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--border);
+  border-radius:13px;background:var(--card);color:var(--text);font-size:10px;white-space:nowrap;
+}
+.bearcoin-top-badge strong{font-size:13px}
+.bearcoin-top-badge span{color:var(--muted)}
+.coin-badge-large{
+  display:flex;align-items:center;gap:8px;
+}
+.lesson-coins{display:flex;align-items:center;gap:5px}
+.shop-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;
+}
+.shop-item-card{
+  border:1px solid var(--border);border-radius:18px;padding:16px;background:var(--bg);
+  display:flex;flex-direction:column;gap:8px;
+}
+.shop-item-icon{font-size:42px;text-align:center;padding:8px}
+.shop-item-card small{color:var(--muted);line-height:1.45;min-height:34px}
+.shop-item-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:auto;gap:8px}
+.shop-item-bottom>span{display:flex;align-items:center;gap:4px}
+@media (max-width:720px){
+  .bearcoin-top-badge span{display:none}
+  .bearcoin-top-badge{padding:6px 8px}
+}
