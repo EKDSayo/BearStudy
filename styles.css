@@ -1736,3 +1736,12 @@ body.dark .social-inline-count {
     justify-content:flex-start;
   }
 }
+
+/* V43 friend row layout: preserve name/avatar while action buttons are present. */
+.social-user-row { grid-template-columns: 42px minmax(160px, 1fr) minmax(260px, auto); }
+@media (max-width: 980px) {
+  .social-user-row { grid-template-columns: 42px minmax(120px, 1fr); }
+  .social-user-actions { grid-column: 2; }
+}
+/* V43: cloud avatar is authoritative in friend/chat cards. */
+.social-avatar img { object-fit: cover; }
