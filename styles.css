@@ -1973,3 +1973,19 @@ body.dark .social-inline-count {
 .lesson-footer #lessonCounter{margin-right:auto;color:var(--muted)}
 .lesson-result-modal{width:min(430px,100%);padding:30px;text-align:center}.result-emoji{font-size:64px}.result-rewards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.result-rewards>div{padding:14px;border:1px solid var(--border);border-radius:14px}
 @media (max-width:700px){.lesson-path{grid-template-columns:repeat(2,1fr)}.lesson-options{grid-template-columns:1fr}.lesson-header{gap:8px}}
+
+/* V56: professional sidebar scrolling */
+.sidebar{
+  height:100vh;
+  max-height:100vh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  scrollbar-gutter:stable;
+}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(90,120,150,.35)}
+.sidebar nav{padding-bottom:18px}
+.learning-levels{padding-bottom:20px}
+.lesson-node{transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease}
+.lesson-node.done{box-shadow:0 0 0 1px rgba(78,170,111,.18)}
