@@ -1,6 +1,6 @@
 
 function bearcoinIcon(extra=""){
-  return `<img src="assets/bearcoin.png" class="bearcoin-icon ${extra}" alt="Bearcoin">`;
+  return `<img src="bearcoin.png" class="bearcoin-icon ${extra}" alt="Bearcoin">`;
 }
 function formatBearcoins(value){
   return `${Math.max(0,Number(value||0)).toLocaleString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN")}`;
