@@ -401,6 +401,9 @@
 
             <label for="profileDisplayName" data-i18n="displayNameLabel">Tên hiển thị</label>
             <input class="profile-input" id="profileDisplayName" maxlength="30" data-i18n-placeholder="displayNamePlaceholder" placeholder="Tên hiển thị">
+            <label for="profileBio" data-i18n="bioLabel">Giới thiệu</label>
+            <textarea class="profile-input profile-bio-input" id="profileBio" maxlength="180"
+              data-i18n-placeholder="bioPlaceholder" placeholder="Giới thiệu ngắn về bạn..."></textarea>
 
             <div class="language-grid">
               <div>
@@ -585,5 +588,51 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="script.js"></script>
+
+  <!-- PUBLIC PROFILE MODAL -->
+  <div class="public-profile-overlay" id="publicProfileOverlay" aria-hidden="true">
+    <div class="public-profile-modal" role="dialog" aria-modal="true" aria-labelledby="publicProfileName">
+      <button class="public-profile-close" id="publicProfileClose" type="button" aria-label="Đóng">✕</button>
+      <div class="public-profile-cover"></div>
+      <div class="public-profile-content">
+        <div class="public-profile-head">
+          <div class="public-profile-avatar" id="publicProfileAvatar">🐻</div>
+          <div class="public-profile-title">
+            <strong id="publicProfileName">User</strong>
+            <span id="publicProfileUsername">@username</span>
+            <small id="publicProfileStatus"></small>
+          </div>
+        </div>
+
+        <div class="public-profile-bio" id="publicProfileBio"></div>
+
+        <div class="public-profile-languages">
+          <div class="public-info-chip"><span>🌱</span><small data-i18n="publicLearningLanguage">Đang học</small><strong id="publicLearningLanguage">—</strong></div>
+          <div class="public-info-chip"><span>🏠</span><small data-i18n="publicNativeLanguage">Ngôn ngữ mẹ đẻ</small><strong id="publicNativeLanguage">—</strong></div>
+          <div class="public-info-chip"><span>📊</span><small data-i18n="publicLevel">Trình độ</small><strong id="publicLearningLevel">—</strong></div>
+        </div>
+
+        <div class="public-profile-section">
+          <div class="public-section-head">
+            <div><span class="card-icon">🎁</span><div><h3 data-i18n="publicCollectionTitle">Bộ sưu tập</h3><p data-i18n="publicCollectionSubtitle">Những vật phẩm người này đã sưu tầm</p></div></div>
+          </div>
+          <div id="publicCollectionGrid" class="public-collection-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLLECTION ITEM DETAIL MODAL -->
+  <div class="item-detail-overlay" id="itemDetailOverlay" aria-hidden="true">
+    <div class="item-detail-modal" role="dialog" aria-modal="true">
+      <button class="public-profile-close" id="itemDetailClose" type="button" aria-label="Đóng">✕</button>
+      <div class="item-detail-icon" id="itemDetailIcon">🎁</div>
+      <h3 id="itemDetailName">Item</h3>
+      <p id="itemDetailDescription"></p>
+      <div class="item-detail-effect" id="itemDetailEffect"></div>
+      <button class="primary-btn" id="itemDetailCloseButton" type="button" data-i18n="close">Đóng</button>
+    </div>
+  </div>
+
 </body>
 </html>

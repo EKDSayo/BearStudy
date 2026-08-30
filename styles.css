@@ -1758,3 +1758,187 @@ body.dark .social-inline-count {
   padding:4px 8px;
   transition:opacity .15s ease;
 }
+
+/* V54 public profile */
+.profile-bio-input{
+  min-height:88px;
+  resize:vertical;
+  font-family:inherit;
+}
+.social-profile-trigger{
+  border:0;
+  padding:0;
+  cursor:pointer;
+  font:inherit;
+}
+.social-profile-trigger-text{
+  cursor:pointer;
+}
+.public-profile-overlay,
+.item-detail-overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(24,35,48,.42);
+  backdrop-filter:blur(8px);
+  z-index:1000;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+}
+.public-profile-overlay.open,
+.item-detail-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+.public-profile-modal,
+.item-detail-modal{
+  position:relative;
+  width:min(720px,100%);
+  max-height:88vh;
+  overflow:auto;
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:24px;
+  box-shadow:0 25px 70px rgba(0,0,0,.18);
+}
+.public-profile-cover{
+  height:120px;
+  background:linear-gradient(135deg,#d8efff,#eef7ff);
+}
+.public-profile-content{
+  padding:0 22px 24px;
+}
+.public-profile-head{
+  display:flex;
+  align-items:flex-end;
+  gap:14px;
+  margin-top:-34px;
+}
+.public-profile-avatar{
+  width:88px;
+  height:88px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:linear-gradient(135deg,var(--bear-light),var(--bear));
+  border:5px solid var(--card);
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  font-size:34px;
+}
+.public-profile-avatar img{
+  width:100%;height:100%;object-fit:cover;
+}
+.public-profile-title{
+  display:flex;
+  flex-direction:column;
+  padding-bottom:8px;
+}
+.public-profile-title strong{font-size:21px}
+.public-profile-title span{color:var(--muted);font-size:12px}
+.public-profile-title small{margin-top:4px;color:var(--muted)}
+.public-profile-close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  z-index:3;
+  width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.75);
+  cursor:pointer;
+}
+.public-profile-bio{
+  margin:18px 0;
+  padding:14px;
+  border-radius:16px;
+  background:var(--bg);
+  color:var(--text);
+  white-space:pre-wrap;
+}
+.public-profile-languages{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.public-info-chip{
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.public-info-chip small{color:var(--muted);font-size:10px}
+.public-info-chip strong{font-size:13px}
+.public-profile-section{margin-top:20px}
+.public-section-head{margin-bottom:12px}
+.public-collection-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;
+}
+.public-collection-item{
+  border:1px solid var(--border);
+  background:var(--bg);
+  border-radius:18px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  transition:transform .16s ease, box-shadow .16s ease;
+  color:var(--text);
+}
+.public-collection-item:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 25px rgba(0,0,0,.08);
+}
+.public-item-icon{
+  font-size:34px;
+  display:block;
+}
+.public-collection-item small{
+  color:var(--muted);
+  font-size:10px;
+}
+.public-empty-collection{
+  grid-column:1/-1;
+  padding:28px;
+  text-align:center;
+  border:1px dashed var(--border);
+  border-radius:16px;
+  color:var(--muted);
+}
+.item-detail-modal{
+  width:min(420px,100%);
+  padding:30px;
+  text-align:center;
+}
+.item-detail-icon{
+  font-size:76px;
+}
+.item-detail-icon.item-pop{
+  animation:itemPop .55s ease;
+}
+.item-detail-effect{
+  padding:12px;
+  border-radius:14px;
+  background:var(--bg);
+  margin:14px 0 20px;
+}
+@keyframes itemPop{
+  0%{transform:scale(.75) rotate(-6deg);opacity:.4}
+  70%{transform:scale(1.12) rotate(4deg);opacity:1}
+  100%{transform:scale(1) rotate(0)}
+}
+@media (max-width:680px){
+  .public-profile-languages{grid-template-columns:1fr}
+  .public-profile-content{padding:0 15px 18px}
+}

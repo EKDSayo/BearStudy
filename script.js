@@ -274,6 +274,7 @@ function usernameExists(username) {
 function makeDefaultUser(displayName) {
   return {
     displayName,
+    bio:"",
     password:"",
     avatar:"",
     interfaceLanguage:"vi",
@@ -295,6 +296,7 @@ function normalizeUser(user) {
   return {
     ...base,
     ...(user || {}),
+    bio:typeof user?.bio === "string" ? user.bio.slice(0,180) : "",
     learned:Array.isArray(user?.learned) ? user.learned.filter(Number.isInteger) : [],
     favorites:Array.isArray(user?.favorites) ? user.favorites.filter(Number.isInteger) : [],
     wrong:Array.isArray(user?.wrong) ? user.wrong.filter(Number.isInteger) : [],
@@ -378,7 +380,7 @@ async function loadSupabaseUserState(user) {
 
   const { data: profile, error: profileError } = await client
     .from("profiles")
-    .select("id,username,display_name,avatar_url,interface_language,native_language,learning_language,learning_level,xp")
+    .select("id,username,display_name,bio,avatar_url,interface_language,native_language,learning_language,learning_level,xp")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -403,6 +405,8 @@ async function loadSupabaseUserState(user) {
   const nextState = normalizeUser({
     ...localFallback,
     displayName: profile?.display_name || user.user_metadata?.display_name || localFallback.displayName,
+    bio: typeof profile?.bio === "string" ? profile.bio : localFallback.bio,
+    collectionItems: Array.isArray(localFallback.collectionItems) ? localFallback.collectionItems : [],
     interfaceLanguage: profile?.interface_language || localFallback.interfaceLanguage,
     nativeLanguage: profile?.native_language || localFallback.nativeLanguage,
     learningLanguage: profile?.learning_language || localFallback.learningLanguage,
@@ -444,6 +448,7 @@ async function syncStateToSupabase() {
     id:user.id,
     username:currentUsername,
     display_name:state.displayName,
+    bio:state.bio || "",
     interface_language:state.interfaceLanguage,
     native_language:state.nativeLanguage,
     learning_language:state.learningLanguage,
@@ -855,6 +860,7 @@ function renderProfile() {
 
   $("profileUsername").textContent = "@" + currentUsername;
   $("profileDisplayName").value = state.displayName;
+  if($("profileBio")) $("profileBio").value = state.bio || "";
   $("learningLanguage").value = state.learningLanguage;
   $("nativeLanguage").value = state.nativeLanguage;
   $("learningLevel").value = state.learningLevel;
@@ -894,6 +900,7 @@ $("saveProfileBtn").addEventListener("click", () => {
   }
 
   state.displayName = name.slice(0,30);
+  state.bio = String($("profileBio")?.value || "").trim().slice(0,180);
   state.learningLanguage = $("learningLanguage").value;
   state.nativeLanguage = $("nativeLanguage").value;
   state.learningLevel = $("learningLevel").value;
@@ -2483,6 +2490,7 @@ window.getStudyBearSupabaseStatus = function () {
         },"search")).join("");
 
         this.bindFriendCardButtons(results);
+        this.bindPublicProfileButtons(results);
         if(status) status.textContent="";
       }catch(error){
         console.error("[StudyBear] Friend search error:",error);
@@ -2537,9 +2545,9 @@ window.getStudyBearSupabaseStatus = function () {
       }
 
       return `<div class="social-user-row">
-        <div class="social-avatar">${avatar}</div>
+        <button type="button" class="social-avatar social-profile-trigger" data-public-profile="${escapeHTML(targetId)}" title="Xem hồ sơ">${avatar}</button>
         <div class="social-user-main">
-          <strong>@${escapeHTML(user.username||"")}</strong>
+          <strong class="social-profile-trigger-text" data-public-profile="${escapeHTML(targetId)}">@${escapeHTML(user.username||"")}</strong>
           <span>${escapeHTML(user.display_name||user.username||"")}</span>
           <small><i class="presence-dot ${online?"online":"offline"}"></i>${escapeHTML(status)}</small>
         </div>
@@ -2553,6 +2561,132 @@ window.getStudyBearSupabaseStatus = function () {
       root.querySelectorAll?.("[data-decline-friend]").forEach(btn=>btn.addEventListener("click",()=>this.respondRequest(Number(btn.dataset.declineFriend),"declined")));
       root.querySelectorAll?.("[data-remove-friend]").forEach(btn=>btn.addEventListener("click",()=>this.removeFriend(Number(btn.dataset.removeFriend))));
       root.querySelectorAll?.("[data-chat-user]").forEach(btn=>btn.addEventListener("click",()=>this.openChatWith(btn.dataset.chatUser)));
+    },
+
+    bindPublicProfileButtons(root=document){
+      root.querySelectorAll?.("[data-public-profile]").forEach(el=>{
+        el.addEventListener("click",(event)=>{
+          event.preventDefault();
+          event.stopPropagation();
+          this.openPublicProfile(el.dataset.publicProfile);
+        });
+      });
+    },
+
+    async openPublicProfile(userId){
+      const client=this.client();
+      if(!client) return;
+      const id=String(userId||"").trim();
+      if(!id || id==="undefined" || id==="null") return;
+
+      try{
+        const {data,error}=await client.rpc("get_public_profile",{p_user_id:id});
+        if(error) throw error;
+        const profile=Array.isArray(data)?data[0]:data;
+        if(!profile) throw new Error("Không tìm thấy hồ sơ.");
+
+        const overlay=$("publicProfileOverlay");
+        if(!overlay) return;
+
+        const avatar=$("publicProfileAvatar");
+        const avatarUrl=profile.avatar_url
+          ? `${profile.avatar_url}${profile.avatar_url.includes("?")?"&":"?"}v=${encodeURIComponent(profile.avatar_updated_at||Date.now())}`
+          : "";
+        if(avatar){
+          avatar.innerHTML=avatarUrl?`<img src="${escapeHTML(avatarUrl)}" alt="">`:"🐻";
+        }
+
+        $("publicProfileName").textContent=profile.display_name||profile.username||"User";
+        $("publicProfileUsername").textContent="@"+(profile.username||"");
+        $("publicProfileBio").textContent=profile.bio || this.text("publicNoBio","Chưa có giới thiệu.");
+        $("publicLearningLanguage").textContent=this.languageLabel(profile.learning_language);
+        $("publicNativeLanguage").textContent=this.languageLabel(profile.native_language);
+        $("publicLearningLevel").textContent=this.levelLabel(profile.learning_level);
+
+        const status=$("publicProfileStatus");
+        if(status){
+          status.innerHTML=this.onlineIds.has(profile.id)
+            ? `<span class="presence-dot online"></span>${escapeHTML(this.text("online","Đang hoạt động"))}`
+            : `<span class="presence-dot offline"></span>${escapeHTML(this.text("offline","Ngoại tuyến"))}`;
+        }
+
+        const items=$("publicCollectionGrid");
+        const collection=Array.isArray(profile.collection_items)?profile.collection_items:[];
+        if(items){
+          items.innerHTML=collection.length
+            ? collection.map(item=>`
+              <button type="button" class="public-collection-item" data-collection-item='${escapeHTML(JSON.stringify(item))}'>
+                <span class="public-item-icon">${escapeHTML(item.icon||"🎁")}</span>
+                <strong>${escapeHTML(item.name||"Item")}</strong>
+                <small>${escapeHTML(item.season||item.theme||"Special")}</small>
+              </button>`).join("")
+            : `<div class="public-empty-collection">🎁 ${escapeHTML(this.text("publicCollectionEmpty","Chưa có vật phẩm trong bộ sưu tập."))}</div>`;
+
+          items.querySelectorAll("[data-collection-item]").forEach(button=>{
+            button.addEventListener("click",()=>{
+              const raw=button.dataset.collectionItem;
+              try{ this.openCollectionItem(JSON.parse(raw)); }catch(_){}
+            });
+          });
+        }
+
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden","false");
+      }catch(error){
+        console.error("[StudyBear] openPublicProfile:",error);
+        showToast(error.message||"Không thể mở hồ sơ.");
+      }
+    },
+
+    languageLabel(code){
+      const map={
+        vi:{vi:"🇻🇳 Tiếng Việt",en:"🇬🇧 English",ko:"🇰🇷 한국어",ru:"🇷🇺 Русский",zh:"🇨🇳 中文"},
+        en:{vi:"🇻🇳 Vietnamese",en:"🇬🇧 English",ko:"🇰🇷 Korean",ru:"🇷🇺 Russian",zh:"🇨🇳 Chinese"},
+        ko:{vi:"🇻🇳 베트남어",en:"🇬🇧 영어",ko:"🇰🇷 한국어",ru:"🇷🇺 러시아어",zh:"🇨🇳 중국어"}
+      };
+      return map[getUILang()]?.[code] || map.vi[code] || code || "—";
+    },
+
+    levelLabel(level){
+      const map={
+        beginner:{vi:"Sơ cấp",en:"Beginner",ko:"초급"},
+        basic:{vi:"Căn bản",en:"Basic",ko:"기초"},
+        intermediate:{vi:"Trung cấp",en:"Intermediate",ko:"중급"},
+        advanced:{vi:"Cao cấp",en:"Advanced",ko:"고급"},
+        fluent:{vi:"Thông thạo",en:"Fluent",ko:"유창"}
+      };
+      return map[level]?.[getUILang()] || map[level]?.vi || level || "—";
+    },
+
+    closePublicProfile(){
+      const overlay=$("publicProfileOverlay");
+      if(!overlay) return;
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden","true");
+    },
+
+    openCollectionItem(item){
+      const overlay=$("itemDetailOverlay");
+      if(!overlay) return;
+      $("itemDetailIcon").textContent=item.icon||"🎁";
+      $("itemDetailName").textContent=item.name||"Item";
+      $("itemDetailDescription").textContent=item.description||this.text("itemNoDescription","Chưa có mô tả.");
+      $("itemDetailEffect").textContent=item.effect||this.text("itemNoEffect","Vật phẩm trang trí.");
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden","false");
+
+      // Small visual feedback effect.
+      const icon=$("itemDetailIcon");
+      icon.classList.remove("item-pop");
+      void icon.offsetWidth;
+      icon.classList.add("item-pop");
+    },
+
+    closeCollectionItem(){
+      const overlay=$("itemDetailOverlay");
+      if(!overlay) return;
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden","true");
     },
 
     async sendRequest(targetId){
@@ -2657,6 +2791,8 @@ window.getStudyBearSupabaseStatus = function () {
 
         this.bindFriendCardButtons($("friendRequestsList"));
         this.bindFriendCardButtons($("friendsList"));
+        this.bindPublicProfileButtons($("friendRequestsList"));
+        this.bindPublicProfileButtons($("friendsList"));
 
         this.friendCount=accepted.length;
         this.friendRequestCount=incoming.length;
@@ -3277,3 +3413,13 @@ window.studyBearSearchDebug = async function(username="yanlinh"){
     return {ok:false,error:error.message};
   }
 };
+
+
+/* ---------- PUBLIC PROFILE MODAL BINDINGS ---------- */
+document.addEventListener("DOMContentLoaded",()=>{
+  $("publicProfileClose")?.addEventListener("click",()=>window.StudyBearSocial?.closePublicProfile());
+  $("itemDetailClose")?.addEventListener("click",()=>window.StudyBearSocial?.closeCollectionItem());
+  $("itemDetailCloseButton")?.addEventListener("click",()=>window.StudyBearSocial?.closeCollectionItem());
+  $("publicProfileOverlay")?.addEventListener("click",e=>{ if(e.target.id==="publicProfileOverlay") window.StudyBearSocial?.closePublicProfile(); });
+  $("itemDetailOverlay")?.addEventListener("click",e=>{ if(e.target.id==="itemDetailOverlay") window.StudyBearSocial?.closeCollectionItem(); });
+});
