@@ -2855,6 +2855,123 @@ window.getStudyBearSupabaseStatus = function () {
 })();
 
 
+
+/* ---------- V50 SOCIAL FALLBACK BRIDGE ---------- */
+(function installStudyBearSocialFallback(){
+  let bound=false;
+
+  function bindWhenReady(){
+    if(bound || !document.getElementById("friendSearchBtn")) return;
+    bound=true;
+
+    const btn=document.getElementById("friendSearchBtn");
+    const input=document.getElementById("friendSearchInput");
+    const results=document.getElementById("friendSearchResults");
+    const status=document.getElementById("friendSearchStatus");
+
+    btn.addEventListener("click", async function(e){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const client=window.studyBearSupabase;
+      if(!client){
+        if(status) status.textContent="⚠️ Đang kết nối Supabase...";
+        return;
+      }
+
+      const q=String(input?.value||"").trim().toLowerCase().replace(/\s+/g,"");
+      if(q.length<2){
+        if(status) status.textContent="Nhập ít nhất 2 ký tự username.";
+        if(results) results.innerHTML="";
+        return;
+      }
+
+      if(status) status.textContent="🔎 Đang tìm...";
+      if(results) results.innerHTML="";
+
+      try{
+        const {data,error}=await client.rpc("find_users_for_friend_search",{p_query:q});
+        if(error) throw error;
+
+        const users=(Array.isArray(data)?data:[]).filter(x=>x?.id);
+        if(!users.length){
+          if(results) results.innerHTML='<div class="empty">🐻 Không tìm thấy người dùng.</div>';
+          if(status) status.textContent="";
+          return;
+        }
+
+        results.innerHTML=users.map(u=>{
+          const avatar=u.avatar_url
+            ? `<img src="${String(u.avatar_url).replace(/"/g,"&quot;")}?v=${encodeURIComponent(u.updated_at||"")}" alt="">`
+            : "🐻";
+          return `<div class="social-user-row" data-fallback-user="${u.id}">
+            <div class="social-avatar">${avatar}</div>
+            <div class="social-user-main">
+              <strong>@${String(u.username||"").replace(/</g,"&lt;")}</strong>
+              <span>${String(u.display_name||u.username||"").replace(/</g,"&lt;")}</span>
+            </div>
+            <div class="social-user-actions">
+              <button type="button" class="primary-btn" data-fallback-add="${u.id}">➕ Kết bạn</button>
+            </div>
+          </div>`;
+        }).join("");
+
+        results.querySelectorAll("[data-fallback-add]").forEach(addBtn=>{
+          addBtn.addEventListener("click",()=>{
+            const id=addBtn.getAttribute("data-fallback-add");
+            if(window.StudyBearSocial?.sendRequest) window.StudyBearSocial.sendRequest(id);
+            else if(status) status.textContent="Đang khởi động chức năng kết bạn, hãy thử lại sau một giây.";
+          });
+        });
+
+        // Let the normal Social renderer replace these basic cards when ready.
+        if(window.StudyBearSocial?.bindFriendCardButtons) {
+          window.StudyBearSocial.bindFriendCardButtons(results);
+        }
+        if(status) status.textContent="";
+      }catch(err){
+        console.error("[StudyBear] fallback friend search failed",err);
+        if(status) status.textContent="";
+        if(results) results.innerHTML=`<div class="empty">⚠️ ${String(err.message||"Không thể tìm kiếm.").replace(/</g,"&lt;")}</div>`;
+      }
+    }, {capture:true});
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",bindWhenReady,{once:true});
+  }else{
+    bindWhenReady();
+  }
+})();
+
+
+/* ---------- V50 CHAT NAVIGATION GUARD ---------- */
+(function installStudyBearChatGuard(){
+  function bind(){
+    const form=document.getElementById("chatForm");
+    if(!form || form.dataset.v50Guard==="1") return;
+    form.dataset.v50Guard="1";
+
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const input=document.getElementById("chatInput");
+      const content=String(input?.value||"").trim();
+      if(!content) return;
+
+      const social=window.StudyBearSocial;
+      if(social && typeof social.sendMessage==="function"){
+        social.sendMessage();
+      }else{
+        const status=document.getElementById("chatStatus");
+        if(status) status.textContent="Đang kết nối tin nhắn, vui lòng thử lại.";
+      }
+    }, {capture:true});
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",bind,{once:true});
+  else bind();
+})();
+
 /* ---------- SOCIAL STARTUP BRIDGE ---------- */
 let studyBearSupabaseReadyPoll = setInterval(() => {
   if (window.studyBearSupabaseReady && window.StudyBearSocial) {
