@@ -2328,6 +2328,7 @@ window.getStudyBearSupabaseStatus = function () {
     activeFriendId: null,
     messageChannel: null,
     friendshipChannel: null,
+    profileChannel: null,
     presenceChannel: null,
     onlineIds: new Set(),
     booted: false,
@@ -2349,6 +2350,7 @@ window.getStudyBearSupabaseStatus = function () {
       this.booted=true;
       await this.bindPresence();
       await this.bindFriendshipRealtime();
+      await this.bindProfileRealtime();
       this.bindUI();
     },
 
@@ -2437,12 +2439,14 @@ window.getStudyBearSupabaseStatus = function () {
     friendCard(user,mode){
       const targetId = String(user.friend_id || user.id || "").trim();
       const online=this.onlineIds.has(targetId);
+
+      const rawAvatar = user.avatar_url || "";
       const avatarVersion = user.avatar_updated_at || user.updated_at || "";
-      const avatarBase = user.avatar_url || "";
-      const avatarSrc = avatarBase
-        ? `${avatarBase}${avatarBase.includes("?") ? "&" : "?"}v=${encodeURIComponent(avatarVersion || Date.now())}`
+      const avatarSrc = rawAvatar
+        ? `${rawAvatar}${rawAvatar.includes("?") ? "&" : "?"}v=${encodeURIComponent(avatarVersion || Date.now())}`
         : "";
-      const avatar=avatarSrc?`<img src="${escapeHTML(avatarSrc)}" alt="">`:`🐻`;
+      const avatar=avatarSrc ? `<img src="${escapeHTML(avatarSrc)}" alt="">` : `🐻`;
+
       const status=online?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
       const relation=user.friendship_status || user.status || null;
       const direction=user.friendship_direction || user.direction || null;
@@ -2451,25 +2455,25 @@ window.getStudyBearSupabaseStatus = function () {
       if(mode==="search"){
         if(relation==="accepted"){
           action=`<span class="social-state accepted">✓ ${escapeHTML(this.text("friendAccepted","Đã kết bạn"))}</span>
-                  <button class="primary-btn" data-chat-user="${targetId}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>`;
+                  <button class="primary-btn" data-chat-user="${escapeHTML(targetId)}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>`;
         }else if(relation==="pending" && direction==="outgoing"){
           action=`<button class="secondary-btn" disabled>⏳ ${escapeHTML(this.text("friendPending","Chờ phản hồi"))}</button>`;
         }else if(relation==="pending" && direction==="incoming"){
-          action=`<button class="primary-btn" data-accept-friend="${user.friendship_id}">✅ ${escapeHTML(this.text("friendAccept","Chấp nhận"))}</button>`;
+          action=`<button class="primary-btn" data-accept-friend="${escapeHTML(String(user.friendship_id||""))}">✅ ${escapeHTML(this.text("friendAccept","Chấp nhận"))}</button>`;
         }else{
-          action=`<button class="secondary-btn" data-friend-add="${targetId}">➕ ${escapeHTML(this.text("friendAdd","Kết bạn"))}</button>`;
+          action=`<button class="secondary-btn" data-friend-add="${escapeHTML(targetId)}">➕ ${escapeHTML(this.text("friendAdd","Kết bạn"))}</button>`;
         }
       }
 
       if(mode==="friend"){
         action=`<span class="social-state accepted">✓ ${escapeHTML(this.text("friendAccepted","Đã kết bạn"))}</span>
-                <button class="primary-btn" data-chat-user="${targetId}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>
-                <button class="secondary-btn" data-remove-friend="${user.friendship_id}">↩ ${escapeHTML(this.text("friendRemove","Xóa bạn"))}</button>`;
+                <button class="primary-btn" data-chat-user="${escapeHTML(targetId)}">💬 ${escapeHTML(this.text("friendChat","Nhắn tin"))}</button>
+                <button class="secondary-btn" data-remove-friend="${escapeHTML(String(user.friendship_id||""))}">↩ ${escapeHTML(this.text("friendRemove","Xóa bạn"))}</button>`;
       }
 
       if(mode==="request"){
-        action=`<button class="primary-btn" data-accept-friend="${user.friendship_id}">✅ ${escapeHTML(this.text("friendAccept","Chấp nhận"))}</button>
-                <button class="secondary-btn" data-decline-friend="${user.friendship_id}">✕ ${escapeHTML(this.text("friendDecline","Từ chối"))}</button>`;
+        action=`<button class="primary-btn" data-accept-friend="${escapeHTML(String(user.friendship_id||""))}">✅ ${escapeHTML(this.text("friendAccept","Chấp nhận"))}</button>
+                <button class="secondary-btn" data-decline-friend="${escapeHTML(String(user.friendship_id||""))}">✕ ${escapeHTML(this.text("friendDecline","Từ chối"))}</button>`;
       }
 
       return `<div class="social-user-row">
@@ -2761,8 +2765,9 @@ window.getStudyBearSupabaseStatus = function () {
       const client=this.client();
       if(client&&this.messageChannel) client.removeChannel(this.messageChannel);
       if(client&&this.friendshipChannel) client.removeChannel(this.friendshipChannel);
+      if(client&&this.profileChannel) client.removeChannel(this.profileChannel);
       if(client&&this.presenceChannel) client.removeChannel(this.presenceChannel);
-      this.messageChannel=this.friendshipChannel=this.presenceChannel=null;
+      this.messageChannel=this.friendshipChannel=this.profileChannel=this.presenceChannel=null;
       if(this.uiAbortController){
         try{ this.uiAbortController.abort(); }catch(_){}
         this.uiAbortController=null;
