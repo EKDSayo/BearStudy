@@ -2331,6 +2331,8 @@ window.getStudyBearSupabaseStatus = function () {
     presenceChannel: null,
     onlineIds: new Set(),
     booted: false,
+    uiAbortController: null,
+    sendBusy: false,
 
     client() { return typeof getSupabaseClient === "function" ? getSupabaseClient() : null; },
     text(key, fallback) { return (typeof UI !== "undefined" && UI[getUILang()]?.[key]) || fallback; },
@@ -2669,7 +2671,7 @@ window.getStudyBearSupabaseStatus = function () {
     messageHTML(m,userId){
       const own=m.sender_id===userId;
       const t=new Date(m.created_at).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
-      return `<div class="chat-row ${own?"own":"friend"}"><div class="chat-bubble"><span>${escapeHTML(m.content)}</span><small>${t}</small></div></div>`;
+      return `<div class="chat-row ${own?"own":"friend"}" data-message-id="${escapeHTML(String(m.id))}"><div class="chat-bubble"><span>${escapeHTML(m.content)}</span><small>${t}</small></div></div>`;
     },
 
     async subscribeMessages(){
@@ -2694,36 +2696,65 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     async sendMessage(){
-      const client=this.client(); const input=$("chatInput");
-      if(!client||!input||!this.activeConversationId)return;
-      const content=input.value.trim(); if(!content)return;
-      const user=await this.user(); if(!user){openAuth();return;}
-      input.value="";
-      const {data,error}=await client.from("messages")
-        .insert({conversation_id:Number(this.activeConversationId),sender_id:user.id,content})
-        .select("id,conversation_id,sender_id,content,created_at")
-        .single();
+      const client=this.client();
+      const input=$("chatInput");
+      if(!client || !input || !this.activeConversationId) return;
+      if(this.sendBusy) return;
 
-      if(error){
+      const content=input.value.trim();
+      if(!content) return;
+
+      const user=await this.user();
+      if(!user){openAuth();return;}
+
+      this.sendBusy=true;
+      input.disabled=true;
+      const original=content;
+      input.value="";
+
+      try{
+        const {data,error}=await client
+          .from("messages")
+          .insert({
+            conversation_id:Number(this.activeConversationId),
+            sender_id:user.id,
+            content:original
+          })
+          .select("id,conversation_id,sender_id,content,created_at,read_at")
+          .single();
+
+        if(error) throw error;
+
+        // The Realtime INSERT is the primary renderer. A delayed fallback only
+        // renders when the authoritative message is still missing from the DOM.
+        const box=$("chatMessages");
+        const addIfMissing=()=>{
+          if(!box || !data) return;
+          const wanted=String(data.id);
+          if([...box.querySelectorAll("[data-message-id]")].some(
+            n => String(n.dataset.messageId)===wanted
+          )) return;
+          const wrapper=document.createElement("div");
+          wrapper.innerHTML=this.messageHTML(data,user.id);
+          const node=wrapper.firstElementChild;
+          if(node){
+            if(box.querySelector(".empty")) box.innerHTML="";
+            box.appendChild(node);
+            box.scrollTop=box.scrollHeight;
+          }
+        };
+        setTimeout(addIfMissing,600);
+
+        await this.renderConversations();
+      }catch(error){
         console.error("[StudyBear] sendMessage",error);
         showToast(error.message||"Không thể gửi tin nhắn.");
-        input.value=content;
-        return;
+        input.value=original;
+      }finally{
+        this.sendBusy=false;
+        input.disabled=false;
+        input.focus();
       }
-
-      // Realtime will normally render this on both clients. If it arrives late,
-      // render it locally immediately and de-duplicate on the realtime callback.
-      const box=$("chatMessages");
-      if(box && data && !box.querySelector(`[data-message-id="${data.id}"]`)){
-        const wrapper=document.createElement("div");
-        wrapper.dataset.messageId=data.id;
-        wrapper.innerHTML=this.messageHTML(data,user.id);
-        if(box.querySelector(".empty")) box.innerHTML="";
-        box.appendChild(wrapper.firstElementChild);
-        box.scrollTop=box.scrollHeight;
-      }
-
-      await this.renderConversations();
     },
 
     cleanup(){
@@ -2732,6 +2763,11 @@ window.getStudyBearSupabaseStatus = function () {
       if(client&&this.friendshipChannel) client.removeChannel(this.friendshipChannel);
       if(client&&this.presenceChannel) client.removeChannel(this.presenceChannel);
       this.messageChannel=this.friendshipChannel=this.presenceChannel=null;
+      if(this.uiAbortController){
+        try{ this.uiAbortController.abort(); }catch(_){}
+        this.uiAbortController=null;
+      }
+      this.sendBusy=false;
       this.booted=false;
     }
   };
