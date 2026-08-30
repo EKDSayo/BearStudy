@@ -2412,9 +2412,10 @@ window.getStudyBearSupabaseStatus = function () {
       const input=$("friendSearchInput");
       const results=$("friendSearchResults");
       const status=$("friendSearchStatus");
-      if(!client||!input||!results) return;
+      if(!client || !input || !results) return;
 
-      const q=normalizeUsername(input.value).trim();
+      const raw=String(input.value || "").trim();
+      const q=normalizeUsername(raw);
       results.innerHTML="";
 
       if(q.length<2){
@@ -2425,36 +2426,39 @@ window.getStudyBearSupabaseStatus = function () {
       if(status) status.textContent=this.getUILabel("searching","Đang tìm...");
 
       try{
-        let rows=[];
+        // V46: profile discovery is deliberately independent of friendships and
+        // does not require auth.uid(). This fixes searches such as "yanlinh"
+        // when the UI account is signed in locally but the Supabase session
+        // has not yet been established.
+        const {data,error}=await client.rpc(
+          "find_users_for_friend_search",
+          {p_query:q}
+        );
+        if(error) throw error;
 
-        // Primary path: server-side secure RPC with relationship state.
-        const rpc=await client.rpc("search_profiles",{p_query:q});
-        if(!rpc.error && Array.isArray(rpc.data)){
-          rows=rpc.data.filter(x=>x?.id);
-        }
+        const users=(data||[]).filter(x=>x?.id);
 
-        // Fallback path: query the profiles table directly if the RPC is missing,
-        // stale, or returned nothing. This makes existing users like "yanlinh"
-        // discoverable even during SQL migration overlap.
-        if(!rows.length){
-          const direct=await client
-            .from("profiles")
-            .select("id,username,display_name,avatar_url,updated_at")
-            .ilike("username", `%${q}%`)
-            .neq("id", (await this.user())?.id || "")
-            .limit(50);
+        // Relationship state is optional. When a Supabase session exists,
+        // enrich each row so the correct button is rendered.
+        const rows=[];
+        for(const user of users){
+          let relation={};
+          try{
+            const rel=await client.rpc(
+              "get_friendship_status",
+              {p_other_user_id:user.id}
+            );
+            const rd=Array.isArray(rel.data) ? rel.data[0] : rel.data;
+            if(!rel.error && rd) relation=rd;
+          }catch(_){}
 
-          if(!direct.error && Array.isArray(direct.data)){
-            rows=direct.data
-              .filter(x=>x?.id)
-              .map(x=>({
-                ...x,
-                avatar_updated_at:x.updated_at,
-                friendship_status:null,
-                friendship_direction:null,
-                friendship_id:null
-              }));
-          }
+          rows.push({
+            ...user,
+            avatar_updated_at:user.updated_at || null,
+            friendship_status:relation.status || null,
+            friendship_direction:relation.direction || null,
+            friendship_id:relation.friendship_id || null
+          });
         }
 
         if(!rows.length){
@@ -2463,13 +2467,11 @@ window.getStudyBearSupabaseStatus = function () {
           return;
         }
 
-        // For fallback rows, hydrate relationship state one user at a time
-        // through the secure search RPC when available.
         results.innerHTML=rows.map(user=>this.friendCard(user,"search")).join("");
         this.bindFriendCardButtons(results);
         if(status) status.textContent="";
       }catch(error){
-        console.error("[StudyBear] Friend search error",error);
+        console.error("[StudyBear] Friend search error:",error);
         results.innerHTML=`<div class="empty">⚠️ ${escapeHTML(error.message||"Không thể tìm kiếm.")}</div>`;
         if(status) status.textContent="";
       }
@@ -2895,4 +2897,19 @@ window.studyBearSearchDiagnostic = async function (username) {
   } catch (error) {
     return { ok:false, error:error.message };
   }
+};
+
+/* ---------- V46 FRIEND SEARCH DIAGNOSTIC ---------- */
+window.studyBearSearchYanlinh = async function () {
+  const client = window.StudyBearSocial?.client?.();
+  if (!client) return { ok:false, error:"Supabase client unavailable" };
+  const rpc = await client.rpc("find_users_for_friend_search",{p_query:"yanlinh"});
+  return {
+    ok: !rpc.error,
+    error: rpc.error?.message || null,
+    count: Array.isArray(rpc.data) ? rpc.data.length : 0,
+    users: Array.isArray(rpc.data) ? rpc.data.map(x => ({
+      id:x.id, username:x.username, display_name:x.display_name
+    })) : []
+  };
 };
