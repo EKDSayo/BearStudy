@@ -2414,8 +2414,7 @@ window.getStudyBearSupabaseStatus = function () {
       const status=$("friendSearchStatus");
       if(!client || !input || !results) return;
 
-      const raw=String(input.value || "").trim();
-      const q=normalizeUsername(raw);
+      const q=normalizeUsername(String(input.value||"").trim());
       results.innerHTML="";
 
       if(q.length<2){
@@ -2426,64 +2425,29 @@ window.getStudyBearSupabaseStatus = function () {
       if(status) status.textContent=this.getUILabel("searching","Đang tìm...");
 
       try{
-        const me=await this.user();
-        const myId=me?.id || null;
-        let rows=[];
+        // Public profile discovery is independent from Supabase Auth.
+        // The StudyBear UI session can exist while auth.uid() is NULL.
+        const rpc=await client.rpc("find_users_for_friend_search",{p_query:q});
+        if(rpc.error) throw rpc.error;
 
-        // PRIMARY SOURCE OF TRUTH:
-        // Profiles is queried directly with ILIKE. This makes search independent
-        // from friendship RPCs and from an older search function on the database.
-        const direct=await client
-          .from("profiles")
-          .select("id,username,display_name,avatar_url,updated_at")
-          .ilike("username", `%${q}%`)
-          .limit(50);
+        const users=(rpc.data||[]).filter(x=>x?.id);
 
-        if(!direct.error && Array.isArray(direct.data)){
-          rows=direct.data
-            .filter(x=>x?.id && (!myId || String(x.id)!==String(myId)))
-            .map(x=>({
-              ...x,
-              avatar_updated_at:x.updated_at || null,
-              friendship_status:null,
-              friendship_direction:null,
-              friendship_id:null
-            }));
-        }
+        const rows=await Promise.all(users.map(async user=>{
+          let relation={};
+          try{
+            const rel=await client.rpc("get_friendship_status",{p_other_user_id:user.id});
+            const rd=Array.isArray(rel.data)?rel.data[0]:rel.data;
+            if(!rel.error && rd) relation=rd;
+          }catch(_){}
 
-        // If RLS blocks direct profile reads, fall back to secure RPC.
-        if(!rows.length){
-          const rpc=await client.rpc("find_users_for_friend_search",{p_query:q});
-          if(!rpc.error && Array.isArray(rpc.data)){
-            rows=rpc.data
-              .filter(x=>x?.id && (!myId || String(x.id)!==String(myId)))
-              .map(x=>({
-                ...x,
-                avatar_updated_at:x.updated_at || null
-              }));
-          }
-        }
-
-        // Exact-match verification for a username with spaces/case differences.
-        if(!rows.length){
-          const exact=await client
-            .from("profiles")
-            .select("id,username,display_name,avatar_url,updated_at")
-            .eq("username", raw)
-            .limit(10);
-
-          if(!exact.error && Array.isArray(exact.data)){
-            rows=exact.data
-              .filter(x=>x?.id && (!myId || String(x.id)!==String(myId)))
-              .map(x=>({
-                ...x,
-                avatar_updated_at:x.updated_at || null,
-                friendship_status:null,
-                friendship_direction:null,
-                friendship_id:null
-              }));
-          }
-        }
+          return {
+            ...user,
+            avatar_updated_at:user.updated_at || null,
+            friendship_status:relation.status || null,
+            friendship_direction:relation.direction || null,
+            friendship_id:relation.friendship_id || null
+          };
+        }));
 
         if(!rows.length){
           results.innerHTML=`<div class="empty">🐻 ${escapeHTML(this.text("friendNoResults","Không tìm thấy người dùng."))}</div>`;
@@ -2491,23 +2455,7 @@ window.getStudyBearSupabaseStatus = function () {
           return;
         }
 
-        // Relationship state is optional; it never blocks user discovery.
-        const enriched=await Promise.all(rows.map(async user=>{
-          try{
-            const rel=await client.rpc("get_friendship_status",{p_other_user_id:user.id});
-            const rd=Array.isArray(rel.data)?rel.data[0]:rel.data;
-            if(!rel.error && rd){
-              return {...user,
-                friendship_status:rd.status || null,
-                friendship_direction:rd.direction || null,
-                friendship_id:rd.friendship_id || null
-              };
-            }
-          }catch(_){}
-          return user;
-        }));
-
-        results.innerHTML=enriched.map(user=>this.friendCard(user,"search")).join("");
+        results.innerHTML=rows.map(user=>this.friendCard(user,"search")).join("");
         this.bindFriendCardButtons(results);
         if(status) status.textContent="";
       }catch(error){
