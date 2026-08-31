@@ -887,13 +887,14 @@ $("interfaceLanguage").addEventListener("change", e => {
 
 const PAGE_KEYS = {
   learning:"learningPathTitle",
+  world:"worldChannelTitle",
   home:"pageHome", dictionary:"dictionaryTitle", vocabulary:"vocabTitle", flashcard:"flashTitle",
   quiz:"quizTitle", typing:"typingTitle", wrong:"wrongTitle", learned:"learnedPageTitle", profile:"profileNav", settings:"navSettings"
 };
 
 function updatePageTitle() {
   const dict = UI[getUILang()];
-  $("pageTitle").textContent = dict[PAGE_KEYS[currentPage]] || dict.pageHome;
+  $("pageTitle").textContent = dict[PAGE_KEYS[currentPage]] || (currentPage==="world" ? (getUILang()==="en"?"World Channel":getUILang()==="ko"?"월드 채널":"Kênh thế giới") : dict.pageHome);
 }
 
 function showPage(page) {
@@ -924,6 +925,7 @@ function showPage(page) {
   if (page === "learned") renderLearnedVault();
   if (page === "friends") window.StudyBearSocial?.onPage("friends");
   if (page === "chat") window.StudyBearSocial?.onPage("chat");
+  if (page === "world") window.StudyBearSocial?.onPage("world");
 
   $("sidebar").classList.remove("open");
 }
@@ -3674,9 +3676,19 @@ window.getStudyBearSupabaseStatus = function () {
         ? `<span class="message-meta-status" data-read-at="${escapeHTML(m.read_at||"")}">${m.read_at?"✓✓ Đã xem":"✓ Đã gửi"}</span>`
         : "";
 
+      let messageBody="";
+      const marker="__STUDYBEAR_GIFT__:";
+      if(String(m.content||"").startsWith(marker)){
+        try{
+          const gift=JSON.parse(String(m.content).slice(marker.length));
+          messageBody=`<div class="chat-gift-card"><span class="gift-card-icon">🎁</span><div><strong>${escapeHTML(gift.item_name||"Quà tặng")}</strong><small>Tặng cho ${escapeHTML(gift.recipient_name||"thành viên")}${gift.quantity>1?` ×${gift.quantity}`:""}</small>${gift.note?`<em>${escapeHTML(gift.note)}</em>`:""}</div></div>`;
+        }catch(_){messageBody=`<span>${escapeHTML(m.content)}</span>`;}
+      }else{
+        messageBody=`<span>${escapeHTML(m.content)}</span>`;
+      }
       return `<div class="chat-row ${own?"own":"friend"}" data-message-id="${escapeHTML(String(m.id))}">
         <div class="chat-bubble">
-          <span>${escapeHTML(m.content)}</span>
+          ${messageBody}
           <small>${t} ${status}</small>
         </div>
       </div>`;

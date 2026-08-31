@@ -2228,3 +2228,17 @@ body.dark .social-inline-count {
 .gift-item span{font-size:34px}.gift-item strong{font-size:11px}.gift-item small{color:var(--muted)}
 .gift-modal-note{margin-top:12px}
 @media(max-width:800px){.world-layout{grid-template-columns:1fr}.world-members{border-right:0;border-bottom:1px solid var(--border);max-height:250px}}
+
+/* V70 — Gift cards in direct/world chat */
+.chat-gift-card,.world-gift-card{
+  display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:14px;
+  background:linear-gradient(135deg,#fff8df,#fff0c4);border:1px solid #f1d37d;
+}
+body.dark .chat-gift-card,body.dark .world-gift-card{
+  background:rgba(126,101,35,.22);border-color:rgba(240,207,105,.35);
+}
+.gift-card-icon{font-size:28px}
+.chat-gift-card div,.world-gift-card div{display:flex;flex-direction:column;gap:2px}
+.chat-gift-card strong,.world-gift-card b{font-size:12px}
+.chat-gift-card small,.world-gift-card small{font-size:9px;color:#886c27}
+.chat-gift-card em,.world-gift-card em{font-size:9px;color:var(--muted);font-style:italic}
