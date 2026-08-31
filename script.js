@@ -2976,7 +2976,7 @@ window.getStudyBearSupabaseStatus = function () {
       });
 
       $("chatInput")?.addEventListener("input",()=>{
-        this.startTypingBroadcast();
+        void this.startTypingBroadcast();
       });
 
       $("chatInput")?.addEventListener("blur",()=>{
@@ -3479,7 +3479,8 @@ window.getStudyBearSupabaseStatus = function () {
       const name=$("chatUserName"), status=$("chatUserStatus"), avatar=$("chatUserAvatar");
       if(!row){if(name)name.textContent=this.text("selectFriendToChat","Chọn một người bạn để bắt đầu"); if(status)status.textContent=""; if(avatar)avatar.textContent="🐻"; return;}
       if(name)name.innerHTML=renderIdentityName(row.display_name||row.username||"",row.role);
-      if(status)status.textContent=this.onlineIds.has(row.friend_id)?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
+      if(status && !this.typingPeerId)
+        status.textContent=this.onlineIds.has(row.friend_id)?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
       if(avatar){
         const avatarSrc = row.avatar_url
           ? `${row.avatar_url}${row.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(row.avatar_updated_at || Date.now())}`
@@ -3580,6 +3581,9 @@ window.getStudyBearSupabaseStatus = function () {
         try{ await client.removeChannel(this.typingChannel); }catch(_){}
         this.typingChannel=null;
       }
+      this.typingChannelReady=false;
+      this.typingChannelReadyPromise=null;
+      this._resolveTypingChannelReady=null;
 
       clearTimeout(this.typingTimeout);
       clearTimeout(this.typingStopTimer);
@@ -3640,6 +3644,7 @@ window.getStudyBearSupabaseStatus = function () {
         config:{presence:{key:user.id}}
       });
 
+      this.typingChannelReady = false;
       this.typingChannel
         .on("presence",{event:"sync"},()=>{
           this.refreshTypingFromPresence();
@@ -3649,8 +3654,13 @@ window.getStudyBearSupabaseStatus = function () {
         })
         .on("presence",{event:"leave"},()=>{
           this.refreshTypingFromPresence();
-        })
-        .subscribe(async status=>{
+        });
+
+      this.typingChannelReadyPromise=new Promise(resolve=>{
+        this._resolveTypingChannelReady=resolve;
+      });
+
+      this.typingChannel.subscribe(async status=>{
           if(status==="SUBSCRIBED"){
             try{
               await this.typingChannel.track({
@@ -3661,6 +3671,8 @@ window.getStudyBearSupabaseStatus = function () {
             }catch(error){
               console.warn("[StudyBear] initial typing presence:",error);
             }
+            this.typingChannelReady = true;
+            this._resolveTypingChannelReady?.();
             console.info("[StudyBear] Typing presence ready.");
           }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
             console.warn("[StudyBear] Typing presence:",status);
@@ -3726,6 +3738,10 @@ window.getStudyBearSupabaseStatus = function () {
       const channel=this.typingChannel;
       const user=await this.user();
       if(!client||!channel||!user)return;
+      if(this.typingChannelReadyPromise){
+        try{ await this.typingChannelReadyPromise; }catch(_){}
+      }
+      if(!this.typingChannelReady)return;
 
       clearTimeout(this.typingStopTimer);
       clearInterval(this.typingHeartbeatTimer);

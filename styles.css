@@ -2171,3 +2171,15 @@ body.dark .social-inline-count {
   0%,100%{opacity:.72}
   50%{opacity:1}
 }
+
+/* V67 — typing indicator stays visible while peer is typing */
+#chatUserStatus.typing-now{
+  display:inline-block;
+  min-height:16px;
+  font-weight:800;
+  animation:studyBearTypingPulseV67 1.15s ease-in-out infinite;
+}
+@keyframes studyBearTypingPulseV67{
+  0%,100%{opacity:.65;transform:translateY(0)}
+  50%{opacity:1;transform:translateY(-1px)}
+}
