@@ -2159,3 +2159,13 @@ body.dark .social-inline-count {
   0%,100%{transform:scale(.65);opacity:.5}
   50%{transform:scale(1.2);opacity:1}
 }
+
+/* V65 — recipient typing indicator */
+#chatUserStatus{
+  min-height:16px;
+  transition:opacity .18s ease, color .18s ease;
+}
+#chatUserStatus:not(:empty){
+  color:var(--muted);
+  font-weight:700;
+}

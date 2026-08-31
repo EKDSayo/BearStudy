@@ -2928,6 +2928,8 @@ window.getStudyBearSupabaseStatus = function () {
     typingChannel: null,
     typingTimeout: null,
     typingStopTimer: null,
+    typingHeartbeatTimer: null,
+    typingPeerId: null,
 
     client() { return typeof getSupabaseClient === "function" ? getSupabaseClient() : null; },
     text(key, fallback) { return (typeof UI !== "undefined" && UI[getUILang()]?.[key]) || fallback; },
@@ -3465,6 +3467,8 @@ window.getStudyBearSupabaseStatus = function () {
       const client=this.client(); if(!client) return;
       await this.stopTypingBroadcast();
       this.activeConversationId=id;
+      clearTimeout(this.typingTimeout);
+      this.typingPeerId=null;
       const row=this.conversations.find(c=>Number(c.conversation_id)===Number(id));
       this.activeFriendId=row?.friend_id||null;
       this.updateChatHeader();
@@ -3479,7 +3483,7 @@ window.getStudyBearSupabaseStatus = function () {
       const name=$("chatUserName"), status=$("chatUserStatus"), avatar=$("chatUserAvatar");
       if(!row){if(name)name.textContent=this.text("selectFriendToChat","Chọn một người bạn để bắt đầu"); if(status)status.textContent=""; if(avatar)avatar.textContent="🐻"; return;}
       if(name)name.innerHTML=renderIdentityName(row.display_name||row.username||"",row.role);
-      if(status)status.textContent=this.onlineIds.has(row.friend_id)?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
+      if(status && !this.typingPeerId) status.textContent=this.onlineIds.has(row.friend_id)?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
       if(avatar){
         const avatarSrc = row.avatar_url
           ? `${row.avatar_url}${row.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(row.avatar_updated_at || Date.now())}`
@@ -3628,32 +3632,7 @@ window.getStudyBearSupabaseStatus = function () {
             this.updateMessageStatus(payload.new.id,payload.new.read_at||"");
           }
         )
-        .on(
-          "broadcast",
-          {event:"typing"},
-          payload=>{
-            const senderId=payload?.payload?.user_id;
-            if(!senderId || String(senderId)===String(user?.id||""))return;
-
-            const isTyping=Boolean(payload?.payload?.isTyping);
-            const statusEl=$("chatStatus");
-            if(!statusEl)return;
-
-            clearTimeout(this.typingTimeout);
-
-            if(isTyping){
-              statusEl.textContent=this.text("typingNow","💬 Đang nhập tin nhắn...");
-              this.typingTimeout=setTimeout(()=>{
-                if(statusEl.textContent===this.text("typingNow","💬 Đang nhập tin nhắn...")){
-                  statusEl.textContent="";
-                }
-              },2200);
-            }else{
-              statusEl.textContent="";
-            }
-          }
-        )
-        .subscribe(status=>{
+.subscribe(status=>{
           if(status==="SUBSCRIBED"){
             console.info("[StudyBear] Message realtime ready.");
           }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
@@ -3661,43 +3640,114 @@ window.getStudyBearSupabaseStatus = function () {
           }
         });
 
+      // Dedicated typing channel. It is separate from DB message events so typing
+      // never depends on message replication and is isolated per conversation.
+      if(this.typingChannel){
+        try{ await client.removeChannel(this.typingChannel); }catch(_){}
+        this.typingChannel=null;
+      }
+      clearTimeout(this.typingTimeout);
+      this.typingPeerId=null;
+
+      this.typingChannel=client.channel(`studybear-typing-${conversationId}`,{
+        config:{broadcast:{self:false}}
+      });
+
+      this.typingChannel.on("broadcast",{event:"typing"},payload=>{
+        const peerId=payload?.payload?.user_id;
+        if(!peerId || String(peerId)===String(user?.id||""))return;
+
+        const isTyping=payload?.payload?.isTyping===true;
+        clearTimeout(this.typingTimeout);
+
+        const statusEl=$("chatUserStatus");
+        const helperEl=$("chatStatus");
+
+        if(isTyping){
+          this.typingPeerId=String(peerId);
+          const text=this.text("typingNow","Đang soạn tin nhắn...");
+          if(statusEl) statusEl.textContent=`💬 ${text}`;
+          if(helperEl) helperEl.textContent="";
+          this.typingTimeout=setTimeout(()=>{
+            if(String(this.typingPeerId||"")===String(peerId)){
+              this.typingPeerId=null;
+              this.updateChatHeader();
+            }
+          },4200);
+        }else if(this.typingPeerId===String(peerId)){
+          this.typingPeerId=null;
+          this.updateChatHeader();
+        }
+      }).subscribe(status=>{
+        if(status==="SUBSCRIBED") console.info("[StudyBear] Typing realtime ready.");
+        else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT") console.warn("[StudyBear] Typing realtime:",status);
+      });
+
       await this.markConversationRead();
     },
 
     async startTypingBroadcast(){
-      const client=this.client();
       const input=$("chatInput");
       const conversationId=Number(this.activeConversationId);
       const user=await this.user();
 
-      if(!client||!input||!Number.isInteger(conversationId)||conversationId<=0||!user||!input.value.trim()){
+      if(!input || !Number.isInteger(conversationId)||conversationId<=0||!user){
         return;
       }
 
-      if(!this.messageChannel) return;
+      if(!this.typingChannel){
+        // In case the user begins typing immediately after opening the chat,
+        // allow the channel to finish binding before the first broadcast.
+        await this.subscribeMessages();
+      }
+      if(!this.typingChannel)return;
 
       clearTimeout(this.typingStopTimer);
+      clearInterval(this.typingHeartbeatTimer);
 
+      const payload={user_id:user.id,isTyping:Boolean(input.value.trim())};
       try{
-        await this.messageChannel.send({
-          type:"broadcast",
-          event:"typing",
-          payload:{user_id:user.id,isTyping:true}
-        });
+        await this.typingChannel.send({type:"broadcast",event:"typing",payload});
       }catch(error){
         console.warn("[StudyBear] typing broadcast:",error);
+        return;
       }
 
-      this.typingStopTimer=setTimeout(()=>this.stopTypingBroadcast(),1800);
+      if(!payload.isTyping){
+        this.typingHeartbeatTimer=null;
+        return;
+      }
+
+      // Heartbeat keeps the recipient indicator alive while the user keeps typing.
+      this.typingHeartbeatTimer=setInterval(async()=>{
+        const current=$("chatInput");
+        if(!current || !current.value.trim() || !this.typingChannel){
+          clearInterval(this.typingHeartbeatTimer);
+          this.typingHeartbeatTimer=null;
+          return;
+        }
+        try{
+          await this.typingChannel.send({
+            type:"broadcast",
+            event:"typing",
+            payload:{user_id:user.id,isTyping:true}
+          });
+        }catch(_){}
+      },1300);
+
+      this.typingStopTimer=setTimeout(()=>this.stopTypingBroadcast(),3600);
     },
 
     async stopTypingBroadcast(){
       clearTimeout(this.typingStopTimer);
+      clearInterval(this.typingHeartbeatTimer);
+      this.typingHeartbeatTimer=null;
+
       const user=await this.user();
-      if(!this.messageChannel||!user)return;
+      if(!this.typingChannel||!user)return;
 
       try{
-        await this.messageChannel.send({
+        await this.typingChannel.send({
           type:"broadcast",
           event:"typing",
           payload:{user_id:user.id,isTyping:false}
@@ -3773,8 +3823,10 @@ window.getStudyBearSupabaseStatus = function () {
       if(client&&this.friendshipChannel) client.removeChannel(this.friendshipChannel);
       if(client&&this.profileChannel) client.removeChannel(this.profileChannel);
       if(client&&this.presenceChannel) client.removeChannel(this.presenceChannel);
+      if(client&&this.typingChannel) client.removeChannel(this.typingChannel);
       clearTimeout(this.typingTimeout);
       clearTimeout(this.typingStopTimer);
+      clearInterval(this.typingHeartbeatTimer);
       this.messageChannel=this.friendshipChannel=this.profileChannel=this.presenceChannel=null;
       this.typingChannel=null;
       if(this.uiAbortController){
