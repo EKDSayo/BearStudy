@@ -2160,12 +2160,14 @@ body.dark .social-inline-count {
   50%{transform:scale(1.2);opacity:1}
 }
 
-/* V65 — recipient typing indicator */
-#chatUserStatus{
-  min-height:16px;
-  transition:opacity .18s ease, color .18s ease;
+/* V66 — stable typing indicator */
+#chatUserStatus.typing-now,
+#chatStatus.typing-now{
+  color:var(--primary-dark,#4c8eea);
+  font-weight:800;
+  animation:studyBearTypingPulse 1.2s ease-in-out infinite;
 }
-#chatUserStatus:not(:empty){
-  color:var(--muted);
-  font-weight:700;
+@keyframes studyBearTypingPulse{
+  0%,100%{opacity:.72}
+  50%{opacity:1}
 }
