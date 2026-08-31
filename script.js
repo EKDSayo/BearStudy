@@ -302,6 +302,7 @@ function makeDefaultUser(displayName) {
     wrong:[],
     xp:0,
     coins:0,
+    role:"user",
     lessonProgress:{},
     dark:false,
     createdAt:new Date().toISOString()
@@ -397,7 +398,7 @@ async function loadSupabaseUserState(user) {
 
   const { data: profile, error: profileError } = await client
     .from("profiles")
-    .select("id,username,display_name,bio,avatar_url,interface_language,native_language,learning_language,learning_level,xp,coins")
+    .select("id,username,display_name,bio,avatar_url,interface_language,native_language,learning_language,learning_level,xp,coins,role")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -449,6 +450,7 @@ async function loadSupabaseUserState(user) {
     learningLevel: profile?.learning_level || localFallback.learningLevel,
     xp: Number.isFinite(Number(profile?.xp)) ? Number(profile.xp) : localFallback.xp,
     coins: Number.isFinite(Number(profile?.coins)) ? Number(profile.coins) : localFallback.coins,
+    role: ["user","admin"].includes(profile?.role) ? profile.role : "user",
     lessonProgress: Object.keys(remoteLessonProgress).length ? remoteLessonProgress : (localFallback.lessonProgress || {}),
     avatar: profile?.avatar_url || localFallback.avatar,
     avatarUrl: profile?.avatar_url || localFallback.avatarUrl || "",
@@ -757,6 +759,7 @@ function logoutUser() {
 }
 
 function updateUserUI() {
+  setAdminNavVisibility();
   updateBearcoinUI();
   const ui = UI[getUILang()];
 
@@ -867,6 +870,7 @@ function showPage(page) {
   }
   if (page === "learning") renderLearningPath();
   if (page === "shop") renderShop();
+  if (page === "admin") loadAdminDashboard();
   if (page === "vocabulary") {
     renderTopics();
     renderLevels();
@@ -1514,6 +1518,86 @@ function renderLevels() {
   };
 }
 
+
+
+/* ---------- ADMIN CENTER V59 ---------- */
+let adminSelectedUserId=null;
+function isAdminUser(){return state?.role==="admin";}
+function setAdminNavVisibility(){
+  const btn=$("adminNavBtn"); if(!btn)return;
+  btn.hidden=!isAdminUser();
+}
+async function loadAdminDashboard(){
+  const panel=$("adminPanel"), denied=$("adminAccessDenied");
+  if(!panel||!denied)return;
+  if(!isAdminUser()){panel.hidden=true;denied.hidden=false;return;}
+  denied.hidden=true;panel.hidden=false;
+  await Promise.all([loadAdminStats(),loadAdminUsers(),loadAdminAudit()]);
+}
+async function loadAdminStats(){
+  const client=getSupabaseClient();if(!client)return;
+  try{
+    const {data,error}=await client.rpc("admin_dashboard_stats");
+    if(error)throw error; const d=Array.isArray(data)?data[0]:data||{};
+    $("adminUserCount").textContent=Number(d.user_count||0).toLocaleString();
+    $("adminCoinSupply").textContent=Number(d.coin_supply||0).toLocaleString();
+    $("adminItemCount").textContent=Number(d.item_count||0).toLocaleString();
+    $("adminTxCount").textContent=Number(d.transaction_count||0).toLocaleString();
+  }catch(e){console.warn("[StudyBear] admin stats",e);}
+}
+async function loadAdminUsers(){
+  const client=getSupabaseClient(),body=$("adminUserTableBody");if(!client||!body)return;
+  const q=String($("adminUserSearch")?.value||"").trim();body.innerHTML='<tr><td colspan="4">Đang tải...</td></tr>';
+  try{
+    const {data,error}=await client.rpc("admin_list_profiles",{p_query:q});if(error)throw error;
+    const users=Array.isArray(data)?data:[];
+    if(!users.length){body.innerHTML='<tr><td colspan="4">Không tìm thấy người dùng.</td></tr>';return;}
+    body.innerHTML=users.map(u=>`<tr>
+      <td><div class="admin-user-cell"><div class="admin-mini-avatar">${u.avatar_url?`<img src="${escapeHTML(u.avatar_url)}" alt="">`:"🐻"}</div><div><strong>@${escapeHTML(u.username||"")}</strong><small>${escapeHTML(u.display_name||"")}</small></div></div></td>
+      <td><span class="admin-role-badge ${u.role==="admin"?"is-admin":""}">${u.role==="admin"?"🛡️ Admin":"User"}</span></td>
+      <td><div class="admin-coin-cell">${bearcoinIcon()}<strong>${Number(u.coins||0).toLocaleString()}</strong></div></td>
+      <td><div class="admin-actions"><button type="button" class="secondary-btn" data-admin-adjust="${escapeHTML(u.id)}">🪙 Bearcoin</button><button type="button" class="secondary-btn" data-admin-grant="${escapeHTML(u.id)}">🎁 Vật phẩm</button></div></td>
+    </tr>`).join("");
+    body.querySelectorAll("[data-admin-adjust]").forEach(b=>b.addEventListener("click",()=>adminAdjustCoins(b.dataset.adminAdjust)));
+    body.querySelectorAll("[data-admin-grant]").forEach(b=>b.addEventListener("click",()=>adminPrepareGrant(b.dataset.adminGrant,users)));
+  }catch(e){console.error("[StudyBear] admin users",e);body.innerHTML=`<tr><td colspan="4">⚠️ ${escapeHTML(e.message||"Không thể tải danh sách.")}</td></tr>`;}
+}
+async function adminAdjustCoins(userId){
+  const raw=prompt("Nhập số Bearcoin cần điều chỉnh (+ cộng, - trừ):","50");if(raw===null)return;
+  const amount=Number(raw);if(!Number.isSafeInteger(amount)||amount===0){showToast("⚠️ Số Bearcoin không hợp lệ.");return;}
+  const reason=prompt("Lý do điều chỉnh:","Điều chỉnh bởi quản trị viên");if(reason===null)return;
+  const client=getSupabaseClient();if(!client)return;
+  try{const {error}=await client.rpc("admin_adjust_bearcoins",{p_user_id:userId,p_amount:amount,p_reason:reason.trim().slice(0,200)});if(error)throw error;
+    showToast("✅ Đã điều chỉnh Bearcoin.");await loadAdminStats();await loadAdminUsers();await loadAdminAudit();
+  }catch(e){showToast(e.message||"Không thể điều chỉnh Bearcoin.");}
+}
+async function adminPrepareGrant(userId,users){
+  adminSelectedUserId=userId;const area=$("adminItemGrantArea"),client=getSupabaseClient();if(!area||!client)return;
+  const selected=users.find(x=>String(x.id)===String(userId));
+  try{
+    const {data,error}=await client.rpc("admin_list_shop_items");if(error)throw error;
+    const items=Array.isArray(data)?data:[];
+    area.innerHTML=`<div class="admin-grant-header"><strong>Cấp vật phẩm cho @${escapeHTML(selected?.username||"user")}</strong><button id="adminGrantCancel" class="secondary-btn" type="button">Hủy</button></div>
+    <div class="admin-grant-form"><select id="adminGrantItem" class="profile-select">${items.map(i=>`<option value="${escapeHTML(i.id)}">${escapeHTML(i.icon||"🎁")} ${escapeHTML(i.name)}</option>`).join("")}</select><input id="adminGrantQty" class="profile-input" type="number" min="1" max="999" value="1"><button id="adminGrantSubmit" class="primary-btn" type="button">🎁 Cấp</button></div>`;
+    $("adminGrantCancel").onclick=()=>{area.innerHTML='<div class="muted">Chọn người dùng ở bảng trên để cấp vật phẩm.</div>';};
+    $("adminGrantSubmit").onclick=async()=>{
+      const qty=Number($("adminGrantQty").value);if(!Number.isSafeInteger(qty)||qty<1||qty>999)return showToast("⚠️ Số lượng không hợp lệ.");
+      try{const {error}=await client.rpc("admin_grant_collection_item",{p_user_id:userId,p_item_id:$("adminGrantItem").value,p_quantity:qty,p_reason:"Admin reward"});if(error)throw error;showToast("✅ Đã cấp vật phẩm.");await loadAdminAudit();}catch(e){showToast(e.message||"Không thể cấp vật phẩm.");}
+    };
+  }catch(e){area.innerHTML=`<div class="muted">⚠️ ${escapeHTML(e.message||"Không thể tải vật phẩm.")}</div>`;}
+}
+async function loadAdminAudit(){
+  const body=$("adminAuditBody"),client=getSupabaseClient();if(!body||!client)return;
+  try{const {data,error}=await client.rpc("admin_list_audit",{p_limit:30});if(error)throw error;const rows=Array.isArray(data)?data:[];
+    body.innerHTML=rows.length?rows.map(r=>`<tr><td>${new Date(r.created_at).toLocaleString()}</td><td>@${escapeHTML(r.admin_username||"")}</td><td>${escapeHTML(r.action||"")}</td><td>${escapeHTML(r.details||"")}</td></tr>`).join(""):'<tr><td colspan="4">Chưa có hoạt động quản trị.</td></tr>';
+  }catch(e){body.innerHTML='<tr><td colspan="4">Không thể tải lịch sử.</td></tr>';}
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  $("adminRefreshBtn")?.addEventListener("click",loadAdminDashboard);
+  $("adminUserSearchBtn")?.addEventListener("click",loadAdminUsers);
+  $("adminUserSearch")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();loadAdminUsers();}});
+  setAdminNavVisibility();
+});
 
 /* ---------- LEARNING PATH ---------- */
 const LESSON_LEVELS=["beginner","basic","intermediate","advanced","fluent"];
@@ -2744,6 +2828,7 @@ function showToast(message) {
 }
 
 function refreshAll() {
+  setAdminNavVisibility();
   updateBearcoinUI();
   updateDashboard();
   updateLearnedNavCount();

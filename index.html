@@ -40,6 +40,7 @@
       </button>
       <button class="nav-btn" data-page="shop">🛍️ <span>Cửa hàng</span></button>
       <button class="nav-btn" data-page="profile">👤 <span data-i18n="profileNav">Hồ sơ</span></button>
+      <button class="nav-btn admin-only" id="adminNavBtn" data-page="admin" hidden>🛡️ <span>Quản trị</span></button>
       <button class="nav-btn" data-page="settings">⚙️ <span data-i18n="navSettings">Cài đặt</span></button>
     </nav></aside>
 
@@ -161,6 +162,39 @@
     </section>
 
 
+    <section class="page" id="page-admin">
+      <div class="section-heading">
+        <div><span class="eyebrow">🛡️ ADMIN CENTER</span><h2>Quản trị StudyBear</h2><p>Quản lý người dùng, Bearcoin và vật phẩm an toàn.</p></div>
+        <div class="admin-security-badge">🔐 Admin protected</div>
+      </div>
+      <div id="adminAccessDenied" class="card admin-access-denied" hidden>
+        <div class="empty-bear">🛡️</div><h3>Không có quyền truy cập</h3><p>Tài khoản hiện tại không có quyền quản trị.</p>
+      </div>
+      <div id="adminPanel" hidden>
+        <div class="admin-stat-grid">
+          <div class="card admin-stat"><span>👥</span><small>Người dùng</small><strong id="adminUserCount">—</strong></div>
+          <div class="card admin-stat"><span>🪙</span><small>Tổng Bearcoin</small><strong id="adminCoinSupply">—</strong></div>
+          <div class="card admin-stat"><span>🎁</span><small>Vật phẩm</small><strong id="adminItemCount">—</strong></div>
+          <div class="card admin-stat"><span>📈</span><small>Giao dịch</small><strong id="adminTxCount">—</strong></div>
+        </div>
+        <div class="card admin-toolbar">
+          <div class="admin-search-wrap"><input id="adminUserSearch" class="profile-input" placeholder="Tìm username hoặc tên hiển thị..."><button id="adminUserSearchBtn" class="primary-btn" type="button">🔎 Tìm</button></div>
+          <button id="adminRefreshBtn" class="secondary-btn" type="button">↻ Làm mới</button>
+        </div>
+        <div class="card">
+          <div class="card-title"><div><span class="card-icon">👥</span><div><h3>Quản lý người dùng</h3><p>Điều chỉnh Bearcoin có ghi nhận lịch sử.</p></div></div></div>
+          <div class="admin-user-table-wrap"><table class="admin-user-table"><thead><tr><th>Người dùng</th><th>Vai trò</th><th>Bearcoin</th><th>Thao tác</th></tr></thead><tbody id="adminUserTableBody"><tr><td colspan="4">Đang tải...</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div><span class="card-icon">🎁</span><div><h3>Kho vật phẩm</h3><p>Cấp vật phẩm cho tài khoản khi cần.</p></div></div></div>
+          <div id="adminItemGrantArea" class="admin-grant-area"><div class="muted">Chọn người dùng ở bảng trên để cấp vật phẩm.</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div><span class="card-icon">🧾</span><div><h3>Lịch sử quản trị</h3><p>Mọi thay đổi Bearcoin/vật phẩm đều được ghi lại.</p></div></div></div>
+          <div class="admin-audit-wrap"><table class="admin-user-table"><thead><tr><th>Thời gian</th><th>Admin</th><th>Hành động</th><th>Chi tiết</th></tr></thead><tbody id="adminAuditBody"><tr><td colspan="4">Đang tải...</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </section>
     <section class="page" id="page-learning">
       <div class="section-heading">
         <div><span class="eyebrow">🧭 LEARNING PATH</span>
