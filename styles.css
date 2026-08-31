@@ -2036,3 +2036,30 @@ body.dark .social-inline-count {
 .admin-grant-area{padding:12px;border:1px dashed var(--border);border-radius:16px}.admin-grant-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.admin-grant-form{display:grid;grid-template-columns:1fr 110px auto;gap:8px}
 .admin-access-denied{text-align:center;padding:50px 20px}
 @media(max-width:900px){.admin-stat-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.admin-toolbar{flex-direction:column;align-items:stretch}.admin-grant-form{grid-template-columns:1fr}.admin-stat-grid{grid-template-columns:1fr 1fr}}
+
+/* V61 — universal Admin Galaxy identity */
+.admin-galaxy-name{position:relative;display:inline-flex;align-items:center;gap:3px;isolation:isolate;font-weight:900;white-space:nowrap}
+.admin-galaxy-text{
+  position:relative;display:inline-block;
+  background:linear-gradient(100deg,#55f6ff 0%,#6b8cff 22%,#b86cff 40%,#ff5dc8 57%,#6ff6d5 76%,#62cfff 100%);
+  background-size:300% 300%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:adminGalaxyFlow 5s ease-in-out infinite;
+  filter:drop-shadow(0 0 4px rgba(95,225,255,.55)) drop-shadow(0 0 8px rgba(190,95,255,.32));
+}
+.admin-galaxy-name::before{
+  content:"";position:absolute;inset:-4px -7px;border-radius:999px;pointer-events:none;
+  background:
+   radial-gradient(circle at 8% 46%,#fff 0 1.2px,transparent 2px),
+   radial-gradient(circle at 28% 15%,rgba(255,255,255,.92) 0 1px,transparent 1.7px),
+   radial-gradient(circle at 52% 82%,#fff 0 1.3px,transparent 2px),
+   radial-gradient(circle at 78% 28%,rgba(255,255,255,.95) 0 1.1px,transparent 1.8px),
+   radial-gradient(circle at 94% 67%,#fff 0 1px,transparent 1.7px);
+  opacity:.35;animation:adminGalaxySparkle 1.6s ease-in-out infinite;z-index:-1;
+}
+.admin-galaxy-stars{display:inline-flex;gap:1px;color:#fff;text-shadow:0 0 5px #7ff7ff,0 0 11px #a16cff,0 0 16px #ff75da}
+.admin-galaxy-stars i{font-style:normal;display:inline-block;animation:adminStarPulse 1.25s ease-in-out infinite}
+.admin-galaxy-stars i:nth-child(2){animation-delay:.25s}.admin-galaxy-stars i:nth-child(3){animation-delay:.5s}
+@keyframes adminGalaxyFlow{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+@keyframes adminGalaxySparkle{0%,100%{opacity:.2;transform:scale(.98)}50%{opacity:1;transform:scale(1.02)}}
+@keyframes adminStarPulse{0%,100%{transform:scale(.62);opacity:.55}50%{transform:scale(1.12);opacity:1}}

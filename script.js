@@ -1,4 +1,18 @@
 
+
+function renderIdentityName(name, role, options={}){
+  const text=String(name??"");
+  const safe=escapeHTML(text);
+  if(String(role||"").toLowerCase()==="admin"){
+    const showAt=options.showAt===true;
+    const label=showAt && !text.startsWith("@") ? "@"+text : text;
+    return `<span class="admin-galaxy-name" data-admin-name="true" title="Administrator" aria-label="${escapeHTML(label)}">
+      <span class="admin-galaxy-stars" aria-hidden="true"><i>✦</i><i>✧</i><i>✦</i></span>
+      <span class="admin-galaxy-text">${escapeHTML(label)}</span>
+    </span>`;
+  }
+  return safe;
+}
 function bearcoinIcon(extra=""){
   return `<img src="bearcoin.png" class="bearcoin-icon ${extra}" alt="Bearcoin">`;
 }
@@ -3060,6 +3074,7 @@ window.getStudyBearSupabaseStatus = function () {
       const status=online?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
       const relation=String(user.friendship_status || user.status || "").toLowerCase() || null;
       const direction=String(user.friendship_direction || user.direction || "").toLowerCase() || null;
+      const userRole=String(user.role||"user").toLowerCase();
       let action="";
 
       if(mode==="search"){
@@ -3089,8 +3104,8 @@ window.getStudyBearSupabaseStatus = function () {
       return `<div class="social-user-row">
         <button type="button" class="social-avatar social-profile-trigger" data-public-profile="${escapeHTML(targetId)}" title="Xem hồ sơ">${avatar}</button>
         <div class="social-user-main">
-          <strong class="social-profile-trigger-text" data-public-profile="${escapeHTML(targetId)}">@${escapeHTML(user.username||"")}</strong>
-          <span>${escapeHTML(user.display_name||user.username||"")}</span>
+          <strong class="social-profile-trigger-text" data-public-profile="${escapeHTML(targetId)}">${renderIdentityName(user.username||"",""===String(user.role||"")?"user":user.role,{showAt:true})}</strong>
+          <span>${renderIdentityName(user.display_name||user.username||"",user.role)}</span>
           <small><i class="presence-dot ${online?"online":"offline"}"></i>${escapeHTML(status)}</small>
         </div>
         <div class="social-user-actions">${action}</div>
@@ -3310,7 +3325,8 @@ window.getStudyBearSupabaseStatus = function () {
                 username:x.username || p.username || "",
                 display_name:x.display_name || p.display_name || "",
                 avatar_url:x.avatar_url || p.avatar_url || "",
-                avatar_updated_at:x.avatar_updated_at || p.updated_at || null
+                avatar_updated_at:x.avatar_updated_at || p.updated_at || null,
+                role:x.role || p.role || "user"
               } : x;
             });
           }
@@ -3405,7 +3421,7 @@ window.getStudyBearSupabaseStatus = function () {
             ? `${c.avatar_url}${c.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(c.avatar_updated_at || Date.now())}`
             : "";
           const avatar=avatarSrc?`<img src="${escapeHTML(avatarSrc)}" alt="">`:`🐻`;
-          return `<button class="conversation-item ${Number(c.conversation_id)===Number(this.activeConversationId)?"active":""}" data-conversation="${c.conversation_id}"><span class="social-avatar small">${avatar}</span><span class="conversation-main"><strong>${escapeHTML(c.display_name||c.username||"")}</strong><small>@${escapeHTML(c.username||"")}</small><em>${escapeHTML(c.last_message||"")}</em></span><i class="presence-dot ${online?"online":"offline"}"></i></button>`;
+          return `<button class="conversation-item ${Number(c.conversation_id)===Number(this.activeConversationId)?"active":""}" data-conversation="${c.conversation_id}"><span class="social-avatar small">${avatar}</span><span class="conversation-main"><strong>${renderIdentityName(c.display_name||c.username||"",c.role)}</strong><small>${renderIdentityName(c.username||"",c.role,{showAt:true})}</small><em>${escapeHTML(c.last_message||"")}</em></span><i class="presence-dot ${online?"online":"offline"}"></i></button>`;
         }).join(""):`<div class="empty">🐻 ${escapeHTML(this.text("chatEmpty","Chưa có cuộc trò chuyện."))}</div>`;
         list.querySelectorAll("[data-conversation]").forEach(btn=>btn.addEventListener("click",()=>this.selectConversation(Number(btn.dataset.conversation))));
         if(this.activeConversationId && !this.conversations.some(c=>Number(c.conversation_id)===Number(this.activeConversationId))) this.activeConversationId=null;
@@ -3434,7 +3450,7 @@ window.getStudyBearSupabaseStatus = function () {
       const row=this.conversations.find(c=>Number(c.conversation_id)===Number(this.activeConversationId));
       const name=$("chatUserName"), status=$("chatUserStatus"), avatar=$("chatUserAvatar");
       if(!row){if(name)name.textContent=this.text("selectFriendToChat","Chọn một người bạn để bắt đầu"); if(status)status.textContent=""; if(avatar)avatar.textContent="🐻"; return;}
-      if(name)name.textContent=`${row.display_name||row.username}`;
+      if(name)name.innerHTML=renderIdentityName(row.display_name||row.username||"",row.role);
       if(status)status.textContent=this.onlineIds.has(row.friend_id)?this.text("online","Đang hoạt động"):this.text("offline","Ngoại tuyến");
       if(avatar){
         const avatarSrc = row.avatar_url
@@ -3801,8 +3817,8 @@ window.getStudyBearSupabaseStatus = function () {
           return `<div class="social-user-row" data-fallback-user="${u.id}">
             <div class="social-avatar">${avatar}</div>
             <div class="social-user-main">
-              <strong>@${String(u.username||"").replace(/</g,"&lt;")}</strong>
-              <span>${String(u.display_name||u.username||"").replace(/</g,"&lt;")}</span>
+              <strong>${renderIdentityName(u.username||"",u.role,{showAt:true})}</strong>
+              <span>${renderIdentityName(u.display_name||u.username||"",u.role)}</span>
             </div>
             <div class="social-user-actions">
               <button type="button" class="primary-btn" data-fallback-add="${u.id}">➕ Kết bạn</button>
