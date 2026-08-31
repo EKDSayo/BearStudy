@@ -3,31 +3,41 @@
 
 function refreshAdminGalaxyEverywhere(){
   if(!state)return;
-  const admin=state.role==="admin";
-  const pairs=[
-    ["currentUserName",state.displayName],
-    ["settingsName",state.displayName],
-    ["profileUsername","@"+currentUsername]
-  ];
-  for(const [id,name] of pairs){
-    const el=$(id); if(!el)continue;
-    el.innerHTML=admin ? renderIdentityName(name,"admin",{showAt:name.startsWith("@")}) : escapeHTML(name);
+  const admin=String(state.role||"").toLowerCase()==="admin";
+  const displayName=state.displayName||currentUsername||"";
+  const displayTargets=["currentUserName","settingsName","heroGreeting","publicProfileName"];
+  const usernameTargets=["profileUsername","currentUserUsername","publicProfileUsername"];
+
+  for(const id of displayTargets){
+    const el=$(id);
+    if(!el)continue;
+    if(id==="heroGreeting"){
+      el.innerHTML=admin
+        ? `Chào ${renderIdentityName(displayName,"admin")}! 🐻`
+        : `Chào ${escapeHTML(displayName)}! 🐻`;
+    }else{
+      el.innerHTML=admin ? renderIdentityName(displayName,"admin") : escapeHTML(displayName);
+    }
+  }
+  for(const id of usernameTargets){
+    const el=$(id);
+    if(!el)continue;
+    if(id==="publicProfileUsername" && el.dataset.adminName==="true") el.removeAttribute("data-admin-name");
+    // Username is intentionally plain. Admin styling belongs only to the display name.
   }
 }
 
-function renderIdentityName(name, role, options={}){
-  const text=String(name??"");
-  const safe=escapeHTML(text);
+function renderIdentityName(displayName, role, options={}){
+  const text=String(displayName??"");
   if(String(role||"").toLowerCase()==="admin"){
-    const showAt=options.showAt===true;
-    const label=showAt && !text.startsWith("@") ? "@"+text : text;
-    return `<span class="admin-galaxy-name" data-admin-name="true" title="Administrator" aria-label="${escapeHTML(label)}">
+    return `<span class="admin-galaxy-name" data-admin-display-name="true" title="Administrator" aria-label="${escapeHTML(text)}">
+      <span class="admin-galaxy-text">${escapeHTML(text)}</span>
       <span class="admin-galaxy-stars" aria-hidden="true"><i>✦</i><i>✧</i><i>✦</i></span>
-      <span class="admin-galaxy-text">${escapeHTML(label)}</span>
     </span>`;
   }
-  return safe;
+  return escapeHTML(text);
 }
+
 function bearcoinIcon(extra=""){
   return `<img src="bearcoin.png" class="bearcoin-icon ${extra}" alt="Bearcoin">`;
 }
@@ -3122,7 +3132,7 @@ window.getStudyBearSupabaseStatus = function () {
       return `<div class="social-user-row">
         <button type="button" class="social-avatar social-profile-trigger" data-public-profile="${escapeHTML(targetId)}" title="Xem hồ sơ">${avatar}</button>
         <div class="social-user-main">
-          <strong class="social-profile-trigger-text" data-public-profile="${escapeHTML(targetId)}">${renderIdentityName(user.username||"",""===String(user.role||"")?"user":user.role,{showAt:true})}</strong>
+          <strong class="social-profile-trigger-text" data-public-profile="${escapeHTML(targetId)}">${escapeHTML("@"+(user.username||""))}</strong>
           <span>${renderIdentityName(user.display_name||user.username||"",user.role)}</span>
           <small><i class="presence-dot ${online?"online":"offline"}"></i>${escapeHTML(status)}</small>
         </div>
@@ -3172,7 +3182,7 @@ window.getStudyBearSupabaseStatus = function () {
         }
 
         $("publicProfileName").innerHTML=profile.role==="admin" ? renderIdentityName(profile.display_name||profile.username||"User","admin") : escapeHTML(profile.display_name||profile.username||"User");
-        $("publicProfileUsername").innerHTML=profile.role==="admin" ? renderIdentityName("@"+(profile.username||""),"admin") : "@"+escapeHTML(profile.username||"");
+        $("publicProfileUsername").innerHTML=profile.role==="admin" ? escapeHTML("@"+(profile.username||"")) : "@"+escapeHTML(profile.username||"");
         $("publicProfileBio").textContent=profile.bio || this.text("publicNoBio","Chưa có giới thiệu.");
         $("publicLearningLanguage").textContent=this.languageLabel(profile.learning_language);
         $("publicNativeLanguage").textContent=this.languageLabel(profile.native_language);
@@ -3439,7 +3449,7 @@ window.getStudyBearSupabaseStatus = function () {
             ? `${c.avatar_url}${c.avatar_url.includes("?") ? "&" : "?"}v=${encodeURIComponent(c.avatar_updated_at || Date.now())}`
             : "";
           const avatar=avatarSrc?`<img src="${escapeHTML(avatarSrc)}" alt="">`:`🐻`;
-          return `<button class="conversation-item ${Number(c.conversation_id)===Number(this.activeConversationId)?"active":""}" data-conversation="${c.conversation_id}"><span class="social-avatar small">${avatar}</span><span class="conversation-main"><strong>${renderIdentityName(c.display_name||c.username||"",c.role)}</strong><small>${renderIdentityName(c.username||"",c.role,{showAt:true})}</small><em>${escapeHTML(c.last_message||"")}</em></span><i class="presence-dot ${online?"online":"offline"}"></i></button>`;
+          return `<button class="conversation-item ${Number(c.conversation_id)===Number(this.activeConversationId)?"active":""}" data-conversation="${c.conversation_id}"><span class="social-avatar small">${avatar}</span><span class="conversation-main"><strong>${renderIdentityName(c.display_name||c.username||"",c.role)}</strong><small>${escapeHTML("@"+(c.username||""))}</small><em>${escapeHTML(c.last_message||"")}</em></span><i class="presence-dot ${online?"online":"offline"}"></i></button>`;
         }).join(""):`<div class="empty">🐻 ${escapeHTML(this.text("chatEmpty","Chưa có cuộc trò chuyện."))}</div>`;
         list.querySelectorAll("[data-conversation]").forEach(btn=>btn.addEventListener("click",()=>this.selectConversation(Number(btn.dataset.conversation))));
         if(this.activeConversationId && !this.conversations.some(c=>Number(c.conversation_id)===Number(this.activeConversationId))) this.activeConversationId=null;
@@ -3835,7 +3845,7 @@ window.getStudyBearSupabaseStatus = function () {
           return `<div class="social-user-row" data-fallback-user="${u.id}">
             <div class="social-avatar">${avatar}</div>
             <div class="social-user-main">
-              <strong>${renderIdentityName(u.username||"",u.role,{showAt:true})}</strong>
+              <strong>${escapeHTML("@"+(u.username||""))}</strong>
               <span>${renderIdentityName(u.display_name||u.username||"",u.role)}</span>
             </div>
             <div class="social-user-actions">
