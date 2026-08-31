@@ -33,6 +33,7 @@
       <button class="nav-btn" data-page="wrong">❌ <span data-i18n="navWrong">Từ cần ôn</span></button>
       
       <button class="nav-btn" data-page="friends">👥 <span data-i18n="navFriends">Bạn bè</span><span class="social-nav-count" id="friendCount">0</span></button>
+      <button class="nav-btn" data-page="world">🌍 <span>Kênh thế giới</span></button>
       <button class="nav-btn" data-page="chat">💬 <span data-i18n="navChat">Tin nhắn</span></button>
 <button class="nav-btn learned-nav-btn" data-page="learned" type="button">
         ✅ <span data-i18n="navLearned">Từ đã học</span>
@@ -411,6 +412,28 @@
       </div>
     </section>
 
+
+    <section class="page" id="page-world">
+      <div class="section-heading world-heading">
+        <div><span class="eyebrow">🌍 WORLD CHANNEL</span><h2>Kênh thế giới</h2><p>Nơi mọi người trên StudyBear cùng trò chuyện và tặng quà cho nhau.</p></div>
+        <div class="world-online-badge">🟢 <strong id="worldOnlineCount">0</strong> đang online</div>
+      </div>
+      <div class="world-layout card">
+        <aside class="world-members">
+          <div class="world-members-head"><strong>👥 Thành viên</strong><span id="worldMemberCount">0</span></div>
+          <input id="worldMemberSearch" class="profile-input" placeholder="Tìm thành viên...">
+          <div id="worldMemberList" class="world-member-list"></div>
+        </aside>
+        <section class="world-chat">
+          <div class="world-chat-header"><div class="world-globe">🌍</div><div><strong>Kênh thế giới</strong><span class="muted">Tất cả thành viên đều có thể tham gia</span></div></div>
+          <div id="worldMessages" class="world-messages"></div>
+          <div id="worldGiftTargetBar" class="world-gift-target" hidden></div>
+          <form id="worldChatForm" class="chat-composer"><input id="worldChatInput" class="profile-input" maxlength="1000" autocomplete="off" placeholder="Nói gì đó với mọi người..."><button class="primary-btn" type="submit">Gửi</button><button id="worldGiftBtn" class="secondary-btn" type="button">🎁 Tặng quà</button></form>
+          <div id="worldStatus" class="social-status"></div>
+        </section>
+      </div>
+    </section>
+
     <section class="page" id="page-chat">
       <div class="section-heading">
         <div>
@@ -441,6 +464,7 @@
           <form class="chat-composer" id="chatForm">
             <input id="chatInput" class="profile-input" autocomplete="off" maxlength="1000" data-i18n-placeholder="chatPlaceholder" placeholder="Nhập tin nhắn...">
             <button class="primary-btn" type="submit" data-i18n="sendMessage">Gửi</button>
+            <button id="chatGiftBtn" class="secondary-btn" type="button">🎁 Tặng quà</button>
           </form>
           <div class="social-status" id="chatStatus"></div>
         </section>
@@ -727,6 +751,18 @@
       <h2 id="lessonResultTitle">Hoàn thành!</h2><p id="lessonResultSubtitle"></p>
       <div class="result-rewards"><div>⭐ <strong id="lessonRewardXP">+0 XP</strong></div><div><img src="bearcoin.png" class="bearcoin-icon" alt="Bearcoin"> <strong id="lessonRewardCoins">+0 Bearcoin</strong></div></div>
       <div class="result-actions"><button class="secondary-btn" id="lessonResultClose">Đóng</button><button class="primary-btn" id="lessonResultContinue">Tiếp tục học</button></div>
+    </div>
+  </div>
+
+
+  <div class="gift-modal-overlay" id="giftModalOverlay" aria-hidden="true">
+    <div class="gift-modal" role="dialog" aria-modal="true">
+      <button class="public-profile-close" id="giftModalClose" type="button">✕</button>
+      <div class="gift-modal-head"><span>🎁</span><div><h3>Tặng quà</h3><p id="giftRecipientLabel">Chọn một món quà</p></div></div>
+      <div id="giftInventoryGrid" class="gift-inventory-grid"></div>
+      <div class="gift-modal-note">
+        <input id="giftNote" class="profile-input" maxlength="120" placeholder="Lời nhắn (không bắt buộc)...">
+      </div>
     </div>
   </div>
 

@@ -2982,6 +2982,7 @@ window.getStudyBearSupabaseStatus = function () {
       $("chatInput")?.addEventListener("blur",()=>{
         this.stopTypingBroadcast();
       });
+      $("chatGiftBtn")?.addEventListener("click",()=>this.openGiftModal("direct"));
     },
 
     async onPage(page) {
@@ -3435,6 +3436,150 @@ window.getStudyBearSupabaseStatus = function () {
       }
     },
 
+
+    async openWorldChannel(){
+      const client=this.client(),user=await this.user();
+      if(!client||!user)return;
+      await this.loadWorldMembers();
+      await this.loadWorldMessages();
+      await this.subscribeWorldChannel();
+      this.bindWorldUI();
+    },
+
+    async loadWorldMembers(){
+      const client=this.client(); if(!client)return;
+      try{
+        const {data,error}=await client.rpc("get_world_members");
+        if(error)throw error;
+        this.worldMembers=Array.isArray(data)?data:[];
+        this.renderWorldMembers();
+      }catch(e){console.error("[StudyBear] world members",e);$("worldMemberList") && ($("worldMemberList").innerHTML='<div class="empty">⚠️ Không tải được thành viên.</div>');}
+    },
+
+    renderWorldMembers(){
+      const root=$("worldMemberList"); if(!root)return;
+      const q=String($("worldMemberSearch")?.value||"").trim().toLowerCase();
+      const rows=this.worldMembers.filter(u=>!q||String(u.username||"").toLowerCase().includes(q)||String(u.display_name||"").toLowerCase().includes(q));
+      $("worldMemberCount")&&($("worldMemberCount").textContent=String(this.worldMembers.length));
+      root.innerHTML=rows.map(u=>{
+        const avatar=u.avatar_url?`<img src="${escapeHTML(u.avatar_url)}" alt="">`:"🐻";
+        return `<button type="button" class="world-member" data-world-gift-target="${escapeHTML(u.id)}">
+          <span class="social-avatar small">${avatar}</span>
+          <span class="world-member-main"><strong>${renderIdentityName(u.display_name||u.username||"",u.role)}</strong><small>@${escapeHTML(u.username||"")}</small></span>
+          <i class="presence-dot ${this.onlineIds.has(u.id)?"online":"offline"}"></i>
+        </button>`;
+      }).join("") || '<div class="empty">Không tìm thấy thành viên.</div>';
+      root.querySelectorAll("[data-world-gift-target]").forEach(b=>b.addEventListener("click",()=>this.setWorldGiftTarget(b.dataset.worldGiftTarget)));
+      $("worldOnlineCount")&&($("worldOnlineCount").textContent=String(this.worldMembers.filter(u=>this.onlineIds.has(u.id)).length));
+    },
+
+    async loadWorldMessages(){
+      const client=this.client(),box=$("worldMessages"); if(!client||!box)return;
+      try{
+        const {data,error}=await client.rpc("get_world_messages",{p_limit:100});
+        if(error)throw error;
+        this.worldMessages=Array.isArray(data)?data:[]; this.renderWorldMessages();
+      }catch(e){box.innerHTML=`<div class="empty">⚠️ ${escapeHTML(e.message||"Không thể tải kênh thế giới.")}</div>`;}
+    },
+
+    renderWorldMessages(){
+      const box=$("worldMessages");if(!box)return;
+      box.innerHTML=this.worldMessages.map(m=>{
+        const avatar=m.avatar_url?`<img src="${escapeHTML(m.avatar_url)}" alt="">`:"🐻";
+        const time=new Date(m.created_at).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
+        const gift=m.gift_item_name?`<div class="world-gift-card">🎁 <b>${escapeHTML(m.gift_item_name)}</b><span>tặng cho ${escapeHTML(m.gift_recipient_name||"một người bạn")}</span></div>`:"";
+        return `<article class="world-message"><div class="social-avatar small">${avatar}</div><div class="world-message-body"><div class="world-message-meta">${renderIdentityName(m.display_name||m.username||"",m.role)} <small>@${escapeHTML(m.username||"")} · ${time}</small></div>${m.content?`<div class="world-message-text">${escapeHTML(m.content)}</div>`:""}${gift}</div></article>`;
+      }).join("") || '<div class="empty">🌍 Hãy là người đầu tiên nói gì đó!</div>';
+      box.scrollTop=box.scrollHeight;
+    },
+
+    async subscribeWorldChannel(){
+      const client=this.client(),user=await this.user();if(!client||!user)return;
+      if(this.worldChannel){try{await client.removeChannel(this.worldChannel);}catch(_){}}
+      this.worldChannel=client.channel("studybear-world");
+      this.worldChannel.on("broadcast",{event:"world_message"},async payload=>{
+        const m=payload?.payload?.message;if(!m)return;
+        if(!this.worldMessages.some(x=>String(x.id)===String(m.id))){this.worldMessages.push(m);this.worldMessages=this.worldMessages.slice(-100);this.renderWorldMessages();}
+      }).on("presence",{event:"sync"},()=>{this.renderWorldMembers();})
+      .subscribe();
+    },
+
+    bindWorldUI(){
+      if($("worldChatForm")&&!$("worldChatForm").dataset.bound){
+        $("worldChatForm").dataset.bound="1";
+        $("worldChatForm").addEventListener("submit",e=>{e.preventDefault();this.sendWorldMessage();});
+        $("worldMemberSearch")?.addEventListener("input",()=>this.renderWorldMembers());
+        $("worldGiftBtn")?.addEventListener("click",()=>this.openGiftModal("world"));
+      }
+    },
+
+    async sendWorldMessage(){
+      if(!requireLogin())return;
+      const input=$("worldChatInput"),content=String(input?.value||"").trim();
+      if(!content)return;
+      const client=this.client();if(!client)return;
+      try{
+        const {data,error}=await client.rpc("send_world_message",{p_content:content});
+        if(error)throw error;
+        input.value="";
+        const row=Array.isArray(data)?data[0]:data;
+        if(row){this.worldMessages.push(row);this.worldMessages=this.worldMessages.slice(-100);this.renderWorldMessages();await this.broadcastWorld(row);}
+      }catch(e){showToast(e.message||"Không thể gửi tin nhắn.");}
+    },
+
+    async broadcastWorld(row){
+      if(!this.worldChannel)return;
+      try{await this.worldChannel.send({type:"broadcast",event:"world_message",payload:{message:row}});}catch(_){}
+    },
+
+    setWorldGiftTarget(userId){
+      const id=String(userId||"");
+      const found=this.worldMembers.find(u=>String(u.id)===id);
+      if(!found||String(found.id)===String(currentUserId||""))return;
+      this.worldGiftTarget=found;
+      const bar=$("worldGiftTargetBar");if(bar){bar.hidden=false;bar.innerHTML=`🎁 Tặng quà cho <strong>${renderIdentityName(found.display_name||found.username||"",found.role)}</strong> <button type="button" id="clearWorldGiftTarget">✕</button>`;$("clearWorldGiftTarget").onclick=()=>{this.worldGiftTarget=null;bar.hidden=true;};}
+      showToast("✅ Đã chọn người nhận quà.");
+    },
+
+    async openGiftModal(context="direct"){
+      if(!requireLogin())return;
+      const recipient=context==="direct"
+        ? this.conversations.find(c=>String(c.friend_id)===String(this.activeFriendId))
+        : this.worldGiftTarget;
+      if(!recipient){showToast("🎁 Hãy chọn người nhận trước.");return;}
+      this.giftContext=context;
+      this.giftRecipientId=recipient.friend_id||recipient.id;
+      $("giftRecipientLabel").innerHTML=`Tặng quà cho ${renderIdentityName(recipient.display_name||recipient.username||"",recipient.role)}`;
+      await this.loadGiftInventory();
+      $("giftModalOverlay")?.classList.add("open");
+      $("giftModalOverlay")?.setAttribute("aria-hidden","false");
+    },
+
+    async loadGiftInventory(){
+      const client=this.client(),grid=$("giftInventoryGrid");if(!client||!grid)return;
+      try{
+        const {data,error}=await client.rpc("get_my_gift_inventory");
+        if(error)throw error;
+        const items=Array.isArray(data)?data:[];
+        grid.innerHTML=items.length?items.map(i=>`<button type="button" class="gift-item" data-gift-item="${escapeHTML(i.item_id)}" data-gift-qty="${Number(i.quantity||1)}"><span>${escapeHTML(i.icon||"🎁")}</span><strong>${escapeHTML(i.name||"Item")}</strong><small>×${Number(i.quantity||1)}</small></button>`).join(""):'<div class="empty">🎁 Bạn chưa có vật phẩm để tặng.</div>';
+        grid.querySelectorAll("[data-gift-item]").forEach(b=>b.addEventListener("click",()=>this.sendChatGift(b.dataset.giftItem,Number(b.dataset.giftQty)||1)));
+      }catch(e){grid.innerHTML=`<div class="empty">⚠️ ${escapeHTML(e.message||"Không thể tải túi quà.")}</div>`;}
+    },
+
+    async sendChatGift(itemId,available){
+      const client=this.client();if(!client)return;
+      let qty=1;
+      if(available>1){const raw=prompt(`Số lượng muốn tặng (1-${available}):`,"1");if(raw===null)return;qty=Number(raw);}
+      if(!Number.isInteger(qty)||qty<1||qty>available){showToast("⚠️ Số lượng không hợp lệ.");return;}
+      try{
+        const {data,error}=await client.rpc("send_chat_gift",{p_recipient_id:this.giftRecipientId,p_item_id:itemId,p_quantity:qty,p_context:this.giftContext,p_conversation_id:this.giftContext==="direct"?Number(this.activeConversationId):null,p_note:String($("giftNote")?.value||"").trim().slice(0,120)});
+        if(error)throw error;
+        closeGiftModal();
+        showToast(`🎁 Đã tặng quà thành công.`);
+        if(this.giftContext==="world"){this.worldGiftTarget=null;const b=$("worldGiftTargetBar");if(b)b.hidden=true;await this.loadWorldMessages();}
+      }catch(e){showToast(e.message||"Không thể tặng quà.");}
+    },
+
     async renderConversations(){
       const client=this.client(); if(!client) return;
       try{
@@ -3572,31 +3717,28 @@ window.getStudyBearSupabaseStatus = function () {
       const client=this.client();
       if(!client||!this.activeConversationId)return;
 
-      // Remove previous message/typing channels before switching conversations.
       if(this.messageChannel){
         try{ await client.removeChannel(this.messageChannel); }catch(_){}
         this.messageChannel=null;
       }
-      if(this.typingChannel){
-        try{ await client.removeChannel(this.typingChannel); }catch(_){}
-        this.typingChannel=null;
-      }
-      this.typingChannelReady=false;
-      this.typingChannelReadyPromise=null;
-      this._resolveTypingChannelReady=null;
 
       clearTimeout(this.typingTimeout);
       clearTimeout(this.typingStopTimer);
       clearInterval(this.typingHeartbeatTimer);
+      clearInterval(this.typingPollTimer);
+      clearInterval(this.typingDbHeartbeatTimer);
       this.typingTimeout=this.typingStopTimer=null;
       this.typingHeartbeatTimer=null;
+      this.typingPollTimer=null;
+      this.typingDbHeartbeatTimer=null;
       this.typingPeerId=null;
+      this.typingDbBusy=false;
 
       const conversationId=Number(this.activeConversationId);
       const user=await this.user();
       if(!user)return;
 
-      // -------------------- MESSAGE CHANNEL --------------------
+      // MESSAGE realtime channel.
       this.messageChannel=client.channel(`studybear-chat-${conversationId}`,{
         config:{broadcast:{self:false}}
       });
@@ -3619,10 +3761,7 @@ window.getStudyBearSupabaseStatus = function () {
             box.appendChild(node);
             box.scrollTop=box.scrollHeight;
           }
-
-          if(String(payload.new.sender_id)!==String(user.id)){
-            await this.markConversationRead();
-          }
+          if(String(payload.new.sender_id)!==String(user.id)) await this.markConversationRead();
           this.renderConversations();
         })
         .on("postgres_changes",{
@@ -3636,77 +3775,55 @@ window.getStudyBearSupabaseStatus = function () {
           else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT") console.warn("[StudyBear] Message realtime:",status);
         });
 
-      // -------------------- TYPING PRESENCE CHANNEL --------------------
-      // Each conversation gets its own presence channel. Each participant
-      // advertises {user_id, typing:true/false}; the peer derives the indicator
-      // exclusively from presence state.
-      this.typingChannel=client.channel(`studybear-typing-presence-${conversationId}`,{
-        config:{presence:{key:user.id}}
-      });
-
-      this.typingChannelReady = false;
-      this.typingChannel
-        .on("presence",{event:"sync"},()=>{
-          this.refreshTypingFromPresence();
-        })
-        .on("presence",{event:"join"},()=>{
-          this.refreshTypingFromPresence();
-        })
-        .on("presence",{event:"leave"},()=>{
-          this.refreshTypingFromPresence();
-        });
-
-      this.typingChannelReadyPromise=new Promise(resolve=>{
-        this._resolveTypingChannelReady=resolve;
-      });
-
-      this.typingChannel.subscribe(async status=>{
-          if(status==="SUBSCRIBED"){
-            try{
-              await this.typingChannel.track({
-                user_id:user.id,
-                typing:false,
-                updated_at:new Date().toISOString()
-              });
-            }catch(error){
-              console.warn("[StudyBear] initial typing presence:",error);
-            }
-            this.typingChannelReady = true;
-            this._resolveTypingChannelReady?.();
-            console.info("[StudyBear] Typing presence ready.");
-          }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
-            console.warn("[StudyBear] Typing presence:",status);
-          }
-        });
-
+      // TYPING: database heartbeat + polling is the authoritative cross-device path.
+      // It works even when Realtime Presence/Broadcast is unavailable or delayed.
+      this.startTypingDatabaseMonitor(conversationId,user.id);
       await this.markConversationRead();
     },
 
-    refreshTypingFromPresence(){
-      if(!this.typingChannel)return;
-      const meId=String(this.typingPeerId||"");
-      const state=this.typingChannel.presenceState()||{};
-      let typingUser=null;
+    async startTypingDatabaseMonitor(conversationId,userId){
+      await this.setTypingDatabase(false);
 
-      // Supabase Presence state shape:
-      // {presence_key: [{user_id, typing, ...}], ...}
-      for(const entries of Object.values(state)){
-        for(const entry of (Array.isArray(entries)?entries:[])){
-          const uid=String(entry?.user_id||"");
-          if(uid && entry?.typing===true){
-            typingUser=uid;
-            break;
-          }
+      clearInterval(this.typingPollTimer);
+      this.typingPollTimer=setInterval(()=>this.pollTypingDatabase(conversationId,userId),900);
+      await this.pollTypingDatabase(conversationId,userId);
+    },
+
+    async pollTypingDatabase(conversationId,userId){
+      const client=this.client();
+      if(!client||Number(conversationId)!==Number(this.activeConversationId))return;
+
+      try{
+        const {data,error}=await client.rpc("get_chat_typing_status",{p_conversation_id:conversationId});
+        if(error)throw error;
+        const row=Array.isArray(data)?data[0]:data;
+
+        if(!row){
+          this.typingPeerId=null;
+          this.renderTypingState(false);
+          return;
         }
-        if(typingUser)break;
-      }
 
+        const peerId=String(row.user_id||"");
+        const age=Date.now()-new Date(row.updated_at||0).getTime();
+        const isFresh=age>=0 && age<4200;
+        const isTyping=Boolean(row.typing)&&isFresh&&peerId&&peerId!==String(userId);
+
+        this.typingPeerId=isTyping?peerId:null;
+        this.renderTypingState(isTyping);
+      }catch(error){
+        // The UI will keep normal online/offline state if the typing table/RPC
+        // is temporarily unavailable; chat itself is not blocked.
+        console.warn("[StudyBear] typing status poll:",error);
+      }
+    },
+
+    renderTypingState(isTyping){
       const statusEl=$("chatUserStatus");
       const helperEl=$("chatStatus");
       clearTimeout(this.typingTimeout);
 
-      if(typingUser){
-        this.typingPeerId=typingUser;
+      if(isTyping){
         const text=this.text("typingNow","Đang soạn tin nhắn...");
         if(statusEl){
           statusEl.textContent=`💬 ${text}`;
@@ -3716,70 +3833,37 @@ window.getStudyBearSupabaseStatus = function () {
           helperEl.textContent=`💬 ${text}`;
           helperEl.classList.add("typing-now");
         }
-
-        // Safety timeout if a peer disappears without a leave event.
         this.typingTimeout=setTimeout(()=>{
           this.typingPeerId=null;
-          this.refreshTypingFromPresence();
-        },5000);
+          this.renderTypingState(false);
+        },4300);
       }else{
-        this.typingPeerId=null;
         if(statusEl)statusEl.classList.remove("typing-now");
         if(helperEl){
           helperEl.textContent="";
           helperEl.classList.remove("typing-now");
         }
-        this.updateChatHeader();
+        if(this.activeConversationId) this.updateChatHeader();
       }
     },
 
-    async setTypingPresence(isTyping){
+    async setTypingDatabase(isTyping){
       const client=this.client();
-      const channel=this.typingChannel;
+      const id=Number(this.activeConversationId);
+      if(!client||!Number.isInteger(id)||id<=0||this.typingDbBusy)return;
       const user=await this.user();
-      if(!client||!channel||!user)return;
-      if(this.typingChannelReadyPromise){
-        try{ await this.typingChannelReadyPromise; }catch(_){}
-      }
-      if(!this.typingChannelReady)return;
+      if(!user)return;
 
-      clearTimeout(this.typingStopTimer);
-      clearInterval(this.typingHeartbeatTimer);
-      this.typingHeartbeatTimer=null;
-
+      this.typingDbBusy=true;
       try{
-        await channel.track({
-          user_id:user.id,
-          typing:Boolean(isTyping),
-          updated_at:new Date().toISOString()
+        await client.rpc("set_chat_typing_status",{
+          p_conversation_id:id,
+          p_typing:Boolean(isTyping)
         });
       }catch(error){
-        console.warn("[StudyBear] set typing presence:",error);
-        return;
-      }
-
-      if(isTyping){
-        // Re-track while the user remains active in the input.
-        this.typingHeartbeatTimer=setInterval(async()=>{
-          const input=$("chatInput");
-          if(!input?.value.trim()||!this.typingChannel){
-            clearInterval(this.typingHeartbeatTimer);
-            this.typingHeartbeatTimer=null;
-            return;
-          }
-          try{
-            await this.typingChannel.track({
-              user_id:user.id,
-              typing:true,
-              updated_at:new Date().toISOString()
-            });
-          }catch(_){}
-        },1800);
-
-        this.typingStopTimer=setTimeout(()=>this.stopTypingPresence(),4500);
-      }else{
-        // Immediately remove local typing presence.
-        try{ await channel.untrack(); }catch(_){}
+        console.warn("[StudyBear] set typing status:",error);
+      }finally{
+        this.typingDbBusy=false;
       }
     },
 
@@ -3787,10 +3871,22 @@ window.getStudyBearSupabaseStatus = function () {
       const input=$("chatInput");
       if(!input||!this.activeConversationId)return;
 
-      if(!this.typingChannel){
-        try{ await this.subscribeMessages(); }catch(_){}
+      await this.setTypingDatabase(Boolean(input.value.trim()));
+
+      clearInterval(this.typingDbHeartbeatTimer);
+      clearTimeout(this.typingStopTimer);
+
+      if(input.value.trim()){
+        this.typingDbHeartbeatTimer=setInterval(()=>{
+          if($("chatInput")?.value.trim() && this.activeConversationId){
+            void this.setTypingDatabase(true);
+          }else{
+            void this.stopTypingPresence();
+          }
+        },1600);
+
+        this.typingStopTimer=setTimeout(()=>this.stopTypingPresence(),4500);
       }
-      await this.setTypingPresence(Boolean(input.value.trim()));
     },
 
     async stopTypingBroadcast(){
@@ -3801,25 +3897,21 @@ window.getStudyBearSupabaseStatus = function () {
       clearTimeout(this.typingStopTimer);
       clearTimeout(this.typingTimeout);
       clearInterval(this.typingHeartbeatTimer);
+      clearInterval(this.typingDbHeartbeatTimer);
+      clearInterval(this.typingPollTimer);
       this.typingStopTimer=this.typingTimeout=null;
       this.typingHeartbeatTimer=null;
+      this.typingDbHeartbeatTimer=null;
+      this.typingPollTimer=null;
 
-      const channel=this.typingChannel;
-      const user=await this.user();
-      if(channel&&user){
-        try{ await channel.track({
-          user_id:user.id,
-          typing:false,
-          updated_at:new Date().toISOString()
-        }); }catch(_){}
-        try{ await channel.untrack(); }catch(_){}
-      }
+      await this.setTypingDatabase(false);
       this.typingPeerId=null;
+
       const statusEl=$("chatUserStatus");
       const helperEl=$("chatStatus");
       if(helperEl){helperEl.textContent="";helperEl.classList.remove("typing-now");}
       if(statusEl)statusEl.classList.remove("typing-now");
-      if(this.activeConversationId) this.updateChatHeader();
+      if(this.activeConversationId)this.updateChatHeader();
     },
 
     async sendMessage(){
@@ -4126,4 +4218,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("itemDetailCloseButton")?.addEventListener("click",()=>window.StudyBearSocial?.closeCollectionItem());
   $("publicProfileOverlay")?.addEventListener("click",e=>{ if(e.target.id==="publicProfileOverlay") window.StudyBearSocial?.closePublicProfile(); });
   $("itemDetailOverlay")?.addEventListener("click",e=>{ if(e.target.id==="itemDetailOverlay") window.StudyBearSocial?.closeCollectionItem(); });
+});
+
+function closeGiftModal(){
+  const overlay=$("giftModalOverlay");
+  if(overlay){overlay.classList.remove("open");overlay.setAttribute("aria-hidden","true");}
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  $("giftModalClose")?.addEventListener("click",closeGiftModal);
+  $("giftModalOverlay")?.addEventListener("click",e=>{if(e.target.id==="giftModalOverlay")closeGiftModal();});
 });
