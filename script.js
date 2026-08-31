@@ -1,5 +1,20 @@
 
 
+
+function refreshAdminGalaxyEverywhere(){
+  if(!state)return;
+  const admin=state.role==="admin";
+  const pairs=[
+    ["currentUserName",state.displayName],
+    ["settingsName",state.displayName],
+    ["profileUsername","@"+currentUsername]
+  ];
+  for(const [id,name] of pairs){
+    const el=$(id); if(!el)continue;
+    el.innerHTML=admin ? renderIdentityName(name,"admin",{showAt:name.startsWith("@")}) : escapeHTML(name);
+  }
+}
+
 function renderIdentityName(name, role, options={}){
   const text=String(name??"");
   const safe=escapeHTML(text);
@@ -773,16 +788,17 @@ function logoutUser() {
 }
 
 function updateUserUI() {
+  refreshAdminGalaxyEverywhere();
   setAdminNavVisibility();
   updateBearcoinUI();
   const ui = UI[getUILang()];
 
   if (state) {
-    $("currentUserName").textContent = state.displayName;
+    $("currentUserName").innerHTML = state?.role==="admin" ? renderIdentityName(state.displayName,"admin") : escapeHTML(state.displayName);
     $("currentUserStatus").textContent = ui.loggedInAs;
     $("authActionButton").textContent = ui.navSettings === "설정" ? "로그아웃" : (getUILang() === "en" ? "Sign out" : getUILang() === "ko" ? "로그아웃" : "Đăng xuất");
     $("authActionButton").onclick = logoutUser;
-    $("settingsName").textContent = state.displayName;
+    $("settingsName").innerHTML = state?.role==="admin" ? renderIdentityName(state.displayName,"admin") : escapeHTML(state.displayName);
     $("settingsAuthBtn").textContent = getUILang() === "en" ? "Sign out" : getUILang() === "ko" ? "로그아웃" : "Đăng xuất";
     $("settingsAuthBtn").onclick = logoutUser;
     $("userAvatar").textContent = "🐻";
@@ -816,6 +832,7 @@ function getUILang() {
 }
 
 function applyInterfaceLanguage() {
+  refreshAdminGalaxyEverywhere();
   const lang = getUILang();
   const dict = UI[lang];
 
@@ -933,7 +950,7 @@ function renderProfile() {
     return;
   }
 
-  $("profileUsername").textContent = "@" + currentUsername;
+  $("profileUsername").innerHTML = state?.role==="admin" ? renderIdentityName("@"+currentUsername,"admin") : "@"+escapeHTML(currentUsername);
   $("profileDisplayName").value = state.displayName;
   if($("profileBio")) $("profileBio").value = state.bio || "";
   $("learningLanguage").value = state.learningLanguage;
@@ -1603,7 +1620,7 @@ async function adminPrepareGrant(userId,users){
 async function loadAdminAudit(){
   const body=$("adminAuditBody"),client=getSupabaseClient();if(!body||!client)return;
   try{const {data,error}=await client.rpc("admin_list_audit",{p_limit:30});if(error)throw error;const rows=Array.isArray(data)?data:[];
-    body.innerHTML=rows.length?rows.map(r=>`<tr><td>${new Date(r.created_at).toLocaleString()}</td><td>@${escapeHTML(r.admin_username||"")}</td><td>${escapeHTML(r.action||"")}</td><td>${escapeHTML(r.details||"")}</td></tr>`).join(""):'<tr><td colspan="4">Chưa có hoạt động quản trị.</td></tr>';
+    body.innerHTML=rows.length?rows.map(r=>`<tr><td>${new Date(r.created_at).toLocaleString()}</td><td>${renderIdentityName(r.admin_username||"",r.admin_role||"user",{showAt:true})}</td><td>${escapeHTML(r.action||"")}</td><td>${escapeHTML(r.details||"")}</td></tr>`).join(""):'<tr><td colspan="4">Chưa có hoạt động quản trị.</td></tr>';
   }catch(e){body.innerHTML='<tr><td colspan="4">Không thể tải lịch sử.</td></tr>';}
 }
 document.addEventListener("DOMContentLoaded",()=>{
@@ -2783,6 +2800,7 @@ $("darkButton").addEventListener("click", () => {
 /* ---------- DASHBOARD ---------- */
 
 function updateDashboard() {
+  refreshAdminGalaxyEverywhere();
   updateBearcoinUI();
   const learned = state?.learned.length || 0;
   const favorites = state?.favorites.length || 0;
@@ -3153,8 +3171,8 @@ window.getStudyBearSupabaseStatus = function () {
           avatar.innerHTML=avatarUrl?`<img src="${escapeHTML(avatarUrl)}" alt="">`:"🐻";
         }
 
-        $("publicProfileName").textContent=profile.display_name||profile.username||"User";
-        $("publicProfileUsername").textContent="@"+(profile.username||"");
+        $("publicProfileName").innerHTML=profile.role==="admin" ? renderIdentityName(profile.display_name||profile.username||"User","admin") : escapeHTML(profile.display_name||profile.username||"User");
+        $("publicProfileUsername").innerHTML=profile.role==="admin" ? renderIdentityName("@"+(profile.username||""),"admin") : "@"+escapeHTML(profile.username||"");
         $("publicProfileBio").textContent=profile.bio || this.text("publicNoBio","Chưa có giới thiệu.");
         $("publicLearningLanguage").textContent=this.languageLabel(profile.learning_language);
         $("publicNativeLanguage").textContent=this.languageLabel(profile.native_language);

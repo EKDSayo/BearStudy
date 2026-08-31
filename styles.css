@@ -2063,3 +2063,40 @@ body.dark .social-inline-count {
 @keyframes adminGalaxyFlow{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
 @keyframes adminGalaxySparkle{0%,100%{opacity:.2;transform:scale(.98)}50%{opacity:1;transform:scale(1.02)}}
 @keyframes adminStarPulse{0%,100%{transform:scale(.62);opacity:.55}50%{transform:scale(1.12);opacity:1}}
+
+/* V63 — ensure Galaxy Admin identity is visible even inside compact UI */
+.admin-galaxy-name{
+  position:relative;
+  display:inline-flex !important;
+  align-items:center;
+  gap:3px;
+  font-weight:900;
+  white-space:nowrap;
+  isolation:isolate;
+}
+.admin-galaxy-text{
+  background:linear-gradient(100deg,#55f6ff 0%,#6d8dff 20%,#b96bff 40%,#ff5fc8 58%,#6df5d7 77%,#61cfff 100%);
+  background-size:300% 300%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  animation:adminGalaxyFlowV63 4.8s ease-in-out infinite;
+  filter:drop-shadow(0 0 4px rgba(85,230,255,.62)) drop-shadow(0 0 9px rgba(186,106,255,.38));
+}
+.admin-galaxy-name::before{
+  content:"";
+  position:absolute;
+  inset:-4px -8px;
+  pointer-events:none;
+  border-radius:999px;
+  background:
+    radial-gradient(circle at 7% 50%,#fff 0 1.3px,transparent 2px),
+    radial-gradient(circle at 24% 18%,#fff 0 1px,transparent 1.7px),
+    radial-gradient(circle at 48% 82%,#fff 0 1.1px,transparent 1.8px),
+    radial-gradient(circle at 73% 20%,#fff 0 1.2px,transparent 1.9px),
+    radial-gradient(circle at 94% 64%,#fff 0 1px,transparent 1.7px);
+  animation:adminGalaxySparkV63 1.45s ease-in-out infinite;
+  z-index:-1;
+}
+@keyframes adminGalaxyFlowV63{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+@keyframes adminGalaxySparkV63{0%,100%{opacity:.18;transform:scale(.98)}50%{opacity:1;transform:scale(1.02)}}
