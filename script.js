@@ -3007,10 +3007,25 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     async onPage(page) {
-      if (!this.client()) return;
+      const readyClient = await this.waitForClient(8000);
+      if (!readyClient) {
+        if(page==="world") { const status=$("worldStatus"); if(status) status.textContent="🔴 Chưa kết nối được Supabase."; }
+        return;
+      }
       await this.boot();
       if (page==="friends") await this.renderFriends();
       if (page==="chat") await this.renderConversations();
+      if (page==="world") await this.openWorldChannel();
+    },
+
+    async waitForClient(timeout=8000){
+      const started=Date.now();
+      while(Date.now()-started<timeout){
+        const client=this.client();
+        if(client) return client;
+        await new Promise(r=>setTimeout(r,150));
+      }
+      return null;
     },
 
     async bindPresence() {
@@ -3459,10 +3474,14 @@ window.getStudyBearSupabaseStatus = function () {
 
 
     async openWorldChannel(){
-      const client=this.client(),user=await this.user();
-      if(!client||!user) return;
+      const client=await this.waitForClient(8000);
+      const user=await this.user();
+      const status=$("worldStatus");
+      if(!client){ if(status) status.textContent="🔴 Supabase chưa sẵn sàng."; return; }
+      if(!user){ if(status) status.textContent="🔴 Vui lòng đăng nhập tài khoản Supabase để chat."; return; }
       if(this.currentWorldUserId!==user.id){ await this.closeWorldChannel(); this.currentWorldUserId=user.id; }
       this.bindWorldUI();
+      if(status) status.textContent="🟡 Đang kết nối Kênh thế giới...";
       await this.loadWorldMembers();
       await this.loadWorldMessages();
       await this.subscribeWorldChannel();
@@ -3562,19 +3581,41 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     async sendWorldMessage(){
-      if(!requireLogin()||this.worldSending)return;
-      const input=$("worldChatInput"),status=$("worldStatus"),content=String(input?.value||"").trim(); if(!content)return;
-      const client=this.client(); if(!client)return;
-      this.worldSending=true; if(input)input.disabled=true; if(status)status.textContent="⏳ Đang gửi tin nhắn...";
+      const input=$("worldChatInput"),status=$("worldStatus");
+      if(this.worldSending) return;
+      const content=String(input?.value||"").trim();
+      if(!content){ if(input) input.focus(); return; }
+      const client=await this.waitForClient(5000);
+      if(!client){ if(status) status.textContent="🔴 Không kết nối được máy chủ."; showToast("❌ Không thể kết nối Supabase."); return; }
+      const {data:{user},error:authError}=await client.auth.getUser();
+      if(authError||!user){
+        if(status) status.textContent="🔴 Phiên đăng nhập Supabase đã hết hạn.";
+        showToast("❌ Hãy đăng nhập lại bằng tài khoản Supabase để chat.");
+        return;
+      }
+      this.worldSending=true;
+      if(input) input.disabled=true;
+      if(status) status.textContent="⏳ Đang gửi tin nhắn...";
       try{
-        const {data,error}=await client.rpc("send_world_message",{p_content:content}); if(error)throw error;
-        const row=Array.isArray(data)?data[0]:data; if(!row)throw new Error("Máy chủ không trả về tin nhắn.");
-        if(!this.worldMessages.some(x=>String(x.id)===String(row.id)))this.worldMessages=[...this.worldMessages,row].slice(-100);
-        this.worldLastMessageId=row.id; if(input)input.value=""; this.renderWorldMessages(); await this.broadcastWorld(row);
-        if(status)status.textContent="✅ Đã gửi";
-        setTimeout(()=>{if(currentPage==="world"&&$("worldStatus"))$("worldStatus").textContent="🟢 Kênh thế giới đang hoạt động";},1000);
-      }catch(e){console.error("[StudyBear] sendWorldMessage",e);if(status)status.textContent="";showToast(e.message||"Không thể gửi tin nhắn.");}
-      finally{this.worldSending=false;if(input){input.disabled=false;input.focus();}}
+        const {data,error}=await client.rpc("send_world_message",{p_content:content});
+        if(error) throw error;
+        const row=Array.isArray(data)?data[0]:data;
+        if(!row || !row.id) throw new Error("Máy chủ không trả về tin nhắn hợp lệ.");
+        if(!this.worldMessages.some(x=>String(x.id)===String(row.id))) this.worldMessages=[...this.worldMessages,row].slice(-100);
+        this.worldLastMessageId=row.id;
+        if(input) input.value="";
+        this.renderWorldMessages();
+        await this.broadcastWorld(row);
+        if(status) status.textContent="✅ Đã gửi";
+        setTimeout(()=>{if(currentPage==="world"&&$("worldStatus"))$("worldStatus").textContent="🟢 Kênh thế giới đang hoạt động";},1200);
+      }catch(e){
+        console.error("[StudyBear] sendWorldMessage",e);
+        if(status) status.textContent="🔴 Gửi tin nhắn thất bại.";
+        showToast(`❌ ${e?.message||"Không thể gửi tin nhắn."}`);
+      }finally{
+        this.worldSending=false;
+        if(input){ input.disabled=false; input.focus(); }
+      }
     },
 
     async broadcastWorld(row){
