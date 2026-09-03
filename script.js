@@ -3545,12 +3545,20 @@ window.getStudyBearSupabaseStatus = function () {
     },
 
     bindWorldUI(){
-      const form=$("worldChatForm"); if(!form||this.worldBound)return;
+      const composer=$("worldChatForm"); if(!composer||this.worldBound)return;
       this.worldBound=true;
-      form.addEventListener("submit",e=>{e.preventDefault();e.stopImmediatePropagation();void this.sendWorldMessage();});
-      $("worldChatInput")?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();e.stopImmediatePropagation();form.requestSubmit();}});
+      const send=()=>{ void this.sendWorldMessage(); };
+      $("worldSendBtn")?.addEventListener("click",e=>{ e.preventDefault(); e.stopPropagation(); send(); });
+      $("worldChatInput")?.addEventListener("keydown",e=>{
+        if(e.key==="Enter"&&!e.shiftKey){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          this.stopTypingBroadcast?.();
+          send();
+        }
+      });
       $("worldMemberSearch")?.addEventListener("input",()=>this.renderWorldMembers());
-      $("worldGiftBtn")?.addEventListener("click",()=>this.openGiftModal("world"));
+      $("worldGiftBtn")?.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();this.openGiftModal("world");});
     },
 
     async sendWorldMessage(){
@@ -4201,6 +4209,36 @@ window.getStudyBearSupabaseStatus = function () {
     bind();
   }
 })();
+
+/* ---------- WORLD CHAT NAVIGATION GUARD ---------- */
+(function installStudyBearWorldChatGuard(){
+  function bind(){
+    const input=document.getElementById("worldChatInput");
+    const button=document.getElementById("worldSendBtn");
+    const composer=document.getElementById("worldChatForm");
+    if(!input || !button || !composer || composer.dataset.v73Guard==="1") return;
+    composer.dataset.v73Guard="1";
+
+    // World chat is intentionally not a native <form>. These capture guards
+    // are a final safety net so Enter/click can never navigate or reload the page.
+    composer.addEventListener("keydown",e=>{
+      if(e.key==="Enter"&&!e.shiftKey){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.StudyBearSocial?.sendWorldMessage?.();
+      }
+    },{capture:true});
+
+    button.addEventListener("click",e=>{
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      window.StudyBearSocial?.sendWorldMessage?.();
+    },{capture:true});
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",bind,{once:true});
+  else bind();
+})();
+
 
 /* ---------- SOCIAL STARTUP BRIDGE ---------- */
 let studyBearSupabaseReadyPoll = setInterval(() => {
