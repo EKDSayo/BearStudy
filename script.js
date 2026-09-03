@@ -2948,6 +2948,7 @@ window.getStudyBearSupabaseStatus = function () {
     typingChannel: null,
     typingTimeout: null,
     typingStopTimer: null,
+    worldChannel: null, worldPollingTimer: null, worldBound: false, worldLoading: false, worldSending: false, currentWorldUserId: null, worldMessages: [], worldMembers: [], worldLastMessageId: null,
 
     client() { return typeof getSupabaseClient === "function" ? getSupabaseClient() : null; },
     text(key, fallback) { return (typeof UI !== "undefined" && UI[getUILang()]?.[key]) || fallback; },
@@ -3459,21 +3460,21 @@ window.getStudyBearSupabaseStatus = function () {
 
     async openWorldChannel(){
       const client=this.client(),user=await this.user();
-      if(!client||!user)return;
+      if(!client||!user) return;
+      if(this.currentWorldUserId!==user.id){ await this.closeWorldChannel(); this.currentWorldUserId=user.id; }
+      this.bindWorldUI();
       await this.loadWorldMembers();
       await this.loadWorldMessages();
       await this.subscribeWorldChannel();
-      this.bindWorldUI();
+      this.startWorldPolling();
     },
 
     async loadWorldMembers(){
       const client=this.client(); if(!client)return;
       try{
-        const {data,error}=await client.rpc("get_world_members");
-        if(error)throw error;
-        this.worldMembers=Array.isArray(data)?data:[];
-        this.renderWorldMembers();
-      }catch(e){console.error("[StudyBear] world members",e);$("worldMemberList") && ($("worldMemberList").innerHTML='<div class="empty">⚠️ Không tải được thành viên.</div>');}
+        const {data,error}=await client.rpc("get_world_members"); if(error)throw error;
+        this.worldMembers=Array.isArray(data)?data:[]; this.renderWorldMembers();
+      }catch(e){console.error("[StudyBear] world members",e); const root=$("worldMemberList"); if(root)root.innerHTML=`<div class="empty">⚠️ ${escapeHTML(e.message||"Không tải được thành viên.")}</div>`;}
     },
 
     renderWorldMembers(){
@@ -3483,73 +3484,100 @@ window.getStudyBearSupabaseStatus = function () {
       $("worldMemberCount")&&($("worldMemberCount").textContent=String(this.worldMembers.length));
       root.innerHTML=rows.map(u=>{
         const avatar=u.avatar_url?`<img src="${escapeHTML(u.avatar_url)}" alt="">`:"🐻";
-        return `<button type="button" class="world-member" data-world-gift-target="${escapeHTML(u.id)}">
-          <span class="social-avatar small">${avatar}</span>
-          <span class="world-member-main"><strong>${renderIdentityName(u.display_name||u.username||"",u.role)}</strong><small>@${escapeHTML(u.username||"")}</small></span>
-          <i class="presence-dot ${this.onlineIds.has(u.id)?"online":"offline"}"></i>
-        </button>`;
-      }).join("") || '<div class="empty">Không tìm thấy thành viên.</div>';
-      root.querySelectorAll("[data-world-gift-target]").forEach(b=>b.addEventListener("click",()=>this.setWorldGiftTarget(b.dataset.worldGiftTarget)));
-      $("worldOnlineCount")&&($("worldOnlineCount").textContent=String(this.worldMembers.filter(u=>this.onlineIds.has(u.id)).length));
+        const self=String(u.id)===String(this.currentWorldUserId||"");
+        return `<button type="button" class="world-member" data-world-gift-target="${escapeHTML(u.id)}" ${self?"disabled":""}><span class="social-avatar small">${avatar}</span><span class="world-member-main"><strong>${renderIdentityName(u.display_name||u.username||"",u.role)}</strong><small>@${escapeHTML(u.username||"")}</small></span><i class="presence-dot ${this.onlineIds.has(String(u.id))?"online":"offline"}></i></button>`;
+      }).join("")||'<div class="empty">Không tìm thấy thành viên.</div>';
+      root.querySelectorAll("[data-world-gift-target]:not([disabled])").forEach(b=>b.addEventListener("click",()=>this.setWorldGiftTarget(b.dataset.worldGiftTarget)));
+      $("worldOnlineCount")&&($("worldOnlineCount").textContent=String(this.worldMembers.filter(u=>this.onlineIds.has(String(u.id))).length));
     },
 
-    async loadWorldMessages(){
-      const client=this.client(),box=$("worldMessages"); if(!client||!box)return;
+    async loadWorldMessages(silent=false){
+      const client=this.client(),box=$("worldMessages"); if(!client||!box||this.worldLoading)return;
+      this.worldLoading=true;
       try{
-        const {data,error}=await client.rpc("get_world_messages",{p_limit:100});
-        if(error)throw error;
-        this.worldMessages=Array.isArray(data)?data:[]; this.renderWorldMessages();
-      }catch(e){box.innerHTML=`<div class="empty">⚠️ ${escapeHTML(e.message||"Không thể tải kênh thế giới.")}</div>`;}
+        const {data,error}=await client.rpc("get_world_messages",{p_limit:100}); if(error)throw error;
+        const rows=Array.isArray(data)?data:[];
+        const changed=JSON.stringify(rows)!==JSON.stringify(this.worldMessages);
+        this.worldMessages=rows; this.worldLastMessageId=rows.length?rows[rows.length-1].id:null;
+        if(changed||!silent)this.renderWorldMessages();
+      }catch(e){console.error("[StudyBear] world messages",e); if(!silent)box.innerHTML=`<div class="empty">⚠️ ${escapeHTML(e.message||"Không thể tải kênh thế giới.")}</div>`;}
+      finally{this.worldLoading=false;}
     },
 
     renderWorldMessages(){
-      const box=$("worldMessages");if(!box)return;
+      const box=$("worldMessages"); if(!box)return;
+      const nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<80;
       box.innerHTML=this.worldMessages.map(m=>{
         const avatar=m.avatar_url?`<img src="${escapeHTML(m.avatar_url)}" alt="">`:"🐻";
         const time=new Date(m.created_at).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
-        const gift=m.gift_item_name?`<div class="world-gift-card">🎁 <b>${escapeHTML(m.gift_item_name)}</b><span>tặng cho ${escapeHTML(m.gift_recipient_name||"một người bạn")}</span></div>`:"";
-        return `<article class="world-message"><div class="social-avatar small">${avatar}</div><div class="world-message-body"><div class="world-message-meta">${renderIdentityName(m.display_name||m.username||"",m.role)} <small>@${escapeHTML(m.username||"")} · ${time}</small></div>${m.content?`<div class="world-message-text">${escapeHTML(m.content)}</div>`:""}${gift}</div></article>`;
-      }).join("") || '<div class="empty">🌍 Hãy là người đầu tiên nói gì đó!</div>';
-      box.scrollTop=box.scrollHeight;
+        let content=String(m.content||"");
+        let giftHTML="";
+        if(content.startsWith("__STUDYBEAR_GIFT__:")){
+          try{const gift=JSON.parse(content.slice("__STUDYBEAR_GIFT__:".length)); giftHTML=`<div class="world-gift-card">🎁 <b>${escapeHTML(gift.item_name||"Vật phẩm")}</b><span>tặng cho ${escapeHTML(gift.recipient_name||"một người bạn")} ×${Number(gift.quantity||1)}</span>${gift.note?`<em>${escapeHTML(gift.note)}</em>`:""}</div>`;}catch(_){}
+          content="";
+        }
+        return `<article class="world-message" data-world-message-id="${escapeHTML(String(m.id))}"><div class="social-avatar small">${avatar}</div><div class="world-message-body"><div class="world-message-meta">${renderIdentityName(m.display_name||m.username||"",m.role)} <small>@${escapeHTML(m.username||"")} · ${time}</small></div>${content?`<div class="world-message-text">${escapeHTML(content)}</div>`:""}${giftHTML}</div></article>`;
+      }).join("")||'<div class="empty">🌍 Hãy là người đầu tiên nói gì đó!</div>';
+      if(nearBottom)this.scrollWorldToBottom();
     },
 
+    scrollWorldToBottom(){const box=$("worldMessages");if(box)box.scrollTop=box.scrollHeight;},
+
     async subscribeWorldChannel(){
-      const client=this.client(),user=await this.user();if(!client||!user)return;
-      if(this.worldChannel){try{await client.removeChannel(this.worldChannel);}catch(_){}}
-      this.worldChannel=client.channel("studybear-world");
-      this.worldChannel.on("broadcast",{event:"world_message"},async payload=>{
-        const m=payload?.payload?.message;if(!m)return;
-        if(!this.worldMessages.some(x=>String(x.id)===String(m.id))){this.worldMessages.push(m);this.worldMessages=this.worldMessages.slice(-100);this.renderWorldMessages();}
-      }).on("presence",{event:"sync"},()=>{this.renderWorldMembers();})
-      .subscribe();
+      const client=this.client(),user=await this.user(); if(!client||!user)return;
+      if(this.worldChannel){try{await client.removeChannel(this.worldChannel);}catch(_){} this.worldChannel=null;}
+      this.worldChannel=client.channel("studybear-world-global",{config:{broadcast:{ack:true}}});
+      this.worldChannel.on("broadcast",{event:"world_message"},payload=>{
+        const m=payload?.payload?.message; if(!m)return;
+        if(!this.worldMessages.some(x=>String(x.id)===String(m.id))){this.worldMessages=[...this.worldMessages,m].slice(-100);this.worldLastMessageId=m.id;this.renderWorldMessages();}
+      });
+      this.worldChannel.on("presence",{event:"sync"},()=>this.renderWorldMembers());
+      this.worldChannel.subscribe(async status=>{
+        const el=$("worldStatus");
+        if(status==="SUBSCRIBED"){if(el)el.textContent="🟢 Kênh thế giới đang hoạt động";try{await this.worldChannel.track({user_id:user.id,online_at:new Date().toISOString()});}catch(_){}}
+        else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){if(el)el.textContent="🟡 Realtime không ổn định — đang tự đồng bộ tin nhắn.";}
+      });
+    },
+
+    startWorldPolling(){
+      clearInterval(this.worldPollingTimer);
+      this.worldPollingTimer=setInterval(()=>{if(currentPage!=="world")return;void this.loadWorldMessages(true);void this.loadWorldMembers();},1800);
     },
 
     bindWorldUI(){
-      if($("worldChatForm")&&!$("worldChatForm").dataset.bound){
-        $("worldChatForm").dataset.bound="1";
-        $("worldChatForm").addEventListener("submit",e=>{e.preventDefault();this.sendWorldMessage();});
-        $("worldMemberSearch")?.addEventListener("input",()=>this.renderWorldMembers());
-        $("worldGiftBtn")?.addEventListener("click",()=>this.openGiftModal("world"));
-      }
+      const form=$("worldChatForm"); if(!form||this.worldBound)return;
+      this.worldBound=true;
+      form.addEventListener("submit",e=>{e.preventDefault();e.stopImmediatePropagation();void this.sendWorldMessage();});
+      $("worldChatInput")?.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();e.stopImmediatePropagation();form.requestSubmit();}});
+      $("worldMemberSearch")?.addEventListener("input",()=>this.renderWorldMembers());
+      $("worldGiftBtn")?.addEventListener("click",()=>this.openGiftModal("world"));
     },
 
     async sendWorldMessage(){
-      if(!requireLogin())return;
-      const input=$("worldChatInput"),content=String(input?.value||"").trim();
-      if(!content)return;
-      const client=this.client();if(!client)return;
+      if(!requireLogin()||this.worldSending)return;
+      const input=$("worldChatInput"),status=$("worldStatus"),content=String(input?.value||"").trim(); if(!content)return;
+      const client=this.client(); if(!client)return;
+      this.worldSending=true; if(input)input.disabled=true; if(status)status.textContent="⏳ Đang gửi tin nhắn...";
       try{
-        const {data,error}=await client.rpc("send_world_message",{p_content:content});
-        if(error)throw error;
-        input.value="";
-        const row=Array.isArray(data)?data[0]:data;
-        if(row){this.worldMessages.push(row);this.worldMessages=this.worldMessages.slice(-100);this.renderWorldMessages();await this.broadcastWorld(row);}
-      }catch(e){showToast(e.message||"Không thể gửi tin nhắn.");}
+        const {data,error}=await client.rpc("send_world_message",{p_content:content}); if(error)throw error;
+        const row=Array.isArray(data)?data[0]:data; if(!row)throw new Error("Máy chủ không trả về tin nhắn.");
+        if(!this.worldMessages.some(x=>String(x.id)===String(row.id)))this.worldMessages=[...this.worldMessages,row].slice(-100);
+        this.worldLastMessageId=row.id; if(input)input.value=""; this.renderWorldMessages(); await this.broadcastWorld(row);
+        if(status)status.textContent="✅ Đã gửi";
+        setTimeout(()=>{if(currentPage==="world"&&$("worldStatus"))$("worldStatus").textContent="🟢 Kênh thế giới đang hoạt động";},1000);
+      }catch(e){console.error("[StudyBear] sendWorldMessage",e);if(status)status.textContent="";showToast(e.message||"Không thể gửi tin nhắn.");}
+      finally{this.worldSending=false;if(input){input.disabled=false;input.focus();}}
     },
 
     async broadcastWorld(row){
       if(!this.worldChannel)return;
-      try{await this.worldChannel.send({type:"broadcast",event:"world_message",payload:{message:row}});}catch(_){}
+      try{await this.worldChannel.send({type:"broadcast",event:"world_message",payload:{message:row}});}catch(e){console.warn("[StudyBear] world broadcast failed",e);}
+    },
+
+    async closeWorldChannel(){
+      clearInterval(this.worldPollingTimer);this.worldPollingTimer=null;
+      const client=this.client();if(client&&this.worldChannel){try{await client.removeChannel(this.worldChannel);}catch(_){}}
+      this.worldChannel=null;
     },
 
     setWorldGiftTarget(userId){
@@ -4013,9 +4041,12 @@ window.getStudyBearSupabaseStatus = function () {
       if(client&&this.friendshipChannel) client.removeChannel(this.friendshipChannel);
       if(client&&this.profileChannel) client.removeChannel(this.profileChannel);
       if(client&&this.presenceChannel) client.removeChannel(this.presenceChannel);
+      if(client&&this.worldChannel) client.removeChannel(this.worldChannel);
+      clearInterval(this.worldPollingTimer);
       clearTimeout(this.typingTimeout);
       clearTimeout(this.typingStopTimer);
-      this.messageChannel=this.friendshipChannel=this.profileChannel=this.presenceChannel=null;
+      this.messageChannel=this.friendshipChannel=this.profileChannel=this.presenceChannel=this.worldChannel=null;
+      this.worldPollingTimer=null; this.currentWorldUserId=null; this.worldBound=false; this.worldMessages=[]; this.worldMembers=[];
       this.typingChannel=null;
       if(this.uiAbortController){
         try{ this.uiAbortController.abort(); }catch(_){}
