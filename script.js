@@ -534,9 +534,13 @@ async function syncStateToSupabase() {
     learning_level:state.learningLevel,
     xp:state.xp,
     coins:Math.max(0,Number(state.coins||0)),
-    avatar_url: state.avatarUrl || (state.avatar && !state.avatar.startsWith("data:") ? state.avatar : null),
     updated_at:new Date().toISOString()
   };
+
+  // IMPORTANT: never let the temporary local data: URL overwrite the
+  // authoritative Storage URL while an avatar upload is still in progress.
+  const authoritativeAvatar = state.avatarUrl || (state.avatar && !state.avatar.startsWith("data:") ? state.avatar : "");
+  if (authoritativeAvatar) profilePayload.avatar_url = authoritativeAvatar;
 
   const { error:profileError }=await client.from("profiles").upsert(profilePayload,{onConflict:"id"});
   if (profileError) throw profileError;
@@ -1025,16 +1029,16 @@ $("saveProfileBtn").addEventListener("click", () => {
 
 async function uploadAvatarToSupabase(file) {
   const client = getSupabaseClient();
-  if (!client) return null;
+  if (!client) throw new Error("SUPABASE_CLIENT_UNAVAILABLE");
 
   const { data: { user }, error: userError } = await client.auth.getUser();
-  if (userError || !user) return null;
+  if (userError || !user) throw new Error("NOT_AUTHENTICATED");
 
-  const ext = "webp";
   const path = `${user.id}/avatar.webp`;
   let body = file;
 
-  // Compress large images before upload. Falls back to the original file if canvas is unavailable.
+  // Normalize every uploaded avatar to a small WebP. If the browser cannot
+  // decode/compress it, keep the original file as a safe fallback.
   try {
     const bitmap = await createImageBitmap(file);
     const maxSize = 640;
@@ -1043,33 +1047,46 @@ async function uploadAvatarToSupabase(file) {
     canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
     canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
     const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) throw new Error("CANVAS_UNAVAILABLE");
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    body = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", 0.86));
+    const compressed = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", 0.86));
     bitmap.close?.();
+    if (compressed) body = compressed;
   } catch (error) {
     console.info("[StudyBear] Avatar compression fallback.", error);
   }
 
   const { error: uploadError } = await client.storage
     .from("avatars")
-    .upload(path, body, { upsert: true, contentType: "image/webp", cacheControl: "3600" });
+    .upload(path, body, {
+      upsert: true,
+      contentType: body?.type || "image/webp",
+      cacheControl: "0"
+    });
 
   if (uploadError) throw uploadError;
 
-  const { data: publicData } = client.storage
-    .from("avatars")
-    .getPublicUrl(path);
+  const { data: publicData } = client.storage.from("avatars").getPublicUrl(path);
+  const publicUrl = publicData?.publicUrl;
+  if (!publicUrl) throw new Error("AVATAR_PUBLIC_URL_FAILED");
 
-  const publicUrl = `${publicData.publicUrl}?v=${Date.now()}`;
+  // The database is updated through a SECURITY DEFINER RPC so avatar sync
+  // cannot be blocked by profiles table RLS/update policies. The RPC only
+  // allows the authenticated user to update their own avatar URL.
+  const { data: saved, error: avatarDbError } = await client.rpc("set_my_avatar_url", {
+    p_avatar_url: `${publicUrl}?v=${Date.now()}`
+  });
 
-  const { error: profileError } = await client
-    .from("profiles")
-    .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
-    .eq("id", user.id);
+  if (avatarDbError) throw avatarDbError;
 
-  if (profileError) throw profileError;
+  const row = Array.isArray(saved) ? saved[0] : saved;
+  const savedUrl = row?.avatar_url;
+  const savedAt = row?.avatar_updated_at || row?.updated_at || new Date().toISOString();
+  if (!savedUrl) throw new Error("AVATAR_DATABASE_SAVE_FAILED");
 
-  return publicUrl;
+  // Read back from the database through the same RPC response before we
+  // consider the cloud sync successful. This prevents false-positive toasts.
+  return { url: savedUrl, updatedAt: savedAt };
 }
 
 $("avatarInput").addEventListener("change", async e => {
@@ -1092,30 +1109,31 @@ $("avatarInput").addEventListener("change", async e => {
 
   const reader = new FileReader();
   reader.onload = async () => {
-    // Immediate local preview keeps the UI responsive.
+    // Immediate local preview keeps the UI responsive. Do NOT push this data:
+    // URL to Supabase; the Storage URL is the only authoritative avatar.
     state.avatar = reader.result;
     renderProfile();
     updateUserUI();
-    saveState();
 
     if (hasSupabaseAuth()) {
       try {
-        const cloudUrl = await uploadAvatarToSupabase(file);
-        if (cloudUrl) {
-          state.avatarUrl = cloudUrl;
-          state.avatar = cloudUrl;
-          saveState();
-          renderProfile();
-          updateUserUI();
-          showToast("☁️ Ảnh đại diện đã đồng bộ.");
-          return;
-        }
+        const result = await uploadAvatarToSupabase(file);
+        state.avatarUrl = result.url;
+        state.avatar = result.url;
+        users[currentUsername] = normalizeUser(state);
+        saveAllUsers();
+        renderProfile();
+        updateUserUI();
+        showToast("☁️ Ảnh đại diện đã lưu trên server.");
+        return;
       } catch (error) {
         console.error("[StudyBear] Avatar cloud sync failed:", error);
-        showToast(UI[getUILang()].saveCloudError || "⚠️ Không thể đồng bộ ảnh.");
+        showToast(UI[getUILang()].saveCloudError || "⚠️ Không thể lưu ảnh lên server.");
       }
     }
 
+    // No cloud auth: keep the local preview only.
+    saveState();
     showToast("📷 Đã đổi ảnh đại diện trên thiết bị này.");
   };
   reader.readAsDataURL(file);
