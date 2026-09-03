@@ -2202,11 +2202,12 @@ body.dark .social-inline-count {
 .world-members-head,.world-chat-header{display:flex;align-items:center;gap:9px}
 .world-members-head{justify-content:space-between;margin-bottom:10px}.world-chat-header{padding:14px;border-bottom:1px solid var(--border)}
 .world-chat-header>div:last-child{display:flex;flex-direction:column;gap:2px}.world-globe{font-size:28px}
-.world-member-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-.world-member{display:flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--text);padding:8px;border-radius:12px;text-align:left;cursor:pointer}
+.world-member-list{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:10px;width:100%;min-width:0}
+.world-member{display:grid;width:100%;min-width:0;grid-template-columns:34px minmax(0,1fr) 8px;align-items:center;gap:8px;border:0;background:transparent;color:var(--text);padding:8px;border-radius:12px;text-align:left;cursor:pointer;box-sizing:border-box;overflow:hidden}
 .world-member:hover{background:var(--bg)}
-.world-member-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
-.world-member-main strong,.world-member-main small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.world-member:disabled{opacity:1;cursor:default}
+.world-member-main{min-width:0;max-width:100%;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.world-member-main strong,.world-member-main small{display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .world-member-main strong{font-size:11px}.world-member-main small{font-size:9px;color:var(--muted)}
 .world-chat{display:grid;grid-template-rows:auto 1fr auto auto;min-width:0}
 .world-messages{padding:14px;overflow-y:auto;max-height:540px;display:flex;flex-direction:column;gap:10px}
@@ -2242,3 +2243,8 @@ body.dark .chat-gift-card,body.dark .world-gift-card{
 .chat-gift-card strong,.world-gift-card b{font-size:12px}
 .chat-gift-card small,.world-gift-card small{font-size:9px;color:#886c27}
 .chat-gift-card em,.world-gift-card em{font-size:9px;color:var(--muted);font-style:italic}
+
+/* V76 — stable World member rows: prevent intrinsic button width collapse */
+.world-members{min-width:0}
+.world-member .social-avatar{min-width:34px}
+.world-member .presence-dot{margin-right:0;justify-self:center}
