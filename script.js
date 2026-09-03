@@ -2948,7 +2948,7 @@ window.getStudyBearSupabaseStatus = function () {
     typingChannel: null,
     typingTimeout: null,
     typingStopTimer: null,
-    worldChannel: null, worldPollingTimer: null, worldBound: false, worldLoading: false, worldSending: false, currentWorldUserId: null, worldMessages: [], worldMembers: [], worldLastMessageId: null,
+    worldChannel: null, worldPollingTimer: null, worldBound: false, worldLoading: false, worldSending: false, currentWorldUserId: null, worldMessages: [], worldMembers: [], worldLastMessageId: null, worldFirstRender: true,
 
     client() { return typeof getSupabaseClient === "function" ? getSupabaseClient() : null; },
     text(key, fallback) { return (typeof UI !== "undefined" && UI[getUILang()]?.[key]) || fallback; },
@@ -3482,6 +3482,7 @@ window.getStudyBearSupabaseStatus = function () {
       if(this.currentWorldUserId!==user.id){ await this.closeWorldChannel(); this.currentWorldUserId=user.id; }
       this.bindWorldUI();
       if(status) status.textContent="🟡 Đang kết nối Kênh thế giới...";
+      this.worldFirstRender=true;
       await this.loadWorldMembers();
       await this.loadWorldMessages();
       await this.subscribeWorldChannel();
@@ -3525,9 +3526,19 @@ window.getStudyBearSupabaseStatus = function () {
       try{
         const {data,error}=await client.rpc("get_world_messages",{p_limit:100}); if(error)throw error;
         const rows=Array.isArray(data)?data:[];
+        // The RPC returns newest-first for efficient database reads.
+        // The UI intentionally presents conversation history oldest -> newest,
+        // so messages flow naturally from the top down and new messages appear at the bottom.
+        rows.sort((a,b)=>{
+          const ta=Date.parse(a?.created_at||'')||0;
+          const tb=Date.parse(b?.created_at||'')||0;
+          if(ta!==tb)return ta-tb;
+          return Number(a?.id||0)-Number(b?.id||0);
+        });
         const changed=JSON.stringify(rows)!==JSON.stringify(this.worldMessages);
+        const shouldRender=changed||!silent;
         this.worldMessages=rows; this.worldLastMessageId=rows.length?rows[rows.length-1].id:null;
-        if(changed||!silent)this.renderWorldMessages();
+        if(shouldRender)this.renderWorldMessages();
       }catch(e){console.error("[StudyBear] world messages",e); if(!silent)box.innerHTML=`<div class="empty">⚠️ ${escapeHTML(e.message||"Không thể tải kênh thế giới.")}</div>`;}
       finally{this.worldLoading=false;}
     },
@@ -3535,6 +3546,7 @@ window.getStudyBearSupabaseStatus = function () {
     renderWorldMessages(){
       const box=$("worldMessages"); if(!box)return;
       const nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+      const initialRender=this.worldFirstRender;
       box.innerHTML=this.worldMessages.map(m=>{
         const avatar=m.avatar_url?`<img src="${escapeHTML(m.avatar_url)}" alt="">`:"🐻";
         const time=new Date(m.created_at).toLocaleTimeString(getUILang()==="ko"?"ko-KR":getUILang()==="en"?"en-US":"vi-VN",{hour:"2-digit",minute:"2-digit"});
@@ -3546,10 +3558,15 @@ window.getStudyBearSupabaseStatus = function () {
         }
         return `<article class="world-message" data-world-message-id="${escapeHTML(String(m.id))}"><div class="social-avatar small">${avatar}</div><div class="world-message-body"><div class="world-message-meta">${renderIdentityName(m.display_name||m.username||"",m.role)} <small>@${escapeHTML(m.username||"")} · ${time}</small></div>${content?`<div class="world-message-text">${escapeHTML(content)}</div>`:""}${giftHTML}</div></article>`;
       }).join("")||'<div class="empty">🌍 Hãy là người đầu tiên nói gì đó!</div>';
-      if(nearBottom)this.scrollWorldToBottom();
+      if(initialRender || nearBottom)this.scrollWorldToBottom();
+      this.worldFirstRender=false;
     },
 
-    scrollWorldToBottom(){const box=$("worldMessages");if(box)box.scrollTop=box.scrollHeight;},
+    scrollWorldToBottom(){
+      const box=$("worldMessages");
+      if(!box)return;
+      requestAnimationFrame(()=>{ box.scrollTop=box.scrollHeight; });
+    },
 
     async subscribeWorldChannel(){
       const client=this.client(),user=await this.user(); if(!client||!user)return;
@@ -3557,7 +3574,16 @@ window.getStudyBearSupabaseStatus = function () {
       this.worldChannel=client.channel("studybear-world-global",{config:{broadcast:{ack:true}}});
       this.worldChannel.on("broadcast",{event:"world_message"},payload=>{
         const m=payload?.payload?.message; if(!m)return;
-        if(!this.worldMessages.some(x=>String(x.id)===String(m.id))){this.worldMessages=[...this.worldMessages,m].slice(-100);this.worldLastMessageId=m.id;this.renderWorldMessages();}
+        if(!this.worldMessages.some(x=>String(x.id)===String(m.id))){
+        this.worldMessages=[...this.worldMessages,m]
+          .sort((a,b)=>{
+            const ta=Date.parse(a?.created_at||'')||0, tb=Date.parse(b?.created_at||'')||0;
+            return ta!==tb ? ta-tb : Number(a?.id||0)-Number(b?.id||0);
+          })
+          .slice(-100);
+        this.worldLastMessageId=this.worldMessages.length?this.worldMessages[this.worldMessages.length-1].id:null;
+        this.renderWorldMessages();
+      }
       });
       this.worldChannel.on("presence",{event:"sync"},()=>this.renderWorldMembers());
       this.worldChannel.subscribe(async status=>{
@@ -4104,7 +4130,7 @@ window.getStudyBearSupabaseStatus = function () {
       clearTimeout(this.typingTimeout);
       clearTimeout(this.typingStopTimer);
       this.messageChannel=this.friendshipChannel=this.profileChannel=this.presenceChannel=this.worldChannel=null;
-      this.worldPollingTimer=null; this.currentWorldUserId=null; this.worldBound=false; this.worldMessages=[]; this.worldMembers=[];
+      this.worldPollingTimer=null; this.currentWorldUserId=null; this.worldBound=false; this.worldMessages=[]; this.worldMembers=[]; this.worldFirstRender=true;
       this.typingChannel=null;
       if(this.uiAbortController){
         try{ this.uiAbortController.abort(); }catch(_){}
