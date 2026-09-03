@@ -16,3 +16,4 @@ Hệ thống đăng ký/đăng nhập hiện dùng LocalStorage. Mỗi tài kho�
 
 Lưu ý:
 Đây là hệ thống tài khoản demo phía trình duyệt, phù hợp cho dự án HTML/CSS/JavaScript. Không dùng để lưu mật khẩu hoặc dữ liệu nhạy cảm trên website production.
+
