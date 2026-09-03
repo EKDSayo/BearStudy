@@ -3504,7 +3504,16 @@ window.getStudyBearSupabaseStatus = function () {
       root.innerHTML=rows.map(u=>{
         const avatar=u.avatar_url?`<img src="${escapeHTML(u.avatar_url)}" alt="">`:"🐻";
         const self=String(u.id)===String(this.currentWorldUserId||"");
-        return `<button type="button" class="world-member" data-world-gift-target="${escapeHTML(u.id)}" ${self?"disabled":""}><span class="social-avatar small">${avatar}</span><span class="world-member-main"><strong>${renderIdentityName(u.display_name||u.username||"",u.role)}</strong><small>@${escapeHTML(u.username||"")}</small></span><i class="presence-dot ${this.onlineIds.has(String(u.id))?"online":"offline"}></i></button>`;
+        const presence=this.onlineIds.has(String(u.id))?"online":"offline";
+        const display=renderIdentityName(u.display_name||u.username||"",u.role);
+        return `<button type="button" class="world-member-row" data-world-gift-target="${escapeHTML(u.id)}" ${self?"disabled":""}>
+          <span class="world-member-avatar">${avatar}</span>
+          <span class="world-member-info">
+            <span class="world-member-name">${display}</span>
+            <span class="world-member-username">@${escapeHTML(u.username||"")}</span>
+          </span>
+          <span class="world-member-presence ${presence}" aria-label="${presence==="online"?"Đang online":"Offline"}"></span>
+        </button>`;
       }).join("")||'<div class="empty">Không tìm thấy thành viên.</div>';
       root.querySelectorAll("[data-world-gift-target]:not([disabled])").forEach(b=>b.addEventListener("click",()=>this.setWorldGiftTarget(b.dataset.worldGiftTarget)));
       $("worldOnlineCount")&&($("worldOnlineCount").textContent=String(this.worldMembers.filter(u=>this.onlineIds.has(String(u.id))).length));
