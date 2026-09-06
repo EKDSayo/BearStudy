@@ -25,6 +25,7 @@
     <nav>
       <button class="nav-btn active" data-page="home">🏠 <span data-i18n="navHome">Trang chủ</span></button>
       <button class="nav-btn" data-page="dictionary">📖 <span data-i18n="navDictionary">Kho từ điển</span></button>
+      <button class="nav-btn" data-page="translation">📝 <span>Luyện dịch</span></button>
       <button class="nav-btn" data-page="learning">🧭 <span>Lộ trình học</span></button>
       <button class="nav-btn" data-page="vocabulary">📚 <span data-i18n="navVocabulary">Từ vựng</span></button>
       <button class="nav-btn" data-page="flashcard">🃏 <span data-i18n="navFlashcard">Flashcard</span></button>
@@ -122,6 +123,51 @@
     </section>
 
     
+    <section class="page" id="page-translation">
+      <div class="section-heading translation-heading">
+        <div>
+          <span class="eyebrow">📝 TRANSLATION LAB</span>
+          <h2>Luyện dịch</h2>
+          <p>Luyện dịch Việt · English · 한국어 qua các bài đọc được đăng thường xuyên.</p>
+        </div>
+        <div class="translation-stat-badge">📚 <strong id="translationArticleCount">0</strong> bài</div>
+      </div>
+
+      <div class="translation-toolbar card">
+        <div class="translation-search-wrap">
+          <input id="translationSearch" class="profile-input" type="search" maxlength="100" placeholder="🔎 Tìm bài luyện dịch..." autocomplete="off">
+        </div>
+        <select id="translationLevelFilter" class="profile-input" aria-label="Lọc trình độ">
+          <option value="">Tất cả trình độ</option>
+          <option value="beginner">Sơ cấp</option>
+          <option value="basic">Cơ bản</option>
+          <option value="intermediate">Trung cấp</option>
+          <option value="advanced">Nâng cao</option>
+        </select>
+        <select id="translationSourceFilter" class="profile-input" aria-label="Lọc ngôn ngữ gốc">
+          <option value="">Tất cả ngôn ngữ</option>
+          <option value="vi">🇻🇳 Việt</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="ko">🇰🇷 한국어</option>
+        </select>
+      </div>
+
+      <div id="translationArticleList" class="translation-article-grid"></div>
+      <div id="translationEmpty" class="card translation-empty" hidden>
+        <div class="empty-bear">🐻</div>
+        <h3>Chưa có bài luyện dịch</h3>
+        <p>Các bài mới sẽ xuất hiện ở đây sau khi quản trị viên đăng và xuất bản.</p>
+      </div>
+
+      <section id="translationReader" class="translation-reader card" hidden>
+        <div class="translation-reader-head">
+          <button id="translationBackBtn" class="secondary-btn" type="button">← Danh sách bài</button>
+          <div id="translationReaderMeta" class="translation-meta"></div>
+        </div>
+        <div id="translationReaderContent"></div>
+      </section>
+    </section>
+
     <section class="page" id="page-dictionary">
       <div class="section-heading">
         <div>
@@ -189,6 +235,43 @@
         <div class="card">
           <div class="card-title"><div><span class="card-icon">🎁</span><div><h3>Kho vật phẩm</h3><p>Cấp vật phẩm cho tài khoản khi cần.</p></div></div></div>
           <div id="adminItemGrantArea" class="admin-grant-area"><div class="muted">Chọn người dùng ở bảng trên để cấp vật phẩm.</div></div>
+        </div>
+        <div class="card admin-translation-card">
+          <div class="card-title">
+            <div><span class="card-icon">📝</span><div><h3>Quản lý bài luyện dịch</h3><p>Đăng, chỉnh sửa, xuất bản hoặc ẩn các bài luyện dịch Việt · Anh · Hàn.</p></div></div>
+            <button id="translationAdminNewBtn" class="primary-btn" type="button">＋ Bài mới</button>
+          </div>
+          <div class="translation-admin-layout">
+            <div>
+              <div class="admin-translation-list-head"><strong>Danh sách bài</strong><button id="translationAdminRefreshBtn" class="secondary-btn" type="button">↻</button></div>
+              <div id="translationAdminList" class="translation-admin-list"></div>
+            </div>
+            <form id="translationAdminForm" class="translation-admin-form" novalidate>
+              <input id="translationAdminId" type="hidden">
+              <div class="translation-form-grid">
+                <label>Tiêu đề<input id="translationAdminTitle" class="profile-input" maxlength="160" required></label>
+                <label>Slug<input id="translationAdminSlug" class="profile-input" maxlength="160" placeholder="tu-dong-tao-neu-de-trong"></label>
+                <label>Trình độ<select id="translationAdminLevel" class="profile-input"><option value="beginner">Sơ cấp</option><option value="basic">Cơ bản</option><option value="intermediate" selected>Trung cấp</option><option value="advanced">Nâng cao</option></select></label>
+                <label>Chủ đề<input id="translationAdminTopic" class="profile-input" maxlength="80" placeholder="Đời sống, văn hóa..." required></label>
+                <label>Ngôn ngữ gốc<select id="translationAdminSource" class="profile-input"><option value="vi">🇻🇳 Việt</option><option value="en">🇬🇧 English</option><option value="ko">🇰🇷 한국어</option></select></label>
+                <label class="translation-publish-field"><span>Trạng thái</span><span class="toggle-line"><input id="translationAdminPublished" type="checkbox" checked> Xuất bản ngay</span></label>
+              </div>
+              <label>Mô tả ngắn<textarea id="translationAdminDescription" class="profile-input translation-short-text" maxlength="500" rows="2"></textarea></label>
+              <div class="translation-language-editor">
+                <label>🇻🇳 Bài đọc tiếng Việt<textarea id="translationAdminVi" class="profile-input translation-content-input" rows="7" required></textarea></label>
+                <label>🇬🇧 English reading<textarea id="translationAdminEn" class="profile-input translation-content-input" rows="7" required></textarea></label>
+                <label>🇰🇷 한국어 읽기<textarea id="translationAdminKo" class="profile-input translation-content-input" rows="7" required></textarea></label>
+              </div>
+              <div class="translation-structured-editor">
+                <label>📚 Từ vựng <small>Mỗi dòng: <code>từ | nghĩa Việt | English | 한국어 | ví dụ</code></small><textarea id="translationAdminVocabulary" class="profile-input" rows="7" placeholder="노력하다 | nỗ lực | make an effort | 노력하다 | 매일 조금씩 노력합니다."></textarea></label>
+                <label>📐 Ngữ pháp <small>Mỗi dòng: <code>ngữ pháp | giải thích Việt | explanation English | ví dụ</code></small><textarea id="translationAdminGrammar" class="profile-input" rows="7" placeholder="-(으)ㄹ까 봐 | lo rằng, sợ rằng | worried that | 늦을까 봐 일찍 나왔어요."></textarea></label>
+              </div>
+              <div class="translation-admin-actions">
+                <span id="translationAdminStatus" class="social-status"></span>
+                <div><button id="translationAdminDeleteBtn" class="danger-btn" type="button" hidden>🗑️ Xóa</button><button id="translationAdminSaveBtn" class="primary-btn" type="submit">💾 Lưu bài</button></div>
+              </div>
+            </form>
+          </div>
         </div>
         <div class="card">
           <div class="card-title"><div><span class="card-icon">🧾</span><div><h3>Lịch sử quản trị</h3><p>Mọi thay đổi Bearcoin/vật phẩm đều được ghi lại.</p></div></div></div>

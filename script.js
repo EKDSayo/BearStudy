@@ -149,7 +149,7 @@ const UI = {
     navQuiz:"Trắc nghiệm", navTyping:"Gõ đáp án", navWrong:"Từ cần ôn", navFriends:"Bạn bè", navChat:"Tin nhắn", profileNav:"Hồ sơ", navSettings:"Cài đặt",
     friendsTitle:"Bạn bè", friendsSubtitle:"Kết bạn bằng username và học cùng nhau", friendSearchLabel:"Tìm username", friendSearchPlaceholder:"Nhập username...", friendSearchBtn:"🔎 Tìm", friendRequestsTitle:"Lời mời kết bạn", friendRequestsSubtitle:"Các yêu cầu đang chờ", friendsListTitle:"Danh sách bạn bè", friendsListSubtitle:"Bạn bè đã chấp nhận", friendRequestSent:"✅ Đã gửi lời mời", friendAdd:"Kết bạn", friendAccept:"Chấp nhận", friendDecline:"Từ chối", friendRemove:"Xóa bạn", friendChat:"Nhắn tin", friendPending:"Đang chờ", friendAccepted:"Đã là bạn", friendNoResults:"Không tìm thấy người dùng.", friendEmpty:"Chưa có bạn bè.", requestEmpty:"Không có lời mời nào.", chatTitle:"Tin nhắn", chatReady:"💬 Đã mở cuộc trò chuyện.", chatSubtitle:"Trò chuyện với bạn bè theo thời gian thực", conversationsTitle:"Cuộc trò chuyện", selectFriendToChat:"Chọn một người bạn để bắt đầu", chatPlaceholder:"Nhập tin nhắn...", sendMessage:"Gửi", chatEmpty:"Chưa có tin nhắn.", chatNeedFriend:"Hãy kết bạn trước khi bắt đầu trò chuyện.", online:"Đang hoạt động", offline:"Ngoại tuyến", saveCloudError:"Không thể đồng bộ lên máy chủ, dữ liệu cục bộ vẫn được giữ lại.",
     sidebarTipTitle:"Học một chút mỗi ngày!", sidebarTipText:"Tiến trình của bạn sẽ được lưu riêng theo tài khoản.",
-    pageHome:"Trang chủ", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
+    pageHome:"Trang chủ", translationTitle:"Luyện dịch", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
     homeDescription:"Học từ vựng theo cách nhẹ nhàng, dễ nhớ và đáng yêu.",
     startLearning:"📖 Bắt đầu học", statLearned:"Từ đã học", statFavorite:"Yêu thích", statXP:"Điểm XP", statWrong:"Cần ôn",
     progressTitle:"Tiến trình học", progressSubtitle:"Hành trình của bạn", levelLabel:"Cấp độ",
@@ -187,7 +187,7 @@ const UI = {
     navQuiz:"Quiz", navTyping:"Type answer", navWrong:"Review", navFriends:"Friends", navChat:"Messages", profileNav:"Profile", navSettings:"Settings",
     friendsTitle:"Friends", friendsSubtitle:"Connect by username and learn together", friendSearchLabel:"Find username", friendSearchPlaceholder:"Enter username...", friendSearchBtn:"🔎 Search", friendRequestsTitle:"Friend requests", friendRequestsSubtitle:"Pending requests", friendsListTitle:"Friends list", friendsListSubtitle:"Accepted friends", friendRequestSent:"✅ Request sent", friendAdd:"Add friend", friendAccept:"Accept", friendDecline:"Decline", friendRemove:"Remove", friendChat:"Message", friendPending:"Pending", friendAccepted:"Friends", friendNoResults:"No user found.", friendEmpty:"No friends yet.", requestEmpty:"No pending requests.", chatTitle:"Messages", chatReady:"💬 Chat opened.", chatSubtitle:"Chat with friends in real time", conversationsTitle:"Conversations", selectFriendToChat:"Choose a friend to start", chatPlaceholder:"Type a message...", sendMessage:"Send", chatEmpty:"No messages yet.", chatNeedFriend:"Become friends before chatting.", online:"Online", offline:"Offline", saveCloudError:"Could not sync to the server; local data is still kept.",
     sidebarTipTitle:"A little every day!", sidebarTipText:"Your progress is saved separately for your account.",
-    pageHome:"Home", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
+    pageHome:"Home", translationTitle:"Translation Lab", homeEyebrow:"🐻 WELCOME TO STUDYBEAR",
     homeDescription:"Learn vocabulary in a gentle, memorable and cute way.", startLearning:"📖 Start learning",
     statLearned:"Words learned", statFavorite:"Favorites", statXP:"XP", statWrong:"To review",
     progressTitle:"Learning progress", progressSubtitle:"Your journey", levelLabel:"Level",
@@ -224,7 +224,7 @@ const UI = {
     navQuiz:"퀴즈", navTyping:"답 입력", navWrong:"복습", navFriends:"친구", navChat:"메시지", profileNav:"프로필", navSettings:"설정",
     friendsTitle:"친구", friendsSubtitle:"사용자 이름으로 친구를 추가하고 함께 공부하세요", friendSearchLabel:"사용자 이름 검색", friendSearchPlaceholder:"사용자 이름 입력...", friendSearchBtn:"🔎 검색", friendRequestsTitle:"친구 요청", friendRequestsSubtitle:"대기 중인 요청", friendsListTitle:"친구 목록", friendsListSubtitle:"수락한 친구", friendRequestSent:"✅ 요청 보냄", friendAdd:"친구 추가", friendAccept:"수락", friendDecline:"거절", friendRemove:"삭제", friendChat:"메시지", friendPending:"대기 중", friendAccepted:"친구", friendNoResults:"사용자를 찾을 수 없습니다.", friendEmpty:"아직 친구가 없습니다.", requestEmpty:"대기 중인 요청이 없습니다.", chatTitle:"메시지", chatReady:"💬 대화를 열었습니다.", chatSubtitle:"친구와 실시간으로 대화하세요", conversationsTitle:"대화", selectFriendToChat:"대화할 친구를 선택하세요", chatPlaceholder:"메시지를 입력하세요...", sendMessage:"보내기", chatEmpty:"아직 메시지가 없습니다.", chatNeedFriend:"먼저 친구가 된 후 대화할 수 있습니다.", online:"온라인", offline:"오프라인", saveCloudError:"서버와 동기화하지 못했습니다. 로컬 데이터는 유지됩니다.",
     sidebarTipTitle:"매일 조금씩!", sidebarTipText:"학습 진행 상황은 계정별로 따로 저장됩니다.",
-    pageHome:"홈", homeEyebrow:"🐻 STUDYBEAR에 오신 것을 환영해요",
+    pageHome:"홈", translationTitle:"번역 연습", homeEyebrow:"🐻 STUDYBEAR에 오신 것을 환영해요",
     homeDescription:"부담 없이 쉽고 재미있게 단어를 공부해요.", startLearning:"📖 공부 시작",
     statLearned:"학습한 단어", statFavorite:"즐겨찾기", statXP:"XP", statWrong:"복습 필요",
     progressTitle:"학습 진행도", progressSubtitle:"나의 학습 여정", levelLabel:"레벨",
@@ -891,6 +891,7 @@ $("interfaceLanguage").addEventListener("change", e => {
 
 const PAGE_KEYS = {
   learning:"learningPathTitle",
+  translation:"translationTitle",
   world:"worldChannelTitle",
   home:"pageHome", dictionary:"dictionaryTitle", vocabulary:"vocabTitle", flashcard:"flashTitle",
   quiz:"quizTitle", typing:"typingTitle", wrong:"wrongTitle", learned:"learnedPageTitle", profile:"profileNav", settings:"navSettings"
@@ -915,6 +916,7 @@ function showPage(page) {
     if ($("dictionarySource")) $("dictionarySource").value = currentNativeLanguage();
   }
   if (page === "learning") renderLearningPath();
+  if (page === "translation") window.StudyBearTranslation?.onPage();
   if (page === "shop") renderShop();
   if (page === "admin") loadAdminDashboard();
   if (page === "vocabulary") {
@@ -1594,6 +1596,7 @@ async function loadAdminDashboard(){
   if(!isAdminUser()){panel.hidden=true;denied.hidden=false;return;}
   denied.hidden=true;panel.hidden=false;
   await Promise.all([loadAdminStats(),loadAdminUsers(),loadAdminAudit()]);
+  window.StudyBearTranslation?.loadAdmin();
 }
 async function loadAdminStats(){
   const client=getSupabaseClient();if(!client)return;
@@ -2898,10 +2901,116 @@ function refreshAll() {
   renderWrong();
   renderLearnedVault();
   renderProfile();
+  window.StudyBearTranslation?.refresh();
   syncStudyLanguageFromProfile();
   renderTopics();
   populateVoiceSelect();
 }
+
+
+/* =========================================================
+   STUDYBEAR TRANSLATION LAB V80
+   - Public published translation lessons
+   - Vietnamese / English / Korean parallel readings
+   - Vocabulary + grammar per lesson
+   - Personal translation practice + completion
+   - Admin-only publishing/editing via Supabase RPC
+========================================================= */
+(function initStudyBearTranslation(){
+  const app={
+    articles:[], current:null, currentLang:'vi', practiceTarget:'ko', completed:new Map(), loaded:false, loading:false, adminLoaded:false,
+    client(){return typeof getSupabaseClient==='function'?getSupabaseClient():null;},
+    async user(){const c=this.client();if(!c)return null;const {data:{user}}=await c.auth.getUser();return user||null;},
+    langName(lang){return ({vi:'🇻🇳 Việt',en:'🇬🇧 English',ko:'🇰🇷 한국어'})[lang]||lang;},
+    levelLabel(level){return ({beginner:'Sơ cấp',basic:'Cơ bản',intermediate:'Trung cấp',advanced:'Nâng cao'})[level]||level||'—';},
+    normalize(v){return String(v??'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ');},
+    slugify(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,150);},
+    parseVocabulary(text){return String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{const p=line.split('|').map(x=>x.trim());return {term:p[0]||'',vi:p[1]||'',en:p[2]||'',ko:p[3]||'',example:p.slice(4).join(' | ')||''};}).filter(x=>x.term);},
+    parseGrammar(text){return String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{const p=line.split('|').map(x=>x.trim());return {pattern:p[0]||'',vi:p[1]||'',en:p[2]||'',example:p.slice(3).join(' | ')||''};}).filter(x=>x.pattern);},
+    formatVocabulary(rows){return (Array.isArray(rows)?rows:[]).map(x=>[x.term||'',x.vi||'',x.en||'',x.ko||'',x.example||''].join(' | ')).join('\n');},
+    formatGrammar(rows){return (Array.isArray(rows)?rows:[]).map(x=>[x.pattern||'',x.vi||'',x.en||'',x.example||''].join(' | ')).join('\n');},
+    async load(){
+      const c=this.client(); if(!c||this.loading)return; this.loading=true;
+      try{const q=String(document.getElementById('translationSearch')?.value||'').trim();const level=String(document.getElementById('translationLevelFilter')?.value||'');const source=String(document.getElementById('translationSourceFilter')?.value||'');
+        const {data,error}=await c.rpc('get_translation_articles',{p_query:q,p_level:level||null,p_source_language:source||null,p_limit:100,p_offset:0}); if(error)throw error;
+        this.articles=Array.isArray(data)?data:[]; this.loaded=true; this.renderList();
+        const count=document.getElementById('translationArticleCount');if(count)count.textContent=this.articles.length.toLocaleString();
+      }catch(e){console.error('[StudyBear] translation load',e);const list=document.getElementById('translationArticleList');if(list)list.innerHTML=`<div class="card translation-error">⚠️ ${escapeHTML(e.message||'Không thể tải bài luyện dịch.')}</div>`;}
+      finally{this.loading=false;}
+    },
+    renderList(){
+      const list=document.getElementById('translationArticleList'),empty=document.getElementById('translationEmpty');if(!list||!empty)return;
+      if(!this.articles.length){list.innerHTML='';empty.hidden=false;return;} empty.hidden=true;
+      list.innerHTML=this.articles.map(a=>`<button type="button" class="translation-article-card ${this.current?.id===a.id?'active':''}" data-translation-open="${escapeHTML(a.id)}">
+        <div class="translation-card-top"><span class="translation-level-pill">${escapeHTML(this.levelLabel(a.level))}</span><span class="muted">${escapeHTML(this.langName(a.source_language))}</span></div>
+        <h3>${escapeHTML(a.title)}</h3><p>${escapeHTML(a.description||'Bài luyện dịch Việt · Anh · Hàn')}</p>
+        <div class="translation-card-bottom"><span>📚 ${Number(a.vocabulary_count||0)} từ</span><span>📐 ${Number(a.grammar_count||0)} ngữ pháp</span><span>${a.completed?'✅ Đã hoàn thành':'→ Luyện bài'}</span></div>
+      </button>`).join('');
+      list.querySelectorAll('[data-translation-open]').forEach(b=>b.addEventListener('click',()=>this.open(b.dataset.translationOpen)));
+    },
+    async open(id){
+      const c=this.client();if(!c)return;
+      const reader=document.getElementById('translationReader'),content=document.getElementById('translationReaderContent');if(!reader||!content)return;
+      content.innerHTML='<div class="translation-loading">⏳ Đang mở bài...</div>';reader.hidden=false;reader.scrollIntoView({behavior:'smooth',block:'start'});
+      try{const {data,error}=await c.rpc('get_translation_article',{p_article_id:id});if(error)throw error;this.current=Array.isArray(data)?data[0]:data||null;if(!this.current)throw new Error('Không tìm thấy bài luyện dịch.');
+        this.currentLang=this.current.source_language||'vi';this.practiceTarget=this.current.source_language==='vi'?'ko':'vi';this.renderReader();this.renderList();
+      }catch(e){content.innerHTML=`<div class="translation-error">⚠️ ${escapeHTML(e.message||'Không thể mở bài.')}</div>`;}
+    },
+    renderReader(){
+      const a=this.current,meta=document.getElementById('translationReaderMeta'),content=document.getElementById('translationReaderContent');if(!a||!meta||!content)return;
+      meta.innerHTML=`<span>${escapeHTML(this.levelLabel(a.level))}</span><span>•</span><span>${escapeHTML(a.topic||'')}</span><span>•</span><span>${escapeHTML(this.langName(a.source_language))}</span>`;
+      const translations={vi:a.vi_content||'',en:a.en_content||'',ko:a.ko_content||''};
+      content.innerHTML=`
+        <div class="translation-article-header"><div><span class="eyebrow">📝 BÀI LUYỆN DỊCH</span><h2>${escapeHTML(a.title)}</h2><p>${escapeHTML(a.description||'')}</p></div><div class="translation-status-pill">${a.completed?'✅ Đã hoàn thành':'🎯 Chưa hoàn thành'}</div></div>
+        <div class="translation-reading-card"><div class="translation-reading-head"><div><strong>📖 Bài đọc</strong><span class="muted">Ngôn ngữ gốc: ${escapeHTML(this.langName(a.source_language))}</span></div><div class="translation-tabs">${['vi','en','ko'].map(l=>`<button type="button" class="translation-tab ${this.currentLang===l?'active':''}" data-reading-lang="${l}">${this.langName(l)}</button>`).join('')}</div></div><article class="translation-text">${escapeHTML(translations[this.currentLang]||'').replace(/\n/g,'<br>')}</article></div>
+        <div class="translation-answer-card"><div class="translation-answer-head"><div><strong>🌐 Bản dịch tham khảo</strong><span class="muted">Đối chiếu cả 3 ngôn ngữ</span></div></div><div class="translation-parallel-grid">${['vi','en','ko'].map(l=>`<article class="translation-parallel-item ${l===this.currentLang?'source':''}"><span>${this.langName(l)}${l===this.currentLang?' · Gốc':''}</span><p>${escapeHTML(translations[l]||'').replace(/\n/g,'<br>')}</p></article>`).join('')}</div></div>
+        ${this.renderPractice(translations)}
+        ${this.renderVocabulary(a.vocabulary)}
+        ${this.renderGrammar(a.grammar)}
+      `;
+      content.querySelectorAll('[data-reading-lang]').forEach(b=>b.addEventListener('click',()=>{this.currentLang=b.dataset.readingLang;this.renderReader();}));
+      content.querySelectorAll('[data-practice-target]').forEach(b=>b.addEventListener('click',()=>{this.practiceTarget=b.dataset.practiceTarget;this.renderReader();}));
+      content.querySelector('[data-practice-reveal]')?.addEventListener('click',()=>{const el=content.querySelector('[data-practice-answer]');if(el)el.hidden=!el.hidden;});
+      content.querySelectorAll('[data-practice-score]').forEach(b=>b.addEventListener('click',()=>this.complete(Number(b.dataset.practiceScore))));
+    },
+    renderPractice(t){
+      const source=this.current?.source_language||'vi'; const targets=['vi','en','ko'].filter(l=>l!==source); const target=this.practiceTarget&&this.practiceTarget!==source?this.practiceTarget:targets[0];
+      return `<section class="translation-practice"><div class="translation-section-title"><div><span class="card-icon">✍️</span><div><h3>Bài tập luyện dịch</h3><p>Đọc bài gốc, tự dịch sang ngôn ngữ mục tiêu rồi mới mở đáp án.</p></div></div></div>
+        <div class="practice-controls"><span>Dịch sang:</span>${targets.map(l=>`<button type="button" class="translation-target-btn ${l===target?'active':''}" data-practice-target="${l}">${this.langName(l)}</button>`).join('')}</div>
+        <div class="practice-source"><span>📌 Đoạn gốc</span><p>${escapeHTML(t[source]||'').replace(/\n/g,'<br>')}</p></div>
+        <textarea id="translationPracticeInput" class="profile-input translation-practice-input" rows="8" maxlength="10000" placeholder="Viết bản dịch của bạn tại đây..."></textarea>
+        <div class="practice-actions"><button type="button" class="secondary-btn" data-practice-reveal>👁️ Hiện đáp án</button><div class="practice-score-buttons"><span>Tự đánh giá:</span><button type="button" class="secondary-btn" data-practice-score="0">Cần luyện thêm</button><button type="button" class="secondary-btn" data-practice-score="1">Khá</button><button type="button" class="primary-btn" data-practice-score="2">Tốt</button></div></div>
+        <div class="practice-answer" data-practice-answer hidden><span>💡 Bản dịch ${this.langName(target)}</span><p>${escapeHTML(t[target]||'').replace(/\n/g,'<br>')}</p></div>
+      </section>`;
+    },
+    renderVocabulary(rows){const list=Array.isArray(rows)?rows:[];return `<section class="translation-study-section"><div class="translation-section-title"><div><span class="card-icon">📚</span><div><h3>Từ vựng tổng hợp</h3><p>${list.length} từ/cụm từ quan trọng trong bài.</p></div></div></div>${list.length?`<div class="translation-vocab-table-wrap"><table class="translation-vocab-table"><thead><tr><th>Từ</th><th>🇻🇳 Việt</th><th>🇬🇧 English</th><th>🇰🇷 한국어</th><th>Ví dụ</th></tr></thead><tbody>${list.map(x=>`<tr><td><strong>${escapeHTML(x.term||'')}</strong></td><td>${escapeHTML(x.vi||'')}</td><td>${escapeHTML(x.en||'')}</td><td>${escapeHTML(x.ko||'')}</td><td>${escapeHTML(x.example||'')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="translation-muted-box">Bài này chưa có từ vựng riêng.</div>'}</section>`;},
+    renderGrammar(rows){const list=Array.isArray(rows)?rows:[];return `<section class="translation-study-section"><div class="translation-section-title"><div><span class="card-icon">📐</span><div><h3>Ngữ pháp tổng hợp</h3><p>${list.length} điểm ngữ pháp được dùng trong bài.</p></div></div></div>${list.length?`<div class="translation-grammar-list">${list.map((x,i)=>`<article class="translation-grammar-item"><div class="grammar-index">${String(i+1).padStart(2,'0')}</div><div><strong>${escapeHTML(x.pattern||'')}</strong><p>${escapeHTML(x.vi||'')}</p><small>${escapeHTML(x.en||'')}</small>${x.example?`<blockquote>${escapeHTML(x.example)}</blockquote>`:''}</div></article>`).join('')}</div>`:'<div class="translation-muted-box">Bài này chưa có ngữ pháp riêng.</div>'}</section>`;},
+    async complete(score){if(!this.current)return;const c=this.client();if(!c)return;try{const {error}=await c.rpc('complete_translation_article',{p_article_id:this.current.id,p_score:Math.max(0,Math.min(100,Number(score||0)*50))});if(error)throw error;this.current.completed=true;showToast('✅ Đã lưu tiến độ luyện dịch.');this.renderReader();await this.load();}catch(e){showToast(`⚠️ ${e.message||'Không thể lưu tiến độ.'}`);}},
+    onPage(){this.load();this.bindFilters();if(this.current)document.getElementById('translationReader')?.removeAttribute('hidden');},
+    refresh(){if(this.loaded)this.renderList();},
+    bindFilters(){['translationSearch','translationLevelFilter','translationSourceFilter'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.dataset.bound){el.dataset.bound='1';el.addEventListener(id==='translationSearch'?'input':'change',()=>this.load());}});document.getElementById('translationBackBtn')?.addEventListener('click',()=>{const r=document.getElementById('translationReader');if(r)r.hidden=true;this.current=null;this.renderList();});},
+    async loadAdmin(){
+      if(!isAdminUser())return;const c=this.client(),list=document.getElementById('translationAdminList');if(!c||!list)return;
+      try{const {data,error}=await c.rpc('admin_list_translation_articles',{p_limit:200});if(error)throw error;const rows=Array.isArray(data)?data:[];this.adminRows=rows;list.innerHTML=rows.length?rows.map(a=>`<button type="button" class="translation-admin-item ${a.is_published?'':'unpublished'}" data-admin-translation="${escapeHTML(a.id)}"><span><strong>${escapeHTML(a.title)}</strong><small>${escapeHTML(a.topic||'')} · ${escapeHTML(this.levelLabel(a.level))}</small></span><b>${a.is_published?'LIVE':'DRAFT'}</b></button>`).join(''):'<div class="muted">Chưa có bài nào.</div>';list.querySelectorAll('[data-admin-translation]').forEach(b=>b.addEventListener('click',()=>this.editAdmin(b.dataset.adminTranslation)));}catch(e){list.innerHTML=`<div class="muted">⚠️ ${escapeHTML(e.message||'Không thể tải bài.')}</div>`;}
+    },
+    newAdmin(){this.fillAdmin(null);},
+    async editAdmin(id){const c=this.client();if(!c)return;try{const {data,error}=await c.rpc('get_translation_article_admin',{p_article_id:id});if(error)throw error;this.fillAdmin(Array.isArray(data)?data[0]:data);}catch(e){showToast(`⚠️ ${e.message||'Không thể mở bài.'}`);}},
+    fillAdmin(a){
+      const map={translationAdminId:a?.id||'',translationAdminTitle:a?.title||'',translationAdminSlug:a?.slug||'',translationAdminLevel:a?.level||'intermediate',translationAdminTopic:a?.topic||'',translationAdminSource:a?.source_language||'vi',translationAdminDescription:a?.description||'',translationAdminVi:a?.vi_content||'',translationAdminEn:a?.en_content||'',translationAdminKo:a?.ko_content||'',translationAdminVocabulary:this.formatVocabulary(a?.vocabulary||[]),translationAdminGrammar:this.formatGrammar(a?.grammar||'')};
+      Object.entries(map).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});const pub=document.getElementById('translationAdminPublished');if(pub)pub.checked=a?Boolean(a.is_published):true;const del=document.getElementById('translationAdminDeleteBtn');if(del)del.hidden=!a;const status=document.getElementById('translationAdminStatus');if(status)status.textContent=a?`Đang sửa: ${a.title}`:'Tạo bài mới';
+    },
+    async saveAdmin(e){e?.preventDefault();if(!isAdminUser())return;const c=this.client();if(!c)return;const title=document.getElementById('translationAdminTitle')?.value.trim();const topic=document.getElementById('translationAdminTopic')?.value.trim();const vi=document.getElementById('translationAdminVi')?.value.trim();const en=document.getElementById('translationAdminEn')?.value.trim();const ko=document.getElementById('translationAdminKo')?.value.trim();if(!title||!topic||!vi||!en||!ko){showToast('⚠️ Hãy nhập đủ tiêu đề, chủ đề và cả 3 bản ngôn ngữ.');return;}const payload={p_id:document.getElementById('translationAdminId')?.value||null,p_title:title,p_slug:document.getElementById('translationAdminSlug')?.value.trim()||this.slugify(title),p_description:document.getElementById('translationAdminDescription')?.value.trim()||'',p_level:document.getElementById('translationAdminLevel')?.value||'intermediate',p_topic:topic,p_source_language:document.getElementById('translationAdminSource')?.value||'vi',p_vi_content:vi,p_en_content:en,p_ko_content:ko,p_vocabulary:this.parseVocabulary(document.getElementById('translationAdminVocabulary')?.value||''),p_grammar:this.parseGrammar(document.getElementById('translationAdminGrammar')?.value||''),p_is_published:Boolean(document.getElementById('translationAdminPublished')?.checked)};try{const {data,error}=await c.rpc('admin_upsert_translation_article',payload);if(error)throw error;document.getElementById('translationAdminId').value=data?.id||payload.p_id||'';showToast('✅ Đã lưu bài luyện dịch.');await this.loadAdmin();await this.load();}catch(e){showToast(`⚠️ ${e.message||'Không thể lưu bài.'}`);}},
+    async deleteAdmin(){const id=document.getElementById('translationAdminId')?.value;if(!id)return;if(!confirm('Xóa bài luyện dịch này? Dữ liệu tiến độ của người học cũng sẽ bị xóa.'))return;const c=this.client();if(!c)return;try{const {error}=await c.rpc('admin_delete_translation_article',{p_article_id:id});if(error)throw error;this.newAdmin();showToast('🗑️ Đã xóa bài.');await this.loadAdmin();await this.load();}catch(e){showToast(`⚠️ ${e.message||'Không thể xóa bài.'}`);}}
+  };
+  window.StudyBearTranslation=app;
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById('translationAdminNewBtn')?.addEventListener('click',()=>app.newAdmin());
+    document.getElementById('translationAdminRefreshBtn')?.addEventListener('click',()=>app.loadAdmin());
+    document.getElementById('translationAdminForm')?.addEventListener('submit',e=>app.saveAdmin(e));
+    document.getElementById('translationAdminDeleteBtn')?.addEventListener('click',()=>app.deleteAdmin());
+    app.bindFilters();
+  });
+})();
 
 /* ---------- START ---------- */
 loadCurrentUser();
